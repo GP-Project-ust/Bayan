@@ -1,0 +1,102 @@
+# =============================================================================
+# بيان — Docker Compose للمكدس الكامل
+# =============================================================================
+# البنية التحتية فقط (قواعد بيانات + كاش، للطور المحلي):
+#   docker compose up -d db redis qdrant
+# المكدس كاملاً (يشمل backend + frontend):
+#   docker compose up -d --build
+# تشغيل LLM المحلي (Ollama — ثقيل، يشغل عند الطلب فقط):
+#   docker compose --profile llm up -d ollama
+# ثم سحب النموذج مرة واحدة:
+#   docker compose exec ollama ollama pull qwen2.5:14b
+
+name: bayan
+
+services:
+  # قاعدة بيانات المنصة (محادثات، ذاكرة pgvector، تدقيق)
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bayan
+      POSTGRES_PASSWORD: bayan
+      POSTGRES_DB: bayan
+    ports:
+      - "5432:5432"
+    volumes:
+      - bayan-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bayan -d bayan"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # مستودع المتجهات (RAG — لوائح الجامعة وسياساتها)
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+    volumes:
+      - bayan-qdrant-data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # الكاش وحدود المعدل
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # النموذج اللغوي المحلي (يشغل عند الطلب فقط — يحتاج ~10GB ذاكرة للـ 14B)
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["llm"]
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - bayan-ollama-data:/root/.ollama
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://bayan:bayan@db:5432/bayan
+      REDIS_URL: redis://redis:6379/0
+      QDRANT_URL: http://qdrant:6333
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      LLM_MODEL: qwen2.5:14b
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+
+volumes:
+  bayan-db-data:
+  bayan-qdrant-data:
+  bayan-ollama-data:

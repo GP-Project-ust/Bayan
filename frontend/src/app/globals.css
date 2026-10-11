@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-bayan-950 text-bayan-50 font-arabic antialiased;
+}
+
+/* اتجاه RTL صحيح للأرقام داخل النصوص العربية */
+.num {
+  direction: ltr;
+  unicode-bidi: embed;
+  display: inline-block;
+}

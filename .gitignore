@@ -1,0 +1,42 @@
+# ===== Python / Backend =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# ===== Node / Frontend =====
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+npm-debug.log*
+
+# ===== الأسرار والبيئة — لا تُرفع أبداً =====
+.env
+.env.local
+.env.*.local
+
+# ===== قواعد البيانات والملفات الثقيلة =====
+*.dump
+*.sqlite
+*.sqlite3
+db-data/
+odoo-data/
+
+# ===== مخرجات التشغيل =====
+*.log
+evaluation/reports/*.json
+evaluation/reports/*.md
+!evaluation/reports/*.template.md
+
+# ===== المحررات ونظام التشغيل =====
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp

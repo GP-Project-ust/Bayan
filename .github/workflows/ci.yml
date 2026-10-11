@@ -1,0 +1,63 @@
+# =============================================================================
+# بيان — التكامل المستمر
+# =============================================================================
+# يعمل عند كل دفع إلى main/dev وكل Pull Request.
+# القاعدة الذهبية: PR بلا CI أخضر لا يُدمج — بدون استثناء.
+
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: "Backend: فحص الكود + الاختبارات"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: تثبيت الاعتماديات
+        run: pip install -r requirements.txt
+
+      - name: فحص جودة الكود (ruff)
+        run: ruff check app tests
+
+      - name: الاختبارات (pytest)
+        run: python -m pytest tests -v
+
+  frontend:
+    name: "Frontend: بناء الواجهة"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: تثبيت الاعتماديات
+        run: npm ci
+
+      - name: فحص الأنواع + البناء
+        run: npm run build
