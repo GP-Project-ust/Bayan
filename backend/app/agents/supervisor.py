@@ -1,34 +1,55 @@
 """الـ Supervisor — قائد الوكلاء وموجّههم (الوكيل المحوري في بيان).
 
 المسؤولية (وفق الوثيقة):
-  1. يستقبل السؤال العربي (بعد التطبيع) ويحلّل نيّته
-  2. يقرر المسار:
-       - sql_agent     → أسئلة البيانات والأرقام والإحصاءات
-       - rag_agent     → أسئلة اللوائح والسياسات والأنظمة
-       - analyst_agent → تحليل الاتجاهات والمقارنات (غالباً بعد sql)
-       - reporter_agent→ تجميع إجابة/تقرير نهائي من مخرجات الآخرين
-  3. للأسئلة المركّبة: ينسّق تنفيذاً متسلسلاً (مثلاً sql ثم analyst ثم reporter)
-  4. للأسئلة الغامضة: يعيد للمستخدم سؤال استيضاح بدل التخمين
+  1. يستقبل السؤال العربي ويحلّل نيّته
+  2. يقرر المسار: sql_agent / rag_agent / analyst_agent / reporter_agent
+  3. للأسئلة المركّبة: ينسّق تنفيذاً متسلسلاً (Sprint 3)
+  4. للأسئلة الغامضة: سؤال استيضاح بدل التخمين (Sprint 3)
 
-الوضع الحالي (Sprint 0): توجيه افتراضي ثابت إلى وكيل SQL —
-التوجيه الحقيقي عبر LLM يُبنى في Sprint 3.
+الوضع الحالي (Sprint 0): توجيه قواعدي حتمي بكلمات مفتاحية —
+  سريع ومجاني وقابل للتنبؤ، ويُختبر بلا أي نموذج. يستبدَل بقرار LLM
+  حقيقي (مع الثقة والاستيضاح) في Sprint 3 وفق docs/04_execution_plan.md.
 """
+
+import re
 
 from app.agents.state import AgentState
 
 SUPERVISOR_NAME = "supervisor"
 
+# كلمات مفتاحية للتوجيه القاعدي — مرتبة حسب الأولوية (الأدق أولاً)
+_RAG_KEYWORDS = re.compile(
+    r"لائحة|اللوائح|النظام|الأنظمة|السياسة|السياسات|الشروط|شروط|التعليمات|"
+    r"لائحة القبول|لائحة الترقية|المنح|الخصم"
+)
+ANALYST_KEYWORDS = re.compile(r"قارن|مقارنة|تحليل|حلّل|اتجاه|نسبة|أعلى|أقل|لماذا|السبب")
+REPORTER_KEYWORDS = re.compile(r"تقرير|ملخص شامل|اعرض.*جدول|صيغة رسمية")
+
+
+def decide_route(question: str) -> str:
+    """قرار التوجيه القاعدي الحتمي — دالة نقية قابلة للاختبار المستقل."""
+    if _RAG_KEYWORDS.search(question):
+        return "rag_agent"
+    if ANALYST_KEYWORDS.search(question):
+        return "analyst_agent"
+    if REPORTER_KEYWORDS.search(question):
+        return "reporter_agent"
+    # الافتراضي: أسئلة البيانات والأرقام — قلب حالة الاستخدام الأولى
+    return "sql_agent"
+
 
 def supervisor_node(state: AgentState) -> dict:
     """عقدة الـ Supervisor — تقرر أي وكيل يعالج السؤال."""
-    # TODO(Sprint 3): استبدال التوجيه الثابت بقرار LLM:
-    #   prompt يحلل نية السؤال ويعيد المسار + الثقة، مع سجل المحادثة كسياق
+    question = state.get("question", "")
+    route = decide_route(question)
     return {
-        "route": "sql_agent",
+        "route": route,
         "agent_trace": [
             {
                 "agent": SUPERVISOR_NAME,
-                "note": "توجيه مبدئي إلى وكيل SQL (توجيه LLM يُفعّل في Sprint 3)",
+                "note": f"توجيه قاعدي حتمي إلى {route} "
+                        "(التوجيه الذكي عبر LLM يُفعَّل في Sprint 3)",
+                "status": "done",
             }
         ],
     }

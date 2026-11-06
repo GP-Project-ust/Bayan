@@ -20,10 +20,20 @@ class ChatRequest(BaseModel):
 
 
 class AgentTraceEntry(BaseModel):
-    """عنصر واحد من أثر تنفيذ السؤال عبر الوكلاء."""
+    """عنصر واحد من أثر تنفيذ السؤال عبر الوكلاء.
+
+    هذا عقد مشترك دستوري: تنتجه كل عقدة في المخطط وتستهلكه:
+      - نقطة البث SSE (تحوّله إلى حدث agent_end)
+      - واجهة الاختبار الموحدة (تبني منه بطاقات أثر الوكلاء)
+      - اختبارات القبول (تتحقق من الوكلاء المشاركين ومخرجاتهم)
+    """
 
     agent: str = Field(description="اسم الوكيل (supervisor / sql_agent / ...)")
     note: str = Field(default="", description="ملاحظة موجزة عما فعله الوكيل")
+    status: str = Field(default="done", description="done / failed / skipped")
+    sql: str | None = Field(default=None, description="استعلام SQL إن وُلّد")
+    rows_count: int | None = Field(default=None, description="عدد صفوف النتيجة إن نُفّذ")
+    duration_ms: int | None = Field(default=None, description="مدة تنفيذ الوكيل بالمللي ثانية")
 
 
 class ChatResponse(BaseModel):

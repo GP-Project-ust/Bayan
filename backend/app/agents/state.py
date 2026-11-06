@@ -34,5 +34,8 @@ class AgentState(TypedDict, total=False):
     query_results: list[dict[str, Any]]
     rag_context: Annotated[list[str], operator.add]
     answer: str
-    agent_trace: Annotated[list[dict[str, str]], operator.add]
+    agent_trace: Annotated[list[dict[str, Any]], operator.add]
     error: str
+
+# ملاحظة العقد: عناصر agent_trace تتبع بنية AgentTraceEntry في app/schemas/chat.py
+# (agent, note, status, sql, rows_count, duration_ms) — مصدر الحقيقة للبث والواجهة.
