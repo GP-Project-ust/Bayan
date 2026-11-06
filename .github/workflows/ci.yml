@@ -17,12 +17,59 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  hygiene:
+    name: "النظافة: ترميز بلا BOM + لا أسرار"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: فحص BOM (لا ملف جديد يبدأ بـ UTF-8 BOM)
+        run: |
+          found=0
+          while IFS= read -r f; do
+            if [ "$(head -c 3 "$f" | xxd -p)" = "efbbbf" ]; then
+              echo "::error file=$f::الملف يبدأ بـ UTF-8 BOM — أزل الترميز المحفوظ من محررك"
+              found=1
+            fi
+          done < <(git ls-files)
+          exit $found
+
+      - name: فحص أنماط الأسرار (المفاتيح لا تُرفع أبداً)
+        run: |
+          if git grep -nE "(sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{30,}|AIzaSy[A-Za-z0-9_-]{30,})" -- . ':!frontend/package-lock.json'; then
+            echo "::error::عُثر على نمط مفتاح API — استخدم .env (لا يُرفع إلى Git)"
+            exit 1
+          fi
+          echo "نظيف من الأسرار"
+
   backend:
-    name: "Backend: فحص الكود + الاختبارات"
+    name: "Backend: فحص + اختبارات + قاعدة الجامعة"
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: backend
+    services:
+      # القاعدة التجريبية الموحدة — نفس خدمة university-db في docker-compose
+      university-db:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
+          POSTGRES_DB: university
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U odoo -d university"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      ODOO_DB_HOST: localhost
+      ODOO_DB_PORT: "5433"
+      ODOO_DB_NAME: university
+      ODOO_DB_USER: bayan_reader
+      ODOO_DB_PASSWORD: bayan_dev_reader
+      LLM_PROVIDER: mock
     steps:
       - uses: actions/checkout@v4
 
@@ -35,10 +82,23 @@ jobs:
       - name: تثبيت الاعتماديات
         run: pip install -r requirements.txt
 
+      - name: تجهيز القاعدة التجريبية (schema + seed + views + reader)
+        working-directory: .
+        run: |
+          PGPASSWORD=odoo psql -X -v ON_ERROR_STOP=1 -h localhost -p 5433 -U odoo -d university -f database/university_demo/01_schema.sql
+          # الـseed يكتب البيانات — يتصل بحساب odoo الإداري لا بقارئ bayan_reader
+          python database/university_demo/02_seed.py --students 300 \
+            --dsn postgresql://odoo:odoo@localhost:5433/university
+          PGPASSWORD=odoo psql -X -v ON_ERROR_STOP=1 -h localhost -p 5433 -U odoo -d university -f database/university_demo/03_views_and_reader.sql
+
+      - name: تحقق القاعدة الشامل (بما فيها الاختبارات السالبة)
+        working-directory: .
+        run: bash database/university_demo/verify.sh
+
       - name: فحص جودة الكود (ruff)
         run: ruff check app tests
 
-      - name: الاختبارات (pytest)
+      - name: الاختبارات (pytest — تشمل اختبارات قاعدة الجامعة الحية)
         run: python -m pytest tests -v
 
   frontend:
