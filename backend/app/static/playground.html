@@ -1,0 +1,725 @@
+<!doctype html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بيان — واجهة الاختبار الموحّدة</title>
+<style>
+/* ==========================================================================
+   قسم الأنماط — ثيم داكن بهوية «بيان» (بلا أي موارد خارجية)
+   ========================================================================== */
+
+/* ----- 1) المتغيرات والأساسيات ----- */
+:root {
+  --bg: #0f172a;            /* خلفية الصفحة */
+  --surface: #1e293b;       /* سطح البطاقات والفقاعات */
+  --surface-2: #243247;     /* سطح أفتح للشارات */
+  --pane: #16233a;          /* خلفية اللوحات */
+  --code-bg: #0b1122;       /* خلفية كتل الكود */
+  --border: #334155;
+  --border-soft: #293548;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --brand: #14b8a6;         /* teal علامة بيان */
+  --brand-soft: rgba(20, 184, 166, .14);
+  --ok: #22c55e;   --ok-soft: rgba(34, 197, 94, .14);
+  --err: #ef4444;  --err-soft: rgba(239, 68, 68, .12);
+  --skip: #64748b; --skip-soft: rgba(100, 116, 139, .16);
+  --warn: #f59e0b; --warn-soft: rgba(245, 158, 11, .15);
+  --mono: ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+  --sans: system-ui, "Segoe UI", Tahoma, sans-serif;
+}
+* { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: #334155; border-radius: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: var(--sans); font-size: 14px;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+::selection { background: rgba(20, 184, 166, .35); }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ----- 2) الهيدر: الشعار + شارات المزوّد + نقاط الصحة ----- */
+.topbar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 10px 20px; background: #132036; border-bottom: 1px solid var(--border); }
+.brand { display: flex; align-items: center; gap: 10px; }
+.logo { width: 34px; height: 34px; display: grid; place-items: center; background: var(--brand); color: #052e2b; font-weight: 800; font-size: 20px; border-radius: 10px; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.3; }
+.brand-text strong { font-size: 17px; }
+.brand-text small { font-size: 11px; color: var(--muted); }
+.header-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.h-badge { font-size: 11.5px; padding: 3px 12px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); }
+.h-badge.badge-mock { color: var(--warn); border-color: rgba(245, 158, 11, .55); background: var(--warn-soft); font-weight: 700; }
+.h-badge.badge-real { color: var(--brand); border-color: rgba(20, 184, 166, .55); background: var(--brand-soft); font-weight: 700; }
+.health { margin-inline-start: auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.health-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+.health-item .dot { width: 9px; height: 9px; border-radius: 50%; background: #475569; transition: background .25s, box-shadow .25s; }
+.health-item.up .dot { background: var(--ok); box-shadow: 0 0 7px rgba(34, 197, 94, .55); }
+.health-item.up { color: var(--text); }
+.health-item.checking .dot { background: var(--warn); animation: pulse 1s infinite; }
+.h-refresh { font-size: 11px; padding: 3px 12px; background: transparent; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); cursor: pointer; font-family: inherit; }
+.h-refresh:hover { color: var(--text); border-color: var(--brand); }
+@keyframes pulse { 50% { opacity: .35; } }
+
+/* ----- 3) التخطيط العام: محادثة + لوحة أثر ----- */
+#layout { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 14px; padding: 14px 20px; width: 100%; max-width: 1500px; margin: 0 auto; }
+.pane { min-height: 0; display: flex; flex-direction: column; background: var(--pane); border: 1px solid var(--border-soft); border-radius: 14px; overflow: hidden; }
+
+/* ----- 4) منطقة المحادثة ----- */
+.chat-scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; }
+.conversation { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.msg { max-width: min(78%, 560px); padding: 10px 16px; border-radius: 14px; font-size: 14.5px; line-height: 1.8; overflow-wrap: anywhere; white-space: pre-wrap; }
+.msg-user { align-self: flex-start; background: linear-gradient(135deg, rgba(20,184,166,.22), rgba(20,184,166,.10)); border: 1px solid rgba(20,184,166,.45); border-start-start-radius: 4px; }
+.msg-assistant { align-self: flex-end; background: var(--surface); border: 1px solid var(--border); border-start-end-radius: 4px; }
+.msg-system { align-self: center; max-width: 92%; text-align: center; color: var(--muted); background: transparent; border: 1px dashed var(--border); font-size: 13px; }
+.msg-error { align-self: flex-end; background: var(--err-soft); border: 1px solid rgba(239,68,68,.45); border-start-end-radius: 4px; }
+.err-title { margin: 0 0 4px; font-weight: 700; color: #fca5a5; font-size: 13.5px; }
+.err-code { margin: 0 0 6px; font-family: var(--mono); font-size: 11px; color: #f87171; }
+.err-message { margin: 0; font-size: 13.5px; line-height: 1.8; }
+.msg-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.meta-chip { font-size: 11px; color: var(--muted); background: rgba(148,163,184,.10); border: 1px solid var(--border); padding: 2px 10px; border-radius: 999px; }
+/* مؤشر «جارٍ التنفيذ» + المؤقت الحي */
+.busy { display: flex; align-items: center; gap: 10px; align-self: flex-end; margin: 0 16px 16px; padding: 6px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; font-size: 13px; color: var(--muted); }
+.busy-dots { display: inline-flex; gap: 4px; }
+.busy-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); animation: busyPulse 1s infinite; }
+.busy-dots i:nth-child(2) { animation-delay: .15s; }
+.busy-dots i:nth-child(3) { animation-delay: .3s; }
+@keyframes busyPulse { 0%, 100% { opacity: .25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+.busy-timer { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--brand); direction: ltr; }
+
+/* ----- 5) المُرسِل: أمثلة + إدخال + أزرار ----- */
+.composer { border-top: 1px solid var(--border-soft); padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 10px; background: rgba(15, 23, 42, .35); }
+.examples { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font-family: inherit; font-size: 12.5px; padding: 5px 14px; min-height: 30px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: #cbd5e1; cursor: pointer; transition: border-color .15s, color .15s; }
+.chip:hover:not(:disabled) { border-color: var(--brand); color: var(--text); }
+.composer-row { display: flex; gap: 10px; align-items: stretch; }
+#question-input { flex: 1; min-height: 64px; max-height: 180px; resize: vertical; background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-family: inherit; font-size: 14px; line-height: 1.7; }
+#question-input:focus-visible { outline: 2px solid var(--brand); outline-offset: 0; border-color: var(--brand); }
+.composer-actions { display: flex; flex-direction: column; gap: 8px; }
+.btn { font-family: inherit; font-size: 14px; font-weight: 600; min-height: 38px; padding: 0 22px; border-radius: 10px; cursor: pointer; border: 1px solid transparent; transition: filter .15s, border-color .15s, color .15s; }
+.btn-primary { background: var(--brand); color: #04211d; border-color: var(--brand); }
+.btn-primary:hover:not(:disabled) { filter: brightness(1.12); }
+.btn-ghost { background: transparent; color: var(--muted); border-color: var(--border); }
+.btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--brand); }
+.btn-small { font-size: 12px; min-height: 30px; padding: 0 14px; }
+.btn:disabled, .chip:disabled { opacity: .45; cursor: not-allowed; }
+.composer-status { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 11px; color: var(--muted); }
+.conv-id-wrap { display: flex; gap: 6px; align-items: center; }
+.conv-id { font-family: var(--mono); font-size: 10.5px; color: #5eead4; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ----- 6) لوحة أثر الوكلاء ----- */
+.trace-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border-soft); }
+.trace-head h2 { margin: 0; font-size: 14px; }
+.trace-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.trace-empty { margin: 0; text-align: center; color: var(--muted); font-size: 13px; padding: 26px 16px; line-height: 1.9; }
+.trace-divider { font-size: 11.5px; color: var(--muted); border-inline-start: 2px solid var(--border); padding-inline-start: 10px; margin: 8px 2px 0; }
+.raw-json { margin: 0; flex: 1; min-height: 220px; font-family: var(--mono); font-size: 11.5px; line-height: 1.7; color: #9fb4d8; background: var(--code-bg); border: 1px solid #22304a; border-radius: 8px; padding: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* ----- 7) بطاقة وكيل ----- */
+.agent-card { background: var(--surface); border: 1px solid var(--border); border-inline-start: 3px solid var(--agent-color, var(--muted)); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; animation: cardIn .3s ease-out; }
+.card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.agent-badge { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--agent-color, var(--muted)); background: var(--agent-soft, var(--skip-soft)); border: 1px solid var(--agent-color, var(--muted)); padding: 2px 10px; border-radius: 999px; }
+.status-pill { font-size: 11px; padding: 2px 10px; border-radius: 999px; background: var(--skip-soft); color: var(--skip); }
+.status-pill.status-done { background: var(--ok-soft); color: var(--ok); }
+.status-pill.status-failed { background: var(--err-soft); color: var(--err); }
+.status-pill.status-skipped { background: var(--skip-soft); color: var(--skip); }
+.card-note { margin: 0; font-size: 13px; line-height: 1.7; }
+.sql-wrap { position: relative; }
+.sql-block { margin: 0; background: var(--code-bg); border: 1px solid #22304a; border-radius: 8px; padding: 34px 12px 12px; font-family: var(--mono); font-size: 12px; line-height: 1.6; color: #cbd5e1; white-space: pre; overflow-x: auto; }
+.copy-btn { position: absolute; top: 6px; inset-inline-end: 6px; font-family: inherit; font-size: 11px; padding: 3px 12px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); cursor: pointer; }
+.copy-btn:hover { color: var(--text); border-color: var(--brand); }
+.copy-btn.copied { color: var(--ok); border-color: var(--ok); }
+.card-foot { display: flex; gap: 8px; }
+.rows-badge { font-size: 11.5px; color: var(--brand); background: var(--brand-soft); border: 1px solid rgba(20,184,166,.35); padding: 2px 10px; border-radius: 999px; }
+@keyframes cardIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+/* ----- 8) التجاوب مع الشاشات الصغيرة ----- */
+@media (max-width: 980px) {
+  body { overflow: auto; }
+  #layout { grid-template-columns: 1fr; }
+  #chat-pane { height: 74vh; }
+  .trace-scroll { max-height: 55vh; }
+  .composer-row { flex-direction: column; }
+  .composer-actions { flex-direction: row; }
+  .composer-actions .btn { flex: 1; }
+  .msg { max-width: 90%; }
+  .conv-id { max-width: 180px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== الهيدر: الشعار + هوية المزوّد + الصحة ===================== -->
+<header class="topbar">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">ب</span>
+    <span class="brand-text"><strong>بيان</strong><small>واجهة الاختبار الموحّدة</small></span>
+  </div>
+  <div class="header-badges" aria-label="هوية المزوّد الحالي">
+    <span class="h-badge" id="badge-provider">المزوّد: —</span>
+    <span class="h-badge" id="badge-model">النموذج: —</span>
+    <span class="h-badge" id="badge-mode">الوضع: —</span>
+  </div>
+  <div class="health" id="health-dots" role="group" aria-label="حالة المكونات">
+    <span class="health-item" data-component="database"><i class="dot" aria-hidden="true"></i><span>القاعدة</span></span>
+    <span class="health-item" data-component="redis"><i class="dot" aria-hidden="true"></i><span>Redis</span></span>
+    <span class="health-item" data-component="qdrant"><i class="dot" aria-hidden="true"></i><span>Qdrant</span></span>
+    <span class="health-item" data-component="ollama"><i class="dot" aria-hidden="true"></i><span>Ollama</span></span>
+    <button class="h-refresh" id="health-refresh" type="button">تحديث</button>
+  </div>
+</header>
+
+<!-- ===================== التخطيط: محادثة (يمين) + أثر الوكلاء (يسار) ===================== -->
+<main id="layout">
+
+  <!-- ----- عمود المحادثة ----- -->
+  <section class="pane" id="chat-pane" aria-label="المحادثة">
+    <div class="chat-scroll" id="chat-scroll">
+      <div class="conversation" id="conversation"></div>
+      <div class="busy" id="busy-indicator" role="status" hidden>
+        <span class="busy-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="busy-text">جارٍ التنفيذ…</span>
+        <span class="busy-timer" id="busy-timer">0.00 ث</span>
+      </div>
+    </div>
+    <div class="composer">
+      <div class="examples" id="examples" role="group" aria-label="أمثلة جاهزة">
+        <button type="button" class="chip" data-question="كم عدد الطلاب في كل برنامج؟">كم عدد الطلاب في كل برنامج؟</button>
+        <button type="button" class="chip" data-question="من الطلاب الذين عليهم رسوم متأخرة؟">من الطلاب الذين عليهم رسوم متأخرة؟</button>
+        <button type="button" class="chip" data-question="ما هي شروط الترقية؟">ما هي شروط الترقية؟</button>
+        <button type="button" class="chip" data-question="قارن أعداد الطلاب بين البرامج">قارن أعداد الطلاب بين البرامج</button>
+      </div>
+      <div class="composer-row">
+        <label for="question-input" class="sr-only">سؤالك</label>
+        <textarea id="question-input" rows="2" maxlength="2000" placeholder="اكتب سؤالك بالعربية… (Enter للإرسال، Shift+Enter لسطر جديد)"></textarea>
+        <div class="composer-actions">
+          <button type="button" class="btn btn-primary" id="send-btn">إرسال</button>
+          <button type="button" class="btn btn-ghost" id="new-chat-btn">محادثة جديدة</button>
+        </div>
+      </div>
+      <div class="composer-status">
+        <span class="conv-id-wrap"><span>معرّف المحادثة:</span> <span class="conv-id" id="conversation-id" dir="ltr">—</span></span>
+        <span class="status-hint" id="status-hint" role="status" aria-live="polite"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ----- لوحة أثر الوكلاء ----- -->
+  <aside class="pane" id="trace-pane" aria-label="أثر الوكلاء">
+    <div class="trace-head">
+      <h2>أثر الوكلاء</h2>
+      <button type="button" class="btn btn-ghost btn-small" id="raw-toggle" aria-pressed="false">عرض JSON خام</button>
+    </div>
+    <div class="trace-scroll" id="trace-scroll">
+      <p class="trace-empty" id="trace-empty">لا يوجد أثر بعد.<br>أرسل سؤالاً لتظهر بطاقة كل وكيل لحظة اكتماله.</p>
+      <div class="trace-cards" id="trace-cards"></div>
+      <pre class="raw-json" id="raw-json" dir="ltr" hidden>— لا أحداث بعد —</pre>
+    </div>
+  </aside>
+
+</main>
+
+<script>
+'use strict';
+/* ==========================================================================
+   منطق واجهة الاختبار الموحّدة — JS خالص بلا أي مكتبات
+   ========================================================================== */
+
+/* ----- قسم 1: الثوابت وعقد الواجهة ----- */
+const API = { STREAM: '/api/v1/chat/stream', HEALTH: '/api/v1/health' };
+const NETWORK_ERROR_MSG = 'تعذّر الوصول إلى الخلفية — تأكد أنها مشغّلة (make backend-dev) ثم أعد المحاولة.';
+const DEFAULT_HINT = 'Enter للإرسال • Shift+Enter لسطر جديد • راقب الأحداث الخام من زر «عرض JSON خام»';
+/* ألوان ثابتة لكل وكيل (شارة الاسم + حد البطاقة) — وكيل مجهول = رمادي */
+const AGENT_COLORS = {
+  supervisor:     { color: '#f59e0b', soft: 'rgba(245, 158, 11, .16)' },
+  sql_agent:      { color: '#2dd4bf', soft: 'rgba(45, 212, 191, .16)' },
+  rag_agent:      { color: '#a78bfa', soft: 'rgba(167, 139, 250, .16)' },
+  analyst_agent:  { color: '#fb7185', soft: 'rgba(251, 113, 133, .16)' },
+  reporter_agent: { color: '#38bdf8', soft: 'rgba(56, 189, 248, .16)' },
+};
+const STATUS_LABELS = { done: 'اكتمل', failed: 'فشل', skipped: 'تخطّى' };
+const COMPONENT_LABELS = { database: 'القاعدة', redis: 'Redis', qdrant: 'Qdrant', ollama: 'Ollama' };
+
+/* ----- قسم 2: حالة التطبيق ----- */
+const state = {
+  conversationId: null,  /* معرّف المحادثة الحالي (null = تولّده الخلفية) */
+  streaming: false,      /* هل هناك بث جارٍ الآن؟ */
+  finished: false,       /* هل وصل final/error لهذا الطلب؟ */
+  startedAt: 0,          /* لحظة الإرسال (للمؤقت الكلي) */
+  timerHandle: null,
+  rawEvents: [],         /* الأحداث الخام لآخر طلب (للتشخيص) */
+  rawMode: false,
+};
+const els = {};          /* مراجع العناصر — تُملأ في init() */
+
+/* ----- قسم 3: أدوات مساعدة صغيرة ----- */
+const $ = (id) => document.getElementById(id);
+function el(tag, cls, text) {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+function fmtMs(ms) { return (Math.max(0, ms) / 1000).toFixed(2) + ' ث'; }
+function truncate(text, n) { return text.length > n ? text.slice(0, n) + '…' : text; }
+function scrollChat() { els.chatScroll.scrollTop = els.chatScroll.scrollHeight; }
+function scrollTrace() { els.traceScroll.scrollTop = els.traceScroll.scrollHeight; }
+
+/* توليد UUID: randomUUID عند توفره، وإلا بديل v4 يدوي (سياقات غير آمنة بلا HTTPS) */
+function makeUuid() {
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  } catch (e) { /* نكمل إلى البديل اليدوي */ }
+  const bytes = new Uint8Array(16);
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < 16; i++) bytes[i] = Math.floor(Math.random() * 256);
+  }
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  let h = '';
+  for (const b of bytes) h += b.toString(16).padStart(2, '0');
+  return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20, 32);
+}
+
+/* نسخ نص: navigator.clipboard أولاً ثم بديل execCommand للمتصفحات غير الآمنة */
+function legacyCopy(text) {
+  let ok = false;
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  ta.remove();
+  return ok;
+}
+function copyText(text) {
+  if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+    return navigator.clipboard.writeText(text).then(() => true, () => legacyCopy(text));
+  }
+  return Promise.resolve(legacyCopy(text));
+}
+function onCopyClick(btn, text) {
+  if (btn.dataset.locked) return;
+  btn.dataset.locked = '1';
+  copyText(text).then(
+    (ok) => {
+      btn.textContent = ok ? 'تم النسخ' : 'تعذّر النسخ';
+      btn.classList.toggle('copied', ok);
+      setTimeout(() => { btn.textContent = 'نسخ'; btn.classList.remove('copied'); delete btn.dataset.locked; }, 1600);
+    }
+  );
+}
+
+/* ----- قسم 4: شريط الحالة السفلي (تلميحات) ----- */
+let hintTimer = null;
+function flashHint(msg, opts) {
+  opts = opts || {};
+  if (hintTimer) { clearTimeout(hintTimer); hintTimer = null; }
+  els.statusHint.textContent = msg;
+  if (opts.revertMs) hintTimer = setTimeout(() => { els.statusHint.textContent = DEFAULT_HINT; }, opts.revertMs);
+}
+function updateConvIdDisplay() {
+  if (state.conversationId) {
+    els.convId.textContent = state.conversationId;
+    els.convId.title = state.conversationId;
+  } else {
+    els.convId.textContent = '—';
+    els.convId.title = 'لا معرف بعد — ستولّده الخلفية مع أول سؤال';
+  }
+}
+
+/* ----- قسم 5: فحص الصحة (نقاط الهيدر) ----- */
+async function loadHealth() {
+  els.healthDots.querySelectorAll('.health-item').forEach((item) => {
+    item.classList.remove('up', 'down');
+    item.classList.add('checking');
+  });
+  try {
+    const res = await fetch(API.HEALTH, { headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const body = await res.json();
+    const comps = (body && body.components) || {};
+    Object.keys(COMPONENT_LABELS).forEach((name) => {
+      setHealthDot(name, comps[name] === 'up' ? 'up' : 'down');
+    });
+  } catch (e) {
+    Object.keys(COMPONENT_LABELS).forEach((name) => setHealthDot(name, 'down', 'تعذّر فحص الصحة — الخلفية غير مستجيبة'));
+  }
+}
+function setHealthDot(name, status, reason) {
+  const item = els.healthDots.querySelector('[data-component="' + name + '"]');
+  if (!item) return;
+  item.classList.remove('checking');
+  item.classList.toggle('up', status === 'up');
+  item.classList.toggle('down', status !== 'up');
+  const label = COMPONENT_LABELS[name] || name;
+  item.title = reason || (label + ': ' + (status === 'up' ? 'جاهز' : 'غير جاهز'));
+}
+
+/* ----- قسم 6: بناء عناصر المحادثة والبطاقات ديناميكيًا ----- */
+function welcomeBubble() {
+  return el('div', 'msg msg-system',
+    'مرحبًا بك في واجهة اختبار بيان — اكتب سؤالك بالعربية أو اختر مثالاً جاهزًا. ' +
+    'ستظهر بطاقة كل وكيل في اللوحة المجاورة لحظة اكتماله، ويمكنك مراجعة الأحداث الخام من زر «عرض JSON خام».');
+}
+function addUserBubble(text) {
+  els.conversation.appendChild(el('div', 'msg msg-user', text));
+  scrollChat();
+}
+function metaChip(label, latinValue) {
+  const chip = el('span', 'meta-chip');
+  chip.appendChild(document.createTextNode(label));
+  chip.appendChild(el('bdi', '', latinValue)); /* bdi يعزل القيم اللاتينية عن اتجاه RTL */
+  return chip;
+}
+function showFinalAnswer(data, elapsedMs) {
+  const wrap = el('div', 'msg msg-assistant');
+  wrap.appendChild(el('div', 'msg-text', data.answer || '(إجابة فارغة)'));
+  const foot = el('div', 'msg-meta');
+  if (data.route) foot.appendChild(metaChip('المسار: ', data.route));
+  if (Array.isArray(data.agents) && data.agents.length) {
+    foot.appendChild(metaChip('الوكلاء: ', data.agents.join('، ')));
+  }
+  foot.appendChild(metaChip('الزمن: ', fmtMs(elapsedMs)));
+  wrap.appendChild(foot);
+  els.conversation.appendChild(wrap);
+  scrollChat();
+}
+function addErrorBubble(title, code, message) {
+  const box = el('div', 'msg msg-error');
+  box.setAttribute('role', 'alert');
+  box.appendChild(el('p', 'err-title', title || 'خطأ'));
+  const codeLine = el('p', 'err-code', 'code: ' + (code || '—'));
+  codeLine.dir = 'ltr';
+  box.appendChild(codeLine);
+  box.appendChild(el('p', 'err-message', message || 'رسالة غير متوفرة'));
+  els.conversation.appendChild(box);
+  scrollChat();
+}
+function addTraceDivider(question) {
+  const d = el('div', 'trace-divider', 'سؤال: ' + truncate(question, 70));
+  d.dir = 'auto';
+  els.traceCards.appendChild(d);
+}
+function buildAgentCard(data) {
+  const conf = AGENT_COLORS[data.agent] || { color: '#94a3b8', soft: 'rgba(148, 163, 184, .16)' };
+  const card = el('article', 'agent-card');
+  card.style.setProperty('--agent-color', conf.color);
+  card.style.setProperty('--agent-soft', conf.soft);
+  /* رأس البطاقة: شارة الوكيل + حالة */
+  const head = el('div', 'card-head');
+  head.appendChild(el('span', 'agent-badge', String(data.agent || 'وكيل مجهول')));
+  const statusKey = data.status || 'unknown';
+  head.appendChild(el('span', 'status-pill status-' + statusKey, STATUS_LABELS[statusKey] || statusKey));
+  card.appendChild(head);
+  /* الملاحظة */
+  if (data.note) card.appendChild(el('p', 'card-note', data.note));
+  /* كتلة SQL مع زر نسخ */
+  if (typeof data.sql === 'string' && data.sql.trim()) {
+    const wrap = el('div', 'sql-wrap');
+    const pre = el('pre', 'sql-block', data.sql);
+    pre.dir = 'ltr';
+    const btn = el('button', 'copy-btn', 'نسخ');
+    btn.type = 'button';
+    btn.addEventListener('click', () => onCopyClick(btn, data.sql));
+    wrap.appendChild(btn);
+    wrap.appendChild(pre);
+    card.appendChild(wrap);
+  }
+  /* شارة عدد الصفوف */
+  if (data.rows_count !== null && data.rows_count !== undefined && !Number.isNaN(Number(data.rows_count))) {
+    const foot = el('div', 'card-foot');
+    foot.appendChild(el('span', 'rows-badge', String(data.rows_count) + ' صف'));
+    card.appendChild(foot);
+  }
+  return card;
+}
+
+/* ----- قسم 7: العرض الخام (JSON) وتبديل اللوحة ----- */
+function renderRaw() {
+  els.rawJson.textContent = state.rawEvents.length
+    ? JSON.stringify(state.rawEvents, null, 2)
+    : '— لا أحداث بعد —';
+}
+function updateTraceEmpty() {
+  els.traceEmpty.hidden = state.rawMode || els.traceCards.children.length > 0;
+}
+function syncTraceView() {
+  els.rawJson.hidden = !state.rawMode;
+  els.traceCards.hidden = state.rawMode;
+  updateTraceEmpty();
+}
+function toggleRaw() {
+  state.rawMode = !state.rawMode;
+  els.rawToggle.textContent = state.rawMode ? 'عرض البطاقات' : 'عرض JSON خام';
+  els.rawToggle.setAttribute('aria-pressed', String(state.rawMode));
+  syncTraceView();
+}
+function clearTrace() {
+  els.traceCards.replaceChildren();
+  updateTraceEmpty();
+}
+
+/* ----- قسم 8: المؤقت الكلي (تحديث كل 100ms) ----- */
+function startTimer() {
+  state.startedAt = performance.now();
+  els.busyTimer.textContent = '0.00 ث';
+  if (state.timerHandle) clearInterval(state.timerHandle);
+  state.timerHandle = setInterval(() => {
+    els.busyTimer.textContent = fmtMs(performance.now() - state.startedAt);
+  }, 100);
+}
+function stopTimer() {
+  if (state.timerHandle) { clearInterval(state.timerHandle); state.timerHandle = null; }
+  return state.startedAt ? performance.now() - state.startedAt : 0;
+}
+
+/* ----- قسم 9: حالة الإرسال (تعطيل/تمكين الأزرار) ----- */
+function setBusy(on) {
+  state.streaming = on;
+  els.sendBtn.disabled = on;
+  els.newChatBtn.disabled = on;
+  els.chips.forEach((chip) => { chip.disabled = on; });
+  els.sendBtn.setAttribute('aria-busy', on ? 'true' : 'false');
+  els.busy.hidden = !on;
+  if (on) els.busyTimer.textContent = '0.00 ث';
+}
+
+/* ----- قسم 10: محلل SSE يدوي فوق fetch/ReadableStream ----- */
+async function consumeSse(response, onEvent) {
+  if (!response.body || typeof response.body.getReader !== 'function') {
+    throw new Error('ReadableStream غير مدعوم في هذا المتصفح');
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder('utf-8');
+  let buffer = '';
+  for (;;) {
+    const chunk = await reader.read();
+    if (chunk.done) break;
+    buffer += decoder.decode(chunk.value, { stream: true });
+    buffer = buffer.replace(/\r\n/g, '\n'); /* توحيد نهايات الأسطر (SSE يسمح بـ \r\n) */
+    let cut = buffer.indexOf('\n\n');
+    while (cut !== -1) {
+      dispatchFrame(buffer.slice(0, cut), onEvent);
+      buffer = buffer.slice(cut + 2);
+      cut = buffer.indexOf('\n\n');
+    }
+  }
+  buffer += decoder.decode(); /* تدفق أي بايتات متبقية */
+  if (buffer.trim()) dispatchFrame(buffer, onEvent);
+}
+function dispatchFrame(frame, onEvent) {
+  let eventName = 'message';
+  const dataLines = [];
+  for (const rawLine of frame.split('\n')) {
+    const line = rawLine.replace(/\r$/, '');
+    if (!line || line.startsWith(':')) continue; /* سطر تعليق SSE */
+    if (line.startsWith('event:')) eventName = line.slice(6).trim();
+    else if (line.startsWith('data:')) dataLines.push(line.slice(5).replace(/^ /, ''));
+  }
+  const dataStr = dataLines.join('\n');
+  let data = null;
+  let parseError = null;
+  if (dataStr) {
+    try { data = JSON.parse(dataStr); } catch (e) { parseError = String(e); }
+  }
+  onEvent({ event: eventName, data, raw: dataStr, parseError });
+}
+
+/* ----- قسم 11: معالجات أحداث العقد (meta / agent_end / final / error) ----- */
+function handleStreamEvent(evt) {
+  state.rawEvents.push({
+    at: new Date().toISOString(),
+    event: evt.event,
+    data: evt.data !== null ? evt.data : evt.raw,
+    parseError: evt.parseError || undefined,
+  });
+  renderRaw();
+  if (evt.parseError) {
+    console.warn('إطار SSE ببيانات غير JSON:', evt.raw);
+    return;
+  }
+  switch (evt.event) {
+    case 'meta': onMeta(evt.data); break;
+    case 'agent_end': onAgentEnd(evt.data); break;
+    case 'final': onFinal(evt.data); break;
+    case 'error': onStreamError(evt.data); break;
+    default:
+      /* أحداث محجوزة مستقبلًا (agent_start ...) — تُسجَّل في JSON الخام فقط */
+      console.debug('حدث غير معروف (محجوز؟):', evt.event);
+  }
+}
+function setBadge(badge, label, value) {
+  badge.replaceChildren();
+  badge.appendChild(document.createTextNode(label));
+  badge.appendChild(el('bdi', '', String(value)));
+}
+function onMeta(data) {
+  if (!data) return;
+  setBadge(els.badgeProvider, 'المزوّد: ', data.provider || '—');
+  setBadge(els.badgeModel, 'النموذج: ', data.model || '—');
+  const mode = String(data.mode || '—');
+  els.badgeMode.textContent = mode === 'mock' ? 'وضع mock' : 'وضع ' + mode;
+  els.badgeMode.classList.toggle('badge-mock', mode === 'mock');
+  els.badgeMode.classList.toggle('badge-real', mode !== 'mock');
+  if (data.conversation_id) {
+    state.conversationId = data.conversation_id;
+    updateConvIdDisplay();
+  }
+}
+function onAgentEnd(data) {
+  if (!data) return;
+  els.traceCards.appendChild(buildAgentCard(data));
+  updateTraceEmpty();
+  scrollTrace();
+}
+function onFinal(data) {
+  if (!data) return;
+  state.finished = true;
+  const elapsed = stopTimer();
+  setBusy(false);
+  if (data.conversation_id) {
+    state.conversationId = data.conversation_id;
+    updateConvIdDisplay();
+  }
+  showFinalAnswer(data, elapsed);
+  flashHint('اكتملت الإجابة — يمكنك متابعة الأسئلة في نفس المحادثة أو بدء محادثة جديدة.');
+}
+function onStreamError(data) {
+  if (!state.streaming) return; /* درء التكرار عند تعدد المصادر */
+  state.finished = true;
+  stopTimer();
+  setBusy(false);
+  data = data || {};
+  addErrorBubble(data.title || 'خطأ في البث', data.code || 'error', data.message || 'خطأ غير معروف');
+  flashHint('فشل الطلب — راجع الفقاعة الحمراء في منطقة المحادثة.');
+}
+
+/* ----- قسم 12: دورة الإرسال الكاملة ----- */
+function beginStream(text) {
+  state.rawEvents = [];
+  renderRaw();
+  state.finished = false;
+  setBusy(true);
+  addUserBubble(text);
+  addTraceDivider(text);
+  startTimer();
+  flashHint('جارٍ البث — تصل بطاقات الوكلاء لحظة اكتمالها…');
+}
+async function sendQuestion() {
+  if (state.streaming) return;
+  const text = els.input.value.trim();
+  if (!text) {
+    flashHint('اكتب سؤالًا أولًا أو اختر أحد الأمثلة الجاهزة.', { revertMs: 3000 });
+    els.input.focus();
+    return;
+  }
+  if (text.length < 2) {
+    flashHint('السؤال قصير جدًا — الحد الأدنى حرفان (كما في عقد الخلفية).', { revertMs: 3000 });
+    return;
+  }
+  els.input.value = '';
+  beginStream(text);
+  try {
+    const res = await fetch(API.STREAM, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+      body: JSON.stringify({ question: text, conversation_id: state.conversationId }),
+    });
+    if (!res.ok) {
+      let detail = '';
+      try {
+        const body = await res.json();
+        detail = body && typeof body.detail === 'string' ? body.detail : JSON.stringify(body);
+      } catch (e) { detail = ''; }
+      onStreamError({
+        code: 'http_' + res.status,
+        message: 'رفضت الخلفية الطلب (HTTP ' + res.status + ')' + (detail ? ' — ' + detail : ''),
+      });
+      return;
+    }
+    await consumeSse(res, handleStreamEvent);
+    if (!state.finished) {
+      onStreamError({ code: 'stream_ended', message: 'انقطع البث قبل حدث final — قد تكون الخلفية توقفت أثناء التنفيذ.' });
+    }
+  } catch (err) {
+    onStreamError({
+      code: 'network',
+      title: 'تعذّر الاتصال بالخلفية',
+      message: NETWORK_ERROR_MSG + ' (' + ((err && err.message) || err) + ')',
+    });
+  }
+}
+function newConversation() {
+  if (state.streaming) return;
+  state.conversationId = makeUuid();
+  state.rawEvents = [];
+  renderRaw();
+  clearTrace();
+  els.conversation.replaceChildren();
+  els.conversation.appendChild(welcomeBubble());
+  updateConvIdDisplay();
+  flashHint('بدأت محادثة جديدة بمعرّف مولّد محليًا — أرسل سؤالك.');
+  els.input.focus();
+}
+
+/* ----- قسم 13: التهيئة وربط الأحداث ----- */
+function init() {
+  /* جمع المراجع */
+  els.conversation = $('conversation');
+  els.chatScroll = $('chat-scroll');
+  els.busy = $('busy-indicator');
+  els.busyTimer = $('busy-timer');
+  els.input = $('question-input');
+  els.sendBtn = $('send-btn');
+  els.newChatBtn = $('new-chat-btn');
+  els.statusHint = $('status-hint');
+  els.convId = $('conversation-id');
+  els.healthDots = $('health-dots');
+  els.healthRefresh = $('health-refresh');
+  els.badgeProvider = $('badge-provider');
+  els.badgeModel = $('badge-model');
+  els.badgeMode = $('badge-mode');
+  els.rawToggle = $('raw-toggle');
+  els.rawJson = $('raw-json');
+  els.traceCards = $('trace-cards');
+  els.traceEmpty = $('trace-empty');
+  els.traceScroll = $('trace-scroll');
+  els.chips = Array.prototype.slice.call(document.querySelectorAll('#examples .chip'));
+
+  /* ربط الأحداث — بلا أي معالجات مضمّنة في HTML */
+  els.sendBtn.addEventListener('click', sendQuestion);
+  els.newChatBtn.addEventListener('click', newConversation);
+  els.rawToggle.addEventListener('click', toggleRaw);
+  els.healthRefresh.addEventListener('click', loadHealth);
+  els.input.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); sendQuestion(); }
+  });
+  els.chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      els.input.value = chip.dataset.question || chip.textContent.trim();
+      sendQuestion();
+    });
+  });
+
+  /* الحالة الابتدائية */
+  els.conversation.appendChild(welcomeBubble());
+  updateConvIdDisplay();
+  flashHint(DEFAULT_HINT);
+  syncTraceView();
+  renderRaw();
+  loadHealth();
+}
+init();
+</script>
+</body>
+</html>

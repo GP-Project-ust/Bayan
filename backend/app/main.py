@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1.endpoints.playground import router as dev_router
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.core.logging import logger, setup_logging
@@ -38,6 +39,9 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(api_router, prefix=settings.api_prefix)
+
+    # واجهة الاختبار الموحدة — أداة تطوير تُقدَّم خارج بادئة الـ API
+    app.include_router(dev_router)
     return app
 
 
