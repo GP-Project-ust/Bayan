@@ -31,6 +31,25 @@ services:
       timeout: 5s
       retries: 20
 
+  # القاعدة التجريبية الموحدة للجامعة (جوهر أسماء OpenEduCat — قراءة فقط لبيان)
+  # راجع database/university_demo/README.md — التجهيز الكامل بأمر واحد: make dev-db
+  university-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_DB: university
+    ports:
+      - "5433:5432"
+    volumes:
+      - bayan-university-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo -d university"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
   # مستودع المتجهات (RAG — لوائح الجامعة وسياساتها)
   qdrant:
     image: qdrant/qdrant:latest
@@ -100,3 +119,4 @@ volumes:
   bayan-db-data:
   bayan-qdrant-data:
   bayan-ollama-data:
+  bayan-university-data:
