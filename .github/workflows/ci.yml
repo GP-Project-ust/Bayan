@@ -87,7 +87,8 @@ jobs:
         run: |
           PGPASSWORD=odoo psql -X -v ON_ERROR_STOP=1 -h localhost -p 5433 -U odoo -d university -f database/university_demo/01_schema.sql
           # الـseed يكتب البيانات — يتصل بحساب odoo الإداري لا بقارئ bayan_reader
-          python database/university_demo/02_seed.py --students 300 \
+          # (الافتراضي 500 طالباً — عتبة verify.sh تشترط >400 فلا تُنقصها هنا)
+          python database/university_demo/02_seed.py \
             --dsn postgresql://odoo:odoo@localhost:5433/university
           PGPASSWORD=odoo psql -X -v ON_ERROR_STOP=1 -h localhost -p 5433 -U odoo -d university -f database/university_demo/03_views_and_reader.sql
 

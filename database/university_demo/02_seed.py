@@ -427,10 +427,11 @@ def seed(cur: psycopg.Cursor, students: list[dict], faculty: list[dict]) -> None
     )
 
     # 10) ضبط تسلسلات المعرّفات بعد الإدخال الصريح
+    #     (COALESCE يحمي الجداول الفارغة — MAX(id)=NULL لو شُغّل بـ --faculty 0 مثلاً)
     for table in IDENTITY_TABLES:
         cur.execute(
             f"SELECT setval(pg_get_serial_sequence('{table}', 'id'), "
-            f"(SELECT MAX(id) FROM {table}))"
+            f"(SELECT COALESCE(MAX(id), 1) FROM {table}))"
         )
 
 

@@ -96,12 +96,20 @@ services:
         condition: service_healthy
       qdrant:
         condition: service_healthy
+      university-db:
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql://bayan:bayan@db:5432/bayan
       REDIS_URL: redis://redis:6379/0
       QDRANT_URL: http://qdrant:6333
       OLLAMA_BASE_URL: http://host.docker.internal:11434
       LLM_MODEL: qwen2.5:14b
+      # قاعدة الجامعة التجريبية — داخل شبكة compose تُنادى باسم الخدمة لا localhost
+      ODOO_DB_HOST: university-db
+      ODOO_DB_PORT: "5432"
+      ODOO_DB_NAME: university
+      ODOO_DB_USER: bayan_reader
+      ODOO_DB_PASSWORD: bayan_dev_reader
     ports:
       - "8000:8000"
 

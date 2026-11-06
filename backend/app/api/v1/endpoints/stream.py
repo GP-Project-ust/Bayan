@@ -36,6 +36,7 @@ def _node_payload(node_name: str, node_state: dict) -> AgentEndPayload:
         note=entry.get("note", ""),
         sql=entry.get("sql"),
         rows_count=entry.get("rows_count"),
+        duration_ms=entry.get("duration_ms"),
     )
 
 

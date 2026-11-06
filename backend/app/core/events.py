@@ -40,6 +40,9 @@ class AgentEndPayload(BaseModel):
     note: str = Field(default="", description="ما فعله الوكيل بعبارة واحدة")
     sql: str | None = Field(default=None, description="استعلام SQL إن وُلّد")
     rows_count: int | None = Field(default=None, description="عدد صفوف النتيجة إن نُفّذ")
+    duration_ms: int | None = Field(
+        default=None, description="مدة تنفيذ الوكيل بالمللي ثانية إن قيست"
+    )
 
 
 class FinalPayload(BaseModel):
