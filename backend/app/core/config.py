@@ -24,11 +24,18 @@ class Settings(BaseSettings):
     qdrant_url: str = "http://localhost:6333"
 
     # ---------- النموذج اللغوي ----------
-    llm_provider: str = "ollama"
+    # mock = ردود حتمية للتطوير دون أي اتصال (الأنسب لأول تشغيل لكل عضو)
+    llm_provider: str = "mock"
     llm_model: str = "qwen2.5:14b"
     ollama_base_url: str = "http://localhost:11434"
 
+    # ---------- أدوات التطوير ----------
+    # واجهة الاختبار الموحدة (/dev/playground) — تعطَّل في بيئة الإنتاج لاحقاً
+    enable_playground: bool = True
+
     # ---------- بيئة الاختبار: قاعدة بيانات الجامعة (قراءة فقط) ----------
+    # القاعدة التجريبية الموحدة تُجهَّز بأمر واحد: make dev-db  (راجع database/university_demo/)
+    odoo_db_dsn: str = ""  # تجاوز كامل للرابط إن ضُبط (مفيد لقواعد socket في الاختبارات)
     odoo_db_host: str = "localhost"
     odoo_db_port: int = 5433
     odoo_db_name: str = "university"
@@ -37,7 +44,9 @@ class Settings(BaseSettings):
 
     @property
     def odoo_database_url(self) -> str:
-        """رابط اتصال للقراءة فقط بقاعدة Odoo (بيئة الاختبار)."""
+        """رابط اتصال للقراءة فقط بقاعدة الجامعة (التجريبية أو الحقيقية)."""
+        if self.odoo_db_dsn:
+            return self.odoo_db_dsn
         return (
             f"postgresql://{self.odoo_db_user}:{self.odoo_db_password}"
             f"@{self.odoo_db_host}:{self.odoo_db_port}/{self.odoo_db_name}"
