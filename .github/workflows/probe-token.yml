@@ -1,0 +1,32 @@
+# ملف مؤقت للفحص — يُحذف قبل فتح الـ PR
+name: probe-project-token
+on: push
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      projects: write
+    steps:
+      - name: قراءة مشروع المؤسسة رقم 6
+        env:
+          GH: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "PROBE-READ-START"
+          curl -sS -H "Authorization: Bearer $GH" -H "Content-Type: application/json" \
+            https://api.github.com/graphql \
+            -d '{"query":"query{ organization(login:\"GP-Project-ust\"){ projectV2(number:6){ title url } } }"}' \
+            | tee read_result.json || true
+          echo "PROBE-READ-END"
+
+      - name: كتابة تجريبية (بند draft مؤقت)
+        env:
+          GH: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "PROBE-WRITE-START"
+          curl -sS -H "Authorization: Bearer $GH" -H "Content-Type: application/json" \
+            https://api.github.com/graphql \
+            -d '{"query":"mutation($projectId: ID!, $title: String!){ addProjectV2DraftIssue(input:{projectId:$projectId, title:$title}){ projectItem { id } } }","variables":{"projectId":"PVT_kwDOEinEP84BrO5a","title":"PROBE — بند مؤقت يُحذف"}}' \
+            | tee write_result.json || true
+          echo "PROBE-WRITE-END"
