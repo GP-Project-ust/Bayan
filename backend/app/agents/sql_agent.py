@@ -138,6 +138,7 @@ def sql_agent_node(state: AgentState) -> dict:
         return {
             "sql_query": sql,
             "query_results": rows,
+            "rows_truncated": len(rows) >= MAX_ROWS,  # تقدير السقف — يوصل شارة الاقتصاص للواجهة
             "answer": (
                 f"نفّذت استعلاماً آمناً فوق مشهد {view} ({intent}): "
                 f"{len(rows)} صف خلال {duration_s} ثانية."

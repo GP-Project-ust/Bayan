@@ -17,6 +17,7 @@ class AgentState(TypedDict, total=False):
       route             — قرار الـ Supervisor: sql_agent / rag_agent / analyst_agent / ...
       sql_query         — استعلام SQL الذي ولّده وكيل SQL
       query_results     — نتائج التنفيذ (صفوف + أعمدة + عدد)
+      rows_truncated    — هل قُطعت النتائج عند سقف صفوف التنفيذ؟ (يشغل شارة الاقتصاص في الواجهة)
       rag_context       — المقاطع المسترجعة من Qdrant (لوائح/سياسات)
       answer            — الإجابة النهائية المجمّعة
       agent_trace       — أثر التنفيذ (للواجهة والقياس والتصحيح)
@@ -32,6 +33,7 @@ class AgentState(TypedDict, total=False):
     route: str
     sql_query: str
     query_results: list[dict[str, Any]]
+    rows_truncated: bool
     rag_context: Annotated[list[str], operator.add]
     answer: str
     agent_trace: Annotated[list[dict[str, Any]], operator.add]
