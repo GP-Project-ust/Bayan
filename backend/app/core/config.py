@@ -29,6 +29,15 @@ class Settings(BaseSettings):
     llm_model: str = "qwen2.5:14b"
     ollama_base_url: str = "http://localhost:11434"
 
+    # ---------- التضمين (ADR-005: bge-m3 عبر Ollama — 1024 بعداً) ----------
+    # مزوّد مستقل عن مزوّد النموذج اللغوي: mock = متجهات حتمية بلا أي اتصال
+    # (افتراضي التطوير وCI) | ollama = bge-m3 المحلي (راجع app/core/qdrant.py)
+    embedding_provider: str = "mock"
+    embedding_model: str = "bge-m3"
+    embedding_dimensions: int = 1024
+    # فارغ = يفرَّغ تلقائياً إلى ollama_base_url (يضبط فقط لخادم تضمين مستقل)
+    embedding_base_url: str = ""
+
     # ---------- أدوات التطوير ----------
     # واجهة الاختبار الموحدة (/dev/playground) — تعطَّل في بيئة الإنتاج لاحقاً
     enable_playground: bool = True
