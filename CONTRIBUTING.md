@@ -7,41 +7,39 @@
 ## نموذج الفروع
 
 ```
-main  ← مستقر دائماً، محمي، لا يُرفع إليه مباشرة أبداً
-  └── dev  ← فرع التكامل، يُدمج فيه عمل الجميع عبر PR
-       ├── feature/sql-agent-generation   ← عمل أحمد
-       ├── feature/chat-ui-rtl            ← عمل محمد الشريف
-       ├── feature/auth-endpoints         ← عمل عبدالكريم
-       └── fix/smart-views-join           ← إصلاح وليد
+main  ← مستقر دائماً، محمي: الدمج فيه عبر PR فقط
+  ├── feature/sql-agent-generation   ← فرع لكل مهمة
+  ├── feature/chat-ui-rtl
+  ├── feature/auth-endpoints
+  └── fix/smart-views-join
 ```
 
 ## سير العمل القياسي (لكل مهمة، بدون استثناء)
 
 ```bash
-# 1) التحدث بفرع جديد من dev
-git checkout dev
-git pull origin dev
+# 1) التحدث بفرع جديد من main
+git checkout main
+git pull origin main
 git checkout -b feature/اسم-المهمة-الواضح
 
 # 2) أثناء العمل: التزامات صغيرة متكررة بمعنى واضح
 git add <الملفات-المحددة>
 git commit -m "feat(sql-agent): توليد استعلام أساسي من سؤال عربي"
 
-# 3) مزامنة دورية مع dev (تجنّب التعارضات الكبيرة)
+# 3) مزامنة دورية مع main (تجنّب التعارضات الكبيرة)
 git fetch origin
-git rebase origin/dev
+git rebase origin/main
 
-# 4) عند الانتهاء: رفع وفتح Pull Request إلى dev
+# 4) عند الانتهاء: رفع وفتح Pull Request إلى main
 git push -u origin feature/اسم-المهمة
 ```
 
 ثم من واجهة GitHub:
-1. افتح PR إلى `dev` (وليس main)
-2. اطلب مراجعة من زميل واحد على الأقل
-3. انتظر CI الأخضر (الاختبارات + فحص الكود)
-4. بعد موافقة المراجع: **Squash and merge** ثم احذف الفرع
-
-الدمج إلى `main` يجريه **قائد المشروع فقط**، في نهاية كل سبرنت، بعد التأكد من استقرار `dev`.
+1. افتح PR إلى `main`
+2. انتظر CI الأخضر (الاختبارات + فحص الكود) — شرط إلزامي لفتح الدمج
+3. **الدمج بعد موافقة قائد المشروع (code owner) على آخر نسخة من الـ PR حصراً** —
+   قاعدة حماية `main` تفرضها آلياً ولا يمكن تجاوزها
+4. بعد الدمج: احذف الفرع
 
 ## قواعد رسائل الالتزام (Conventional Commits)
 
@@ -67,9 +65,9 @@ git push -u origin feature/اسم-المهمة
 ## حل التعارضات (Conflicts)
 
 ```bash
-git checkout dev && git pull
+git checkout main && git pull
 git checkout feature/فرعك
-git rebase origin/dev
+git rebase origin/main
 # افتح الملفات المتعارضة، ابحث عن علامات <<<<<<< وحلها يدوياً
 git add .
 git rebase --continue
@@ -88,11 +86,12 @@ git push --force-with-lease
 
 ## أول مساهمة لك (تمرين التهيئة)
 
-1. استنسخ المستودع وأنشئ فرعاً: `git checkout -b docs/add-<اسمك>-github`
-2. افتح `README.md` وأضف اسم مستخدم GitHub الخاص بك في جدول الفريق
-3. ارفع وافتح PR إلى `dev`، واطلب مراجعة قائد المشروع
+1. استنسخ المستودع وأنشئ فرعاً: `git checkout -b docs/onboarding-<اسمك>`
+2. أصلح شيئاً صغيراً وواضحاً: تصحيح توثيق، إضافة مثال، أو توضيح تعليق
+3. ارفع وافتح PR إلى `main` — سيمر بالسلسلة كاملة: CI ثم موافقة قائد المشروع
 4. بعد الدمج — مبروك، أنت جاهز للعمل الحقيقي
 
 ## بيئة التطوير
 
-انظر قسم "البدء السريع" في `README.md` وملف `docs/04_execution_plan.md` لمهام الأسبوع الأول.
+انظر قسم "البدء السريع" في `README.md` — والمرجع الكامل للخطة والمهام
+في مستودع وثائق المشروع (Bayan-Documentation).

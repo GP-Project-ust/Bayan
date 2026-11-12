@@ -141,38 +141,11 @@ LLM_PROVIDER=mock      # افتراضي: ردود حتمية بلا اتصال
 [openeducat-yemen-university](https://github.com/GP-Project-ust/openeducat-yemen-university) —
 انظر `database/README.md` لطريقة ربطها ببيان بصلاحية قراءة فقط.
 
-## الوضع الحالي والخارطة
-
-| المرحلة | النطاق | الحالة |
-|---------|--------|--------|
-| Sprint 0 — التأسيس | المستودع + الهيكل + البيئة الموحدة + واجهة الاختبار | **مكتمل** |
-| التصميم التفصيلي | مخطط الوكلاء + Smart Views + API | مخطط له |
-| Sprint 1 — وكيل SQL | سؤال عربي ← LLM ← SQL ← نتائج (شريحة أولية حتمية تعمل) | مخطط له |
-| Sprint 2 — RAG | استرجاع اللوائح + Golden Dataset | مخطط له |
-| Sprint 3 — Supervisor | توجيه متعدد الوكلاء متكامل | مخطط له |
-| Sprint 4 — القياس والنشر | دقة 90% + زمن ≤ 3 ثوانٍ | مخطط له |
-
-الخطة الكاملة بالتفصيل: [`docs/04_execution_plan.md`](docs/04_execution_plan.md)
-
-## الفريق
-
-| العضو | الدور | GitHub |
-|-------|-------|--------|
-| أحمد علي المتوكل | قائد المشروع + AI Lead (الوكلاء والـ Prompts) | `mutawakel-hub` |
-| محمد رشيد الشريف | Frontend Lead (واجهة المحادثة RTL) | `MohammedALshareef711` |
-| عبدالكريم قاسم العبدلي | Backend Lead (FastAPI + الأمان) | — |
-| وليد العنسي | Data & DevOps (Smart Views + Odoo + CI) | `Waleed310426` |
-| محمد نجيب العواضي | Evaluation & QA (Golden Dataset + القياس) | — |
-
-> أول مهمة لكل عضو: افتح Pull Request يضيف اسم مستخدم GitHub الخاص بك في هذا الجدول —
-> تدريب عملي على سير العمل الكامل (فرع ← التزام ← PR ← مراجعة ← دمج). انظر `CONTRIBUTING.md`.
-
 ## الوثائق
 
 - [المعمارية الهندسية](docs/01_architecture.md)
 - [تصميم الوكلاء الخمسة](docs/02_agents.md)
 - [طبقة Smart Views (ابتكار المشروع)](docs/03_smart_views.md)
-- [خطة التنفيذ والسبرنتات](docs/04_execution_plan.md)
 - [دليل المساهمة وسير العمل](CONTRIBUTING.md)
 - [منهجية التقييم](evaluation/README.md)
 
