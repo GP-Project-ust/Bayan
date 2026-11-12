@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: دليل المساهمة وسير العمل
+    url: https://github.com/GP-Project-ust/Bayan/blob/main/CONTRIBUTING.md
+    about: نموذج الفروع، قواعد الالتزامات، سير PR عبر dev، وحل التعارضات — الدستور التشغيلي للفريق.
+  - name: قرارات المعمارية (ADRs)
+    url: https://github.com/GP-Project-ust/Bayan/tree/main/docs/adr
+    about: العقود الملزمة — قاعدة العرض الجامعية (001)، مصنع LLM (002)، أحداث SSE (003)، العقود المشتركة (004).
+  - name: منهجية التقييم والمؤشرات
+    url: https://github.com/GP-Project-ust/Bayan/blob/main/evaluation/README.md
+    about: دقة التنفيذ وزمن الاستجابة وفئات golden dataset — مرجع كل معايير القبول الرقمية.

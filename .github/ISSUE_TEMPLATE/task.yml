@@ -1,0 +1,120 @@
+name: مهمة تطوير
+description: أعدّ المهمة الآن (السبرنت + المسار + الهدف + المعايير) وأسند العضو والتاريخ لاحقًا من الشريط الجانبي للـ Issue.
+title: "S؟: "
+labels: ["type:task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## كيف تستخدم هذا القالب
+
+        **الآن (أثناء الإنشاء):** املأ الحقول أدناه — يكفي الهدف والسبرنت والمعايير لبدء العمل، والباقي يمكن استكماله لاحقًا بتعديل الـ Issue.
+
+        **عنوان المهمة** يُكتب بصيغة موحدة: `S1: فعل + المكوّن` — مثال: `S1: توليد SQL عبر LLM مع تحقق AST`.
+
+        **بعد الإنشاء (الشريط الجانبي يمين صفحة الـ Issue):**
+        1. **Projects** ← اختر «Bayan — خطة التطوير» ثم حدد قيمة حقل **Sprint** لتقفل المهمة في نافذة دورتها (تظهر تلقائيًا في Roadmap).
+        2. **Assignees** ← العضو المسؤول (يمكن أن يبقى دون إسناد حتى تحديده).
+        3. **Due date** ← تاريخ التسليم.
+        4. **Labels** ← `sprint-N` + `track:…` + الأولوية.
+
+        عند فتح PR يكتب صاحب المهمة `Closes #رقم-هذه-المهمة` لتُغلق تلقائيًا عند الدمج.
+
+  - type: dropdown
+    id: sprint
+    attributes:
+      label: السبرنت
+      description: الدورة التي تنتمي إليها المهمة — تطابق حقل Sprint في مشروع «Bayan — خطة التطوير» بالأسماء نفسها.
+      options:
+        - Sprint 1 — وكيل SQL وطبقة الرؤى الذكية
+        - Sprint 2 — وكيل RAG وفهرسة المستندات واللوائح
+        - Sprint 3 — اكتمال منظومة الوكلاء والدمج بالواجهة
+        - Sprint 4 — التهيئة الذكية والتدقيق والاختبار والنشر
+        - احتياط — التسليم النهائي (M11)
+        - مستمر عبر الدورات (قياس / بنية تحتية / توثيق)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: track
+    attributes:
+      label: المسار التقني
+      description: ملكية العمل الأساسية — يساعد على منع تداخل الأعضاء على الملفات نفسها.
+      options:
+        - Backend — خلفية FastAPI وقاعدة البيانات
+        - Frontend — واجهة Next.js العربية RTL
+        - AI — الوكلاء والنموذج اللغوي
+        - Eval — القياس والتقييم وgolden dataset
+        - Infra — CI والنشر والبيئات
+        - Docs — التوثيق والتقرير
+    validations:
+      required: true
+
+  - type: input
+    id: component
+    attributes:
+      label: الوحدات والملفات المستهدفة
+      description: مسارات الملفات الرئيسية التي ستُعدّل — مثال backend/app/agents/sql_agent.py
+      placeholder: "backend/app/agents/sql_agent.py, backend/tests/test_sql_agent.py"
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: الهدف
+      description: "جملة إلى ثلاث جمل: ماذا ينجز؟ ولماذا؟ وما القيمة عند الإغلاق؟"
+      placeholder: "رفع وكيل SQL من القوالب الجاهزة إلى توليد فعلي عبر النموذج اللغوي مع تحقق AST قبل التنفيذ"
+    validations:
+      required: true
+
+  - type: textarea
+    id: instructions
+    attributes:
+      label: التعليمات
+      description: خطوات مرقمة واضحة. اذكر العقود الملزمة (ADR-001 قاعدة العرض / ADR-002 مصنع LLM / ADR-003 أحداث SSE / ADR-004 العقود المشتركة) والواجهات التي يجب ألا تكسرها.
+      placeholder: |
+        1. تطوير X في الملف Y وفق العقد Z
+        2. كتابة اختبارات للحالات A وB
+        3. إظهار النتيجة في /dev/playground
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: معايير القبول
+      description: بنود قابلة للقياس والتحقق — وليست «يعمل جيدًا». تصبح شريط تقدم المهمة تلقائيًا.
+      placeholder: |
+        - [ ] توليد SQL صحيح لـ 25/30 سؤالًا من golden_dataset (فئة الاستعلام البسيط والتجميع)
+        - [ ] رفض أي استعلام يعدّل البيانات (UPDATE/DELETE/DROP) مع رسالة واضحة
+        - [ ] زمن الاستجابة p95 أقل من 3 ثوانٍ
+        - [ ] CI أخضر + اختبارات pytest جديدة تمر
+    validations:
+      required: true
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: خارج النطاق
+      description: ما لا يلمسه صاحب هذه المهمة — يمنع تداخل الأعضاء على العمل نفسه.
+      placeholder: "لا تعديل على events.py أو state.py أو router.py (ملوك أحمد حصرًا وفق ADR-004)"
+
+  - type: checkboxes
+    id: contracts
+    attributes:
+      label: الالتزام بالعقود
+      options:
+        - label: ألتزم بـ ADR-001 (قاعدة العرض الجامعية الموحدة) وADR-002 (مصنع LLM — التطوير ضد mock أولًا) وADR-003 (عقد أحداث SSE) وADR-004 (العقود المشتركة والحدود بين الوكلاء)
+          required: true
+        - label: لن أرفع أي سر أو ملف ‎.env — وكل اختباراتي تعمل عبر mock دون اتصال خارجي
+          required: true
+
+  - type: input
+    id: refs
+    attributes:
+      label: المراجع
+      description: متطلبات/فصول/قرارات مرتبطة — مثال FR-01 / الفصل الرابع §2 / ADR-002 / #12
+      placeholder: "FR-01, الفصل الرابع §2, ADR-002"
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **بعد الحفظ (قائمة سريعة دائمة):** حدد الـ Sprint من خانة Projects ← أسند العضو من Assignees ← ضبط Due date ← أضف تسميات `sprint-N` و`track:…`.
