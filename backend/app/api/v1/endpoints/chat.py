@@ -16,7 +16,7 @@ from fastapi import APIRouter
 
 from app.agents.graph import bayan_graph
 from app.core.logging import logger
-from app.schemas.chat import ChatRequest, ChatResponse
+from app.schemas.chat import ChatRequest, ChatResponse, TablePayload
 
 router = APIRouter()
 
@@ -35,10 +35,18 @@ def chat(request: ChatRequest) -> ChatResponse:
         }
     )
 
+    results = state.get("query_results") or []
+    table = (
+        TablePayload.from_results(results, truncated=bool(state.get("rows_truncated")))
+        if results
+        else None
+    )
+
     return ChatResponse(
         conversation_id=conversation_id,
         question=request.question,
         answer=state.get("answer", ""),
         route=state.get("route", ""),
         agent_trace=state.get("agent_trace", []),
+        table=table,
     )

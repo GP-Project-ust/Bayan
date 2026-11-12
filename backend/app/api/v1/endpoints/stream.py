@@ -19,6 +19,7 @@ from app.api.v1.endpoints.chat import ChatRequest
 from app.core.config import get_settings
 from app.core.events import AgentEndPayload, ErrorPayload, FinalPayload, MetaPayload, sse_event
 from app.core.logging import logger
+from app.schemas.chat import TablePayload
 
 router = APIRouter()
 
@@ -63,6 +64,8 @@ def chat_stream(request: ChatRequest) -> StreamingResponse:
         route = "sql_agent"
         answer = ""
         agents: list[str] = []
+        results: list[dict] = []
+        rows_truncated = False
 
         try:
             # 2) بث تحديثات المخطط — كل تحديث = عقدة اكتملت
@@ -80,9 +83,16 @@ def chat_stream(request: ChatRequest) -> StreamingResponse:
                     agents.append(node_name)
                     route = node_state.get("route", route) or route
                     answer = node_state.get("answer", "") or answer
+                    results = node_state.get("query_results") or results
+                    rows_truncated = bool(node_state.get("rows_truncated", rows_truncated))
                     yield sse_event("agent_end", _node_payload(node_name, node_state))
 
-            # 3) الحدث الختامي: الإجابة النهائية
+            # 3) الحدث الختامي: الإجابة النهائية + جدول النتائج إن وُجد
+            table = (
+                TablePayload.from_results(results, truncated=rows_truncated)
+                if results
+                else None
+            )
             yield sse_event(
                 "final",
                 FinalPayload(
@@ -90,6 +100,7 @@ def chat_stream(request: ChatRequest) -> StreamingResponse:
                     answer=answer,
                     route=route,
                     agents=agents,
+                    table=table,
                 ),
             )
         except Exception as exc:  # noqa: BLE001 — أي فشل يصل المستخدم بوضوح

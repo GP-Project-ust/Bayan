@@ -1,0 +1,289 @@
+<!doctype html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بيان — فحص الفهرسة والبحث</title>
+<style>
+/* ==========================================================================
+   صفحة فحص الفهرسة — ملف واحد بلا أي موارد خارجية (نفس روح playground)
+   ========================================================================== */
+:root {
+  --bg: #0f172a; --surface: #1e293b; --surface-2: #243247; --pane: #16233a;
+  --code-bg: #0b1122; --border: #334155; --border-soft: #293548;
+  --text: #e2e8f0; --muted: #94a3b8;
+  --brand: #14b8a6; --brand-soft: rgba(20, 184, 166, .14);
+  --ok: #22c55e;  --ok-soft: rgba(34, 197, 94, .14);
+  --err: #ef4444; --err-soft: rgba(239, 68, 68, .12);
+  --warn: #f59e0b; --warn-soft: rgba(245, 158, 11, .15);
+  --mono: ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+  --sans: system-ui, "Segoe UI", Tahoma, sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: var(--sans); font-size: 14px; line-height: 1.7;
+  min-height: 100vh;
+}
+.wrap { max-width: 880px; margin: 0 auto; padding: 24px 16px 48px; }
+
+header.page { text-align: center; margin-bottom: 20px; }
+header.page h1 { margin: 0; font-size: 26px; color: var(--brand); }
+header.page p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+header.page a { color: var(--brand); text-decoration: none; }
+header.page a:hover { text-decoration: underline; }
+
+.card {
+  background: var(--pane); border: 1px solid var(--border-soft);
+  border-radius: 14px; padding: 18px; margin-top: 16px;
+}
+.card > h2 { margin: 0 0 12px; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+.card > h2 .hint { font-weight: 400; color: var(--muted); font-size: 12px; }
+
+.badge {
+  display: inline-block; padding: 2px 10px; border-radius: 999px;
+  font-size: 12px; border: 1px solid transparent; vertical-align: middle;
+}
+.badge.ok   { background: var(--ok-soft);   color: var(--ok);   border-color: rgba(34,197,94,.35); }
+.badge.err  { background: var(--err-soft);  color: var(--err);  border-color: rgba(239,68,68,.35); }
+.badge.warn { background: var(--warn-soft); color: var(--warn); border-color: rgba(245,158,11,.35); }
+.badge.mut  { background: rgba(148,163,184,.12); color: var(--muted); border-color: var(--border); }
+
+.meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.meta-item {
+  background: var(--surface); border: 1px solid var(--border-soft);
+  border-radius: 10px; padding: 10px 12px; text-align: center;
+}
+.meta-item .k { color: var(--muted); font-size: 12px; }
+.meta-item .v { font-weight: 700; margin-top: 2px; word-break: break-all; }
+
+button {
+  font-family: inherit; font-size: 14px; cursor: pointer;
+  background: var(--brand); color: #04211d; font-weight: 700;
+  border: none; border-radius: 10px; padding: 10px 22px;
+  transition: filter .15s;
+}
+button:hover { filter: brightness(1.1); }
+button:disabled { opacity: .5; cursor: wait; }
+button.ghost {
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border); font-weight: 400;
+}
+
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+input[type="text"], input[type="number"], select {
+  font-family: inherit; font-size: 14px; color: var(--text);
+  background: var(--code-bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 9px 12px; outline: none; flex: 1; min-width: 160px;
+}
+input:focus, select:focus { border-color: var(--brand); }
+label.field { color: var(--muted); font-size: 12px; }
+
+#result { margin-top: 14px; }
+.msg {
+  border-radius: 10px; padding: 10px 14px; font-size: 13px;
+  border: 1px solid var(--border-soft); background: var(--surface);
+}
+.msg.ok  { border-color: rgba(34,197,94,.4); }
+.msg.err { border-color: rgba(239,68,68,.4); color: #fda4af; }
+.msg b { color: var(--text); }
+
+.hit {
+  background: var(--surface); border: 1px solid var(--border-soft);
+  border-radius: 12px; padding: 14px; margin-top: 10px;
+}
+.hit-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hit-head .doc { font-weight: 700; }
+.hit-head .score {
+  font-family: var(--mono); font-size: 12px; color: var(--brand);
+  background: var(--brand-soft); border-radius: 6px; padding: 1px 8px;
+  direction: ltr;
+}
+.hit-text { margin: 8px 0 0; color: var(--text); font-size: 13.5px; }
+.hit-meta { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+
+footer.page {
+  margin-top: 26px; text-align: center; color: var(--muted); font-size: 12px;
+}
+footer.page b { color: var(--warn); }
+.empty { color: var(--muted); font-size: 13px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <h1>بيان — فحص الفهرسة والبحث</h1>
+    <p>فهرسة لوائح الجامعة التجريبية في Qdrant والبحث فيها — أداة تطوير لسلسلة RAG &nbsp;·&nbsp; <a href="/dev/playground">واجهة الاختبار الموحدة ←</a></p>
+  </header>
+
+  <!-- حالة النظام -->
+  <section class="card">
+    <h2>حالة الفهرسة <span class="hint">تُجلب تلقائيًا عند فتح الصفحة</span> <span id="qdrant-badge" class="badge mut">…</span></h2>
+    <div class="meta-grid" id="meta-grid"></div>
+    <div id="status-msg"></div>
+  </section>
+
+  <!-- الفهرسة -->
+  <section class="card">
+    <h2>فهرسة اللوائح</h2>
+    <p class="empty" style="margin-top:0">
+      يفهرس كل «مادة» في مستندات <b>database/documents_demo/</b> كمقطع مستقل في مجموعة
+      <b>bayan_policies</b> عبر مصنع التضمين (ADR-005). معرفات حتمية — إعادة الفهرسة تحدّث ولا تكرر.
+    </p>
+    <div class="row">
+      <button id="btn-ingest">فهرسة اللوائح</button>
+      <span class="empty">تنفيذ ساذج مؤقت — يستبدل بخط الفهرسة الحقيقي في مهمة طبقة التهيئة (Sprint 1)</span>
+    </div>
+    <div id="ingest-result"></div>
+  </section>
+
+  <!-- البحث -->
+  <section class="card">
+    <h2>البحث في اللوائح</h2>
+    <div class="row">
+      <input type="text" id="q" placeholder="مثال: كم غرامة التأخير في السداد؟" autofocus>
+      <input type="text" id="tenant" placeholder="المستأجر (اختياري) — مثال: جامعة العلوم والتكنولوجيا" style="max-width:260px">
+      <select id="topk" style="max-width:90px">
+        <option>3</option><option selected>5</option><option>10</option>
+      </select>
+      <button id="btn-search" class="ghost">بحث</button>
+    </div>
+    <div id="search-result"></div>
+  </section>
+
+  <footer class="page">
+    هذه صفحة تطوير تجريبية — <b>عطّلها في الإنتاج</b> عبر ENABLE_PLAYGROUND=false
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+/* ----- أدوات صغيرة ----- */
+const $ = (id) => document.getElementById(id);
+function el(tag, cls, text) {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+async function api(path, options) {
+  const res = await fetch(path, options);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.detail || ("خطأ " + res.status));
+  return data;
+}
+
+/* ----- الحالة ----- */
+async function loadStatus() {
+  const badge = $("qdrant-badge"), grid = $("meta-grid"), msg = $("status-msg");
+  badge.className = "badge mut"; badge.textContent = "…";
+  msg.innerHTML = ""; grid.innerHTML = "";
+  try {
+    const s = await api("/dev/indexer/status");
+    if (s.qdrant === "up") {
+      badge.className = "badge ok"; badge.textContent = "Qdrant يعمل";
+    } else {
+      badge.className = "badge err"; badge.textContent = "Qdrant متوقف";
+      msg.appendChild(el("div", "msg err",
+        "تعذر الوصول إلى Qdrant — شغّل البنية التحتية أولًا: make infra"));
+    }
+    const items = [
+      ["المجموعة", s.collection],
+      ["المقاطع المفهرسة", s.qdrant === "up" ? String(s.points_count) : "—"],
+      ["مزوّد التضمين", s.embedding_provider],
+      ["نموذج التضمين", s.embedding_model],
+      ["الأبعاد", String(s.embedding_dimensions)],
+    ];
+    for (const [k, v] of items) {
+      const item = el("div", "meta-item");
+      item.appendChild(el("div", "k", k));
+      item.appendChild(el("div", "v", v));
+      grid.appendChild(item);
+    }
+  } catch (err) {
+    badge.className = "badge err"; badge.textContent = "خطأ";
+    msg.appendChild(el("div", "msg err", err.message));
+  }
+}
+
+/* ----- الفهرسة ----- */
+$("btn-ingest").addEventListener("click", async () => {
+  const btn = $("btn-ingest"), out = $("ingest-result");
+  btn.disabled = true; out.innerHTML = "";
+  const note = el("div", "msg", "جارٍ التقطيع والتضمين والفهرسة…");
+  out.appendChild(note);
+  try {
+    const r = await api("/dev/indexer/ingest", { method: "POST" });
+    out.innerHTML = "";
+    const ok = el("div", "msg ok");
+    ok.innerHTML = "تمت الفهرسة: <b>" + r.chunks + "</b> مقطعًا من <b>" + r.files +
+      "</b> مستندات في مجموعة <b>" + r.collection + "</b> عبر " +
+      r.embedding_provider + " (" + r.embedding_model + " · " + r.embedding_dimensions + " بعدًا)";
+    out.appendChild(ok);
+    loadStatus();
+  } catch (err) {
+    out.innerHTML = "";
+    out.appendChild(el("div", "msg err", err.message));
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+/* ----- البحث ----- */
+$("btn-search").addEventListener("click", doSearch);
+$("q").addEventListener("keydown", (e) => { if (e.key === "Enter") doSearch(); });
+
+async function doSearch() {
+  const query = $("q").value.trim();
+  const out = $("search-result");
+  if (query.length < 2) {
+    out.innerHTML = "";
+    out.appendChild(el("div", "msg err", "اكتب سؤالًا لا يقل عن حرفين"));
+    return;
+  }
+  const body = { query: query, top_k: Number($("topk").value) };
+  const tenant = $("tenant").value.trim();
+  if (tenant) body.tenant = tenant;
+  out.innerHTML = "";
+  out.appendChild(el("div", "msg", "جارٍ البحث المتجهي…"));
+  try {
+    const r = await api("/dev/indexer/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    out.innerHTML = "";
+    if (!r.hits.length) {
+      out.appendChild(el("div", "msg", "لا نتائج — جرّب صياغة أخرى أو فهرس أولًا"));
+      return;
+    }
+    const label = r.tenant ? (" (حصر: " + r.tenant + ")") : "";
+    out.appendChild(el("div", "empty", r.hits.length + " نتيجة" + label));
+    for (const hit of r.hits) {
+      const p = hit.payload || {};
+      const card = el("div", "hit");
+      const head = el("div", "hit-head");
+      head.appendChild(el("span", "score", hit.score.toFixed(3)));
+      head.appendChild(el("span", "doc", p.document || "—"));
+      head.appendChild(el("span", "badge mut", p.section || ""));
+      card.appendChild(head);
+      card.appendChild(el("p", "hit-text", p.text || ""));
+      const meta = el("div", "hit-meta");
+      meta.appendChild(el("span", "badge warn", p.tenant || "بلا مستأجر"));
+      meta.appendChild(el("span", "badge mut", "التصنيف: " + (p.classification || "—")));
+      meta.appendChild(el("span", "badge mut", "الإصدار: " + (p.version || "—")));
+      card.appendChild(meta);
+      out.appendChild(card);
+    }
+  } catch (err) {
+    out.innerHTML = "";
+    out.appendChild(el("div", "msg err", err.message));
+  }
+}
+
+loadStatus();
+</script>
+</body>
+</html>
