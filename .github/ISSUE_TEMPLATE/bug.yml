@@ -1,0 +1,52 @@
+name: بلاغ خلل
+description: شيء يعمل بخلاف المتوقع في main أو dev — وصف سريع وسنحوّله إلى مهمة عند الحاجة.
+title: "[خلل]: "
+labels: ["type:bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        بلاغ سريع — لا يحتاج كل حقول مهمة التطوير. إذا تبين أن الخلل يحتاج عملًا حقيقيًا نحوّله إلى مهمة كاملة من قالب «مهمة تطوير».
+
+  - type: textarea
+    id: what
+    attributes:
+      label: ماذا حدث؟
+      description: السلوك الخاطئ الذي رأيته — مع الصق أي رسالة خطأ كما هي.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: ما المتوقع بدلًا منه؟
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: خطوات إعادة الإنتاج
+      placeholder: |
+        1. شغّل make dev-db
+        2. افتح /dev/playground
+        3. اكتب «كم عدد الطلاب؟»
+        4. ظهر الخطأ التالي: ...
+
+  - type: dropdown
+    id: env
+    attributes:
+      label: أين حدث؟
+      options:
+        - محليًا (make dev)
+        - محليًا (playground /dev/playground)
+        - CI (GitHub Actions)
+        - أخرى / غير متأكد
+    validations:
+      required: true
+
+  - type: input
+    id: logs
+    attributes:
+      label: رابط سجل أو مقطع سجل (اختياري)
+      description: رابط تشغيل CI أو مقطع من سجل الخادم إن وجد.

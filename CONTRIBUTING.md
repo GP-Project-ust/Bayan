@@ -7,39 +7,44 @@
 ## نموذج الفروع
 
 ```
-main  ← مستقر دائماً، محمي: الدمج فيه عبر PR فقط
-  ├── feature/sql-agent-generation   ← فرع لكل مهمة
-  ├── feature/chat-ui-rtl
-  ├── feature/auth-endpoints
-  └── fix/smart-views-join
+main  ← مستقر دائماً، محمي: يُدمج فيه فقط عبر PR من dev وبقرار قائد المشروع
+  └── dev  ← فرع التكامل: كل العمل يُدمج هنا بعد CI أخضر
+        ├── feature/sql-agent-generation   ← فرع لكل مهمة
+        ├── feature/chat-ui-rtl
+        ├── feature/auth-endpoints
+        └── fix/smart-views-join
 ```
+
+- **`main`** — جودة الإصدار فقط: حمايته تشترط CI أخضر + موافقة قائد المشروع (code owner) على آخر دفعة، والدمج له حكرًا على القائد. لا يفتح فيه أي عضو PR مباشرة.
+- **`dev`** — فرع التكامل الجماعي: الدمج فيه عبر PR يمر بـ CI الأخضر فقط (بلا انتظار موافقة) — هنا يتكامل عمل الأعضاء سريعاً.
+- سير العمل المعتاد: `dev` ← قاعدة فروعك، وPR الغلق إلى `dev`، والقائد وحده يرفع `dev` إلى `main` دورياً.
 
 ## سير العمل القياسي (لكل مهمة، بدون استثناء)
 
 ```bash
-# 1) التحدث بفرع جديد من main
-git checkout main
-git pull origin main
+# 1) التحدث بفرع جديد من dev (وليس من main)
+git checkout dev
+git pull origin dev
 git checkout -b feature/اسم-المهمة-الواضح
 
 # 2) أثناء العمل: التزامات صغيرة متكررة بمعنى واضح
 git add <الملفات-المحددة>
 git commit -m "feat(sql-agent): توليد استعلام أساسي من سؤال عربي"
 
-# 3) مزامنة دورية مع main (تجنّب التعارضات الكبيرة)
+# 3) مزامنة دورية مع dev (تجنّب التعارضات الكبيرة)
 git fetch origin
-git rebase origin/main
+git rebase origin/dev
 
-# 4) عند الانتهاء: رفع وفتح Pull Request إلى main
+# 4) عند الانتهاء: رفع وفتح Pull Request إلى dev
 git push -u origin feature/اسم-المهمة
 ```
 
 ثم من واجهة GitHub:
-1. افتح PR إلى `main`
+1. افتح PR إلى `dev` (الأساس dev — لا تفتح إلى main)
 2. انتظر CI الأخضر (الاختبارات + فحص الكود) — شرط إلزامي لفتح الدمج
-3. **الدمج بعد موافقة قائد المشروع (code owner) على آخر نسخة من الـ PR حصراً** —
-   قاعدة حماية `main` تفرضها آلياً ولا يمكن تجاوزها
+3. ادمج في `dev` بعد خضوع CI — أي عضو يملك صلاحية الدمج هنا
 4. بعد الدمج: احذف الفرع
+5. دمج `dev` إلى `main` يقع على القائد وحده — عبر PR بالحماية الكاملة (CI + موافقة code owner على آخر دفعة)
 
 ## قواعد رسائل الالتزام (Conventional Commits)
 
@@ -54,20 +59,30 @@ git push -u origin feature/اسم-المهمة
 
 **النطاق بين القوسين اختياري لكنه مفيد**: اسم الوحدة (agents, api, views, ui, eval, ci).
 
+## إنشاء المهام (قائد الفريق)
+
+1. **Issues → New issue → «مهمة تطوير»** — القالب يطلب السبرنت والمسار والهدف ومعايير القبول وخارج النطاق.
+2. **بعد الإنشاء من الشريط الجانبي:** Projects ← «Bayan — خطة التطوير» + قيمة حقل Sprint ← Assignees ← العضو ← Due date ← التاريخ ← Labels.
+3. صيغة العنوان: `S1: فعل + المكوّن` — ومعايير القبول دائماً قابلة للقياس (أرقام من `evaluation/README.md`).
+
+تسميات جاهزة: `sprint-1`..`sprint-4` — `track:backend` / `track:frontend` / `track:ai` / `track:eval` / `track:infra` / `track:docs` — `priority:high` / `priority:medium` / `priority:low` — `type:task` / `type:bug`.
+
 ## المحظورات (خطايا حمراء)
 
-1. **الرفع المباشر إلى `main`** — الحماية تمنعه، وحتى لو لم تمنعه فهو مخالف
-2. **`git push --force`** على فروع مشتركة — إن لزم بعد rebase على فرعك الخاص استخدم `--force-with-lease`
-3. **رفع ملف `.env` أو أي سر** (مفاتيح API، كلمات مرور) — استخدم `.env.example` كقالب فقط
-4. **التزامات عملاقة** ("update" يضم 40 ملفاً) — قسّم العمل لالتزامات منطقية
-5. **دمج PR بدون مراجعة** — حتى المراجعة السريعة أفضل من لا شيء
+1. **الرفع المباشر إلى `main` أو `dev`** — الحماية تمنعه، وحتى لو لم تمنعه فهو مخالف
+2. **فتح PR مباشرة إلى `main` من فروع المزايا** — القاعدة `dev`؛ الرفع إلى `main` قرار القائد وحده
+3. **`git push --force` على فروع مشتركة** — إن لزم بعد rebase على فرعك الخاص استخدم `--force-with-lease`
+4. **رفع ملف `.env` أو أي سر** (مفاتيح API، كلمات مرور) — استخدم `.env.example` كقالب فقط
+5. **تعديل الملفات المشتركة دون موافقة القائد** — وفق ADR-004: `state.py` و`events.py` و`graph.py` و`supervisor.py` و`router.py` و`schemas/chat.py` و`llm/provider.py`
+6. **التزامات عملاقة** ("update" يضم 40 ملفاً) — قسّم العمل لالتزامات منطقية
+7. **دمج PR بدون CI أخضر** — حتى في `dev`
 
 ## حل التعارضات (Conflicts)
 
 ```bash
-git checkout main && git pull
+git checkout dev && git pull
 git checkout feature/فرعك
-git rebase origin/main
+git rebase origin/dev
 # افتح الملفات المتعارضة، ابحث عن علامات <<<<<<< وحلها يدوياً
 git add .
 git rebase --continue
@@ -86,12 +101,13 @@ git push --force-with-lease
 
 ## أول مساهمة لك (تمرين التهيئة)
 
-1. استنسخ المستودع وأنشئ فرعاً: `git checkout -b docs/onboarding-<اسمك>`
+1. استنسخ المستودع وأنشئ فرعاً: `git checkout -b docs/onboarding-<اسمك>` (من `dev`)
 2. أصلح شيئاً صغيراً وواضحاً: تصحيح توثيق، إضافة مثال، أو توضيح تعليق
-3. ارفع وافتح PR إلى `main` — سيمر بالسلسلة كاملة: CI ثم موافقة قائد المشروع
+3. ارفع وافتح PR إلى `dev` — سيمر بالسلسلة كاملة: CI ثم الدمج
 4. بعد الدمج — مبروك، أنت جاهز للعمل الحقيقي
 
 ## بيئة التطوير
 
 انظر قسم "البدء السريع" في `README.md` — والمرجع الكامل للخطة والمهام
-في مستودع وثائق المشروع (Bayan-Documentation).
+في مستودع وثائق المشروع (Bayan-Documentation). عقود المعمارية الملزمة
+في `docs/adr/` (ADR-001..004).
