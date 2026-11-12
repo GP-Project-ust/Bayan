@@ -45,9 +45,10 @@ dev-db: ## تجهيز القاعدة التجريبية الموحدة للجا�
         @echo "   الاتصال بصلاحية القراءة فقط:"
         @echo "   PGPASSWORD=bayan_dev_reader psql -h localhost -p 5433 -U bayan_reader -d university"
 
-llm: ## تشغيل Ollama المحلي + سحب نموذج Qwen (يستغرق وقتاً أول مرة)
+llm: ## تشغيل Ollama المحلي + سحب النموذجين (qwen2.5:14b للمحادثة + bge-m3 للتضمين)
         docker compose --profile llm up -d ollama
         docker compose exec ollama ollama pull qwen2.5:14b
+        docker compose exec ollama ollama pull bge-m3
 
 up: ## تشغيل المكدس كاملاً (بناء الصور عند أول مرة)
         docker compose up -d --build

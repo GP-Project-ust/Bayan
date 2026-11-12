@@ -6,8 +6,13 @@
 أنواع الأحداث المعتمدة (event field):
   meta       — أول حدث دائماً: معرّف المحادثة + المزوّد الحالي (وضع mock أو حقيقي)
   agent_end  — اكتمال عقدة/وكيل: هويته وحالته ومدته وما أنتجه (SQL، عدد الصفوف)
-  final      — الإجابة النهائية + الوكلاء المشاركون + المسار المختار
+  final      — الإجابة النهائية + الوكلاء المشاركون + المسار المختار + جدول النتائج (اختياري)
   error      — خطأ يمنع إكمال الطلب (يُعرض للمستخدم بوضوح)
+
+ملاحظة عقدية (تحديث نوفمبر 2026): الحدث الختامي final يحمل حقلًا اختياريًا
+  table من النوع TablePayload (app/schemas/chat.py: columns / rows / truncated)
+  يوصل جدول نتائج وكيل SQL إلى الواجهات — النوع مشترك مع ChatResponse
+  (عقد واحد، مستهلكان)، والحقل اختياري فلا يكسر متلقياً قديماً.
 
 أحداث مستقبلية محجوزة (لا تُستخدم بعد — تُفعَّل في السبرنتات القادمة):
   agent_start / agent_token / clarification / tool_call
@@ -17,6 +22,8 @@
 from typing import Any
 
 from pydantic import BaseModel, Field
+
+from app.schemas.chat import TablePayload
 
 # ---------------------------------------------------------------------------
 # حمولات الأحداث (Payloads) — كل نوع حدث له نموذج Pydantic موثّق
@@ -52,6 +59,10 @@ class FinalPayload(BaseModel):
     answer: str = Field(description="الإجابة النهائية للمستخدم")
     route: str = Field(description="المسار الذي اختاره الـ Supervisor")
     agents: list[str] = Field(default_factory=list, description="الوكلاء المشاركون بالترتيب")
+    table: TablePayload | None = Field(
+        default=None,
+        description="جدول نتائج الاستعلام إن وُجد (columns / rows / truncated) — اختياري",
+    )
 
 
 class ErrorPayload(BaseModel):
