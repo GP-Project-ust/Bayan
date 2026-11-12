@@ -1,0 +1,47 @@
+# =============================================================================
+# بيان — حارس القضايا
+# =============================================================================
+# إنشاء قضايا المهام من صلاحية قائد المشروع حصراً (قناع المهام والتوزيع مسؤوليته).
+# هذا السير يغلق تلقائياً أي قضية يفتحها غير القائد مع تعليق توضيحي،
+# ويترك للفريق القنوات الصحيحة: التعليق على القضايا القائمة والمحادثة الفورية.
+
+name: حارس القضايا
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  guard:
+    name: "فحص من فتح القضية"
+    runs-on: ubuntu-latest
+    if: github.actor != 'mutawakel-hub' && github.actor != 'github-actions[bot]' && github.actor != 'dependabot[bot]'
+    steps:
+      - name: تعليق توضيحي وإغلاق
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const leader = 'mutawakel-hub';
+            const actor = context.actor;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body:
+                `@${actor} شكراً لتفاعلك!\n\n` +
+                `إنشاء القضايا في هذا المستودع من صلاحية قائد المشروع (@${leader}) حصراً — ` +
+                `هو من يصوغ المهام ويوزعها وفق خطة السبرنت.\n\n` +
+                `إن كانت لديك ملاحظة على عمل جارٍ فعلّق على القضية المعنية؛ ` +
+                `وإن رأيت خللاً فافتح PR إلى \`dev\` (بلا قضية) واشرحه فيه — شروط الدمج في [CONTRIBUTING](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CONTRIBUTING.md).\n\n` +
+                `أُغلقت تلقائياً.`
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              state: 'closed',
+              state_reason: 'not_planned'
+            });
