@@ -132,5 +132,8 @@ jobs:
       - name: تثبيت الاعتماديات
         run: npm ci
 
+      - name: اختبارات الواجهة (تعمل عند وجود سكربت test)
+        run: npm run test --if-present
+
       - name: فحص الأنواع + البناء
         run: npm run build
