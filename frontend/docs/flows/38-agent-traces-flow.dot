@@ -1,0 +1,29 @@
+digraph G {
+ graph [rankdir=TB,bgcolor="#F5F9FD",pad=.35,nodesep=.37,ranksep=.42,fontname="Noto Kufi Arabic",labelloc=t,label="نظام بيان | تدفق مراجعة مسارات الوكلاء (تجريبي)",fontsize=20,fontcolor="#0A2342"];
+ node [shape=box,style="rounded,filled",fillcolor="white",color="#C8DCE8",penwidth=1.4,fontname="Noto Kufi Arabic",fontsize=12,fontcolor="#163B59",margin=".22,.16"];
+ edge [color="#2C96A4",penwidth=1.6,arrowsize=.7,fontname="Noto Kufi Arabic",fontsize=10,fontcolor="#497A8D"];
+ start [label="فتح واجهة تتبع الوكلاء",fillcolor="#DFF6F6"];
+ authorize [shape=diamond,label="تحقق الصلاحيات",fillcolor="#E7F4FD"];
+ denied [label="منع الوصول وإخفاء السجلات",fillcolor="#FFF0EC"];
+ search [label="عرض بيانات تنفيذ اصطناعية\nبحث وتصفيات حسب الدور والحالة والفترة"];
+ dates [shape=diamond,label="تاريخ صالح؟",fillcolor="#E7F4FD"];
+ bad [label="تنبيه بتصحيح المدة",fillcolor="#FFF3E7"];
+ table [label="جدول النتائج المسموحة"];
+ detail [label="درج تفاصيل الخطوات الآمنة\nSupervisor · SQL · RAG · Analyst · Reporter",fillcolor="#E6F7F8"];
+ link [label="رابط حدث تدقيق تدريبي إن وجد"];
+ export [label="تصدير CSV وصفي دون أسرار"];
+ finish [label="الانتهاء - دون اتصال فعلي بالخادم",fillcolor="#E6F8ED"];
+ start -> authorize;
+ authorize -> denied [label="غير مخول"];
+ authorize -> search [label="مخول"];
+ search -> dates;
+ dates -> bad [label="لا"];
+ bad -> search;
+ dates -> table [label="نعم"];
+ table -> detail;
+ detail -> link;
+ table -> export;
+ link -> finish;
+ export -> finish;
+ denied -> finish;
+}

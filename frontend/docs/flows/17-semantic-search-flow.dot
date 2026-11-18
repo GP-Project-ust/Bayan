@@ -1,0 +1,34 @@
+digraph BayanSemanticSearch {
+ graph [rankdir=TB, bgcolor="#FFFFFF", pad="0.35", nodesep="0.30", ranksep="0.50", fontname="DejaVu Sans", label="بيان — مخطط تدفق البحث الدلالي (الشاشة 09)\nنموذج تفاعلي حالي + نقطة الربط الحقيقي مستقبلًا", labelloc=t, fontsize=19, fontcolor="#0A2342"];
+ node [shape=box, style="rounded,filled", color="#DCE7F2", fillcolor="#F5F9FD", fontcolor="#123452", fontname="DejaVu Sans", fontsize=12, margin="0.22,0.15"];
+ edge [color="#4F8E9A", penwidth=1.5, arrowsize=0.8, fontname="DejaVu Sans", fontsize=10];
+ start [label="فتح /semantic-search",fillcolor="#0A2342",fontcolor="white"];
+ access [shape=diamond,label="هل توجد صلاحية\nللبحث؟",fillcolor="#FFF7E6",color="#E2BD7F"];
+ forbidden [label="403: رفض عرض البيانات",fillcolor="#FFF0F0",color="#EFBCBC"];
+ query [label="كتابة سؤال بالعربية\nأو اختيار اقتراح"];
+ validate [shape=diamond,label="هل العبارة صالحة؟",fillcolor="#FFF7E6",color="#E2BD7F"];
+ bad [label="إظهار خطأ إدخال\n(3–180 حرفًا)",fillcolor="#FFF0F0",color="#EFBCBC"];
+ loading [label="عرض حالة انتظار قصيرة\nللمحاكاة فقط"];
+ rank [label="مطابقة كلمات مفتاحية محلية\nفي 12 مقطعًا افتراضيًا\n(ليست embeddings ولا RAG)",fillcolor="#E9F9FA",color="#98DDE2"];
+ filters [label="تطبيق التصنيف / المستند\nونطاق الصلة / الترتيب"];
+ count [shape=diamond,label="هل وجدت نتائج؟",fillcolor="#FFF7E6",color="#E2BD7F"];
+ empty [label="حالة لا توجد نتائج\nمع إعادة الفلاتر"];
+ results [label="بطاقات النتائج: مقتطفات\nواسم المستند والصفحة\nودرجة صلة توضيحية",fillcolor="#E3F6EF",color="#A8DEC4"];
+ preview [label="فتح درج معاينة المصدر\nأو نسخ استشهاد تجريبي"];
+ future [label="المستقبل: API موثق + FastAPI\nمصادقة وصلاحيات المستند والمستأجر\nQdrant + RAG + استشهادات حقيقية",fillcolor="#E7EEFF",color="#A8BFE9"];
+ start->access;
+ access->forbidden [label="لا"];
+ access->query [label="نعم"];
+ query->validate;
+ validate->bad [label="لا"];
+ bad->query;
+ validate->loading [label="نعم"];
+ loading->rank->filters->count;
+ count->empty [label="لا"];
+ empty->query;
+ count->results [label="نعم"];
+ results->preview;
+ preview->query [style=dashed,label="بحث جديد"];
+ results->filters [style=dashed,label="تغيير الفلاتر"];
+ future->rank [style=dotted,dir=back,label="مسار لاحق\nغير منفذ",color="#8196C3"];
+}

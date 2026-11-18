@@ -1,0 +1,85 @@
+/* Stage 4: Bayan-specific domain UI. All selectors are strictly bayan-* scoped. */
+.bayan-domain{font-family:var(--bayan-font-family);color:var(--bayan-text-primary);font-size:var(--bayan-text-sm);box-sizing:border-box}
+.bayan-domain *, .bayan-domain *::before, .bayan-domain *::after{box-sizing:border-box}
+.bayan-domain button,.bayan-domain textarea,.bayan-domain input,.bayan-domain select{font:inherit}
+.bayan-domain button{cursor:pointer}
+.bayan-domain button:disabled{opacity:.48;cursor:not-allowed}
+.bayan-domain button:focus-visible,.bayan-domain input:focus-visible,.bayan-domain textarea:focus-visible,.bayan-domain select:focus-visible{outline:2px solid var(--bayan-brand-turquoise);outline-offset:3px}
+.bayan-screen-reader{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.bayan-domain-card{background:var(--bayan-surface-card);border:1px solid var(--bayan-border-subtle);border-radius:var(--bayan-radius-lg);box-shadow:var(--bayan-shadow-xs);padding:17px}
+.bayan-domain h3{margin:0;font-size:16px;font-weight:700;color:var(--bayan-brand-navy)}
+.bayan-domain p{margin:0}
+/* Composer */
+.bayan-chat-composer{display:grid;gap:11px}
+.bayan-chat-suggestions{display:grid;gap:8px}
+.bayan-suggestions-label{display:inline-flex;align-items:center;gap:7px;font-weight:700;color:var(--bayan-brand-navy)}
+.bayan-suggestions-label svg{color:var(--bayan-brand-turquoise)}
+.bayan-suggestions-list{display:flex;flex-wrap:wrap;gap:9px}
+.bayan-suggestions-list button{border:1px solid var(--bayan-border-subtle);background:#edf8fb;border-radius:12px;padding:9px 13px;color:var(--bayan-brand-navy);font-weight:650}
+.bayan-suggestions-list button:hover{border-color:var(--bayan-brand-turquoise);background:#d8f4f5}
+.bayan-composer-form{display:flex;align-items:flex-end;gap:10px;border:1px solid #bcd1e6;background:white;box-shadow:var(--bayan-shadow-xs);border-radius:14px;padding:10px}
+.bayan-composer-form textarea{display:block;flex:1;min-height:52px;resize:vertical;min-width:0;border:0;background:transparent;outline:none;padding:7px 4px;color:var(--bayan-text-primary);line-height:1.7}
+.bayan-composer-form textarea:focus-visible{outline:none}
+.bayan-icon-action{border:0;background:#edf4fa;padding:9px;color:var(--bayan-brand-navy);border-radius:10px}
+.bayan-chat-composer>small{color:var(--bayan-text-secondary);font-size:12px}
+/* Messages */
+.bayan-message{display:flex;align-items:flex-start;gap:10px;padding:7px 0;max-width:100%}
+.bayan-message-avatar{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border-radius:50%;background:var(--bayan-brand-turquoise);color:white}
+.bayan-message--user .bayan-message-avatar{background:#d4e9fb;color:var(--bayan-brand-navy)}
+.bayan-message-content{max-width:min(100%,750px);min-width:0}
+.bayan-message--user .bayan-message-content{margin-inline-start:auto}
+.bayan-message-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.9;background:white;border:1px solid var(--bayan-border-subtle);border-radius:14px;padding:13px 16px;box-shadow:var(--bayan-shadow-xs)}
+.bayan-message--user .bayan-message-text{background:#ddecff}
+.bayan-message-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--bayan-text-secondary);font-size:11px;margin-top:5px}
+.bayan-message-state{display:inline-flex;align-items:center;gap:4px}.bayan-message-state--complete{color:var(--bayan-feedback-success)}.bayan-message-state--error{color:var(--bayan-feedback-danger)}
+.bayan-inline-action{display:inline-flex;align-items:center;gap:4px;border:0;background:none;color:var(--bayan-text-secondary);padding:2px}
+.bayan-spin{animation:bayan-spin 1.5s linear infinite}@keyframes bayan-spin{to{transform:rotate(360deg)}}
+/* SQL */
+.bayan-section-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;background:#eef5fe;border:0;border-radius:9px;color:var(--bayan-brand-navy);padding:10px 12px;text-align:right;font-weight:700}
+.bayan-section-toggle>span{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.bayan-sql-viewer{padding:8px}
+.bayan-sql-body{padding:12px 8px 7px}.bayan-sql-body p{font-size:12px;color:var(--bayan-text-secondary);margin-bottom:9px}
+.bayan-code-panel{position:relative;border:1px solid #dde7f1;border-radius:12px;background:#f0f4f8;padding:16px;overflow:auto}
+.bayan-code-panel pre{color:#0a2342;font:13px/1.85 var(--bayan-font-mono);margin:0;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;padding-top:23px}
+.bayan-code-panel button{position:absolute;inset-inline-start:12px;top:10px;background:white;color:var(--bayan-brand-navy);border:1px solid var(--bayan-border-subtle);display:flex;align-items:center;gap:5px;border-radius:7px;font-size:12px;padding:5px 8px}
+.bayan-sql-restricted{display:flex;gap:10px;align-items:center;color:var(--bayan-text-secondary)}
+/* Citation */
+.bayan-citation{display:flex;align-items:flex-start;gap:12px;padding:14px}
+.bayan-citation-icon{display:grid;place-items:center;border-radius:11px;background:var(--bayan-surface-info);width:37px;height:37px;flex-shrink:0;color:var(--bayan-brand-navy)}
+.bayan-citation-info{flex:1;min-width:0}.bayan-citation-info h3{font-size:14px}.bayan-citation-info p{color:var(--bayan-text-secondary);line-height:1.75;margin-top:7px}
+.bayan-citation-sub{display:flex;gap:6px;align-items:center;color:var(--bayan-text-secondary);font-size:12px;margin-top:5px}
+.bayan-citation-open{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;border:1px solid var(--bayan-border-subtle);border-radius:8px;color:var(--bayan-action-primary);padding:7px 9px;background:#f6fbfd}
+.bayan-citation-blocked{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--bayan-feedback-danger)}
+/* Export */
+.bayan-export-head,.bayan-smartviews-head,.bayan-trace-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;flex-wrap:wrap}
+.bayan-export-head h3,.bayan-smartviews-head h3,.bayan-trace-head h3{display:flex;align-items:center;gap:8px}
+.bayan-export-head p,.bayan-smartviews-head p,.bayan-trace-head p{color:var(--bayan-text-secondary);margin-top:4px;line-height:1.8}
+.bayan-export-note{display:flex;gap:4px;align-items:center;color:var(--bayan-text-secondary);font-size:12px}
+.bayan-format-choices{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0 14px}
+.bayan-format-option{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid var(--bayan-border-subtle);border-radius:10px;cursor:pointer;background:#f7fbff}
+.bayan-format-option.is-selected{border-color:var(--bayan-action-primary);background:#e2f6f7;color:#07566d;font-weight:700}
+.bayan-format-option input{accent-color:var(--bayan-action-primary)}
+.bayan-export-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.bayan-export-actions small{max-width:500px;color:var(--bayan-text-secondary);line-height:1.7}
+.bayan-export-preview{margin-top:14px;overflow-x:auto;border-radius:10px;border:1px solid var(--bayan-border-subtle)}
+.bayan-export-preview table{width:100%;border-collapse:collapse;text-align:right}.bayan-export-preview caption{text-align:right;font-size:12px;padding:8px 12px;color:var(--bayan-text-secondary)}.bayan-export-preview th{background:#e9f1fa;color:var(--bayan-brand-navy)}.bayan-export-preview th,.bayan-export-preview td{padding:9px;border-top:1px solid var(--bayan-border-subtle)}
+/* Views */
+.bayan-smartviews-filter{display:flex;gap:9px;margin:16px 0;flex-wrap:wrap}
+.bayan-smartviews-filter label{display:flex;align-items:center;gap:7px;min-height:41px;background:#fafcff;border:1px solid var(--bayan-border-subtle);border-radius:9px;padding:4px 10px;min-width:0}
+.bayan-smartviews-filter input{border:0;outline:0;background:transparent;min-width:160px;color:var(--bayan-text-primary)}
+.bayan-smartviews-filter select{background:transparent;border:0;color:var(--bayan-text-primary);min-width:120px}
+.bayan-view-name{display:inline-flex;align-items:center;gap:7px;color:var(--bayan-brand-navy)}.bayan-view-name svg{color:var(--bayan-brand-turquoise)}
+.bayan-view-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.bayan-smartviews-foot{display:flex;align-items:center;gap:7px;color:var(--bayan-text-secondary);font-size:12px;margin-top:12px!important}
+/* Trace */
+.bayan-trace-head code{font:12px var(--bayan-font-mono);direction:ltr;background:#f4f7fb;padding:7px;border-radius:8px}
+.bayan-trace-list{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:0}.bayan-trace-step{position:relative;display:flex;gap:10px;padding:0 0 13px}
+.bayan-trace-step:not(:last-child)::before{content:"";position:absolute;inset-inline-start:16px;top:34px;bottom:0;width:1px;background:#ccdae8}
+.bayan-trace-index{width:33px;height:33px;flex-shrink:0;display:grid;place-items:center;border:1px solid var(--bayan-border-subtle);border-radius:50%;background:#e9f3f9;color:var(--bayan-brand-navy);font-weight:700}
+.bayan-trace-step--success .bayan-trace-index{background:#e6f7ed;color:#167b48}.bayan-trace-step--error .bayan-trace-index{background:#ffeaeb;color:#b02230}
+.bayan-trace-step-body{flex:1;min-width:0;background:#fafcff;border:1px solid var(--bayan-border-subtle);border-radius:10px}
+.bayan-trace-toggle{display:flex;justify-content:space-between;gap:12px;width:100%;padding:12px;border:0;background:transparent;text-align:right;flex-wrap:wrap;align-items:center;color:var(--bayan-text-primary)}
+.bayan-trace-agent,.bayan-trace-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.bayan-trace-agent strong{color:var(--bayan-brand-navy)}.bayan-trace-meta small{display:inline-flex;align-items:center;gap:4px;color:var(--bayan-text-secondary)}
+.bayan-trace-summary{border-top:1px solid var(--bayan-border-subtle);padding:11px 15px;color:var(--bayan-text-secondary);line-height:1.8}.bayan-trace-disclaimer{margin-top:12px!important;font-size:12px;color:var(--bayan-text-secondary)}
+@media(max-width:600px){.bayan-domain-card{padding:11px}.bayan-citation{flex-wrap:wrap}.bayan-composer-form{flex-wrap:wrap}.bayan-composer-form textarea{flex-basis:calc(100% - 50px)}.bayan-trace-head{display:grid}.bayan-smartviews-filter label{flex:1}}
+@media print{body:has(.bayan-exporter) .bayan-exporter{border:0;box-shadow:none}body:has(.bayan-exporter) .bayan-exporter .bayan-export-actions,body:has(.bayan-exporter) .bayan-exporter .bayan-format-choices,body:has(.bayan-exporter) .bayan-exporter .bayan-export-note{display:none}}
+@media(prefers-reduced-motion:reduce){.bayan-spin{animation:none}}

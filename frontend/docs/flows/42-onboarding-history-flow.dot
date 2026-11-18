@@ -1,0 +1,31 @@
+digraph onboarding_history {
+  graph [label="نظام بيان — تدفق سجل عمليات التهيئة (الشاشة 34)", labelloc="t", fontsize=23, fontname="DejaVu Sans", bgcolor="#f5f9fd", pad=0.32, nodesep=0.38, ranksep=0.46, rankdir=TB];
+  node [shape=box, style="rounded,filled", color="#7bbbc7", fillcolor="#e8f6fa", fontcolor="#0a2342", fontname="DejaVu Sans", fontsize=12, penwidth=1.3, margin="0.22,0.15"];
+  edge [color="#2c7b90", arrowsize=0.8, fontname="DejaVu Sans", fontsize=11];
+  start [label="فتح سجل التهيئة"];
+  access [shape=diamond, label="دور منصة مخوّل؟", fillcolor="#fff8e9", color="#c9a362"];
+  deny [label="رفض الوصول", fillcolor="#ffecec", color="#d55b63"];
+  load [label="تحميل أمثلة اصطناعية + سجلات محلية", fillcolor="#def2f6"];
+  filter [label="البحث والتصفية / التاريخ"];
+  dates [shape=diamond,label="التاريخ صحيح؟", fillcolor="#fff8e9",color="#c9a362"];
+  invalid [label="خطأ في التاريخ",fillcolor="#fff0de",color="#e0b063"];
+  table [label="جدول السجل والحالات"];
+  detail [label="تفاصيل المراحل الست وأسباب التعثر"];
+  csv [label="تصدير CSV آمن للبيانات الوصفية"];
+  retry [shape=diamond,label="إعادة المحاولة مؤهلة؟",fillcolor="#fff8e9",color="#c9a362"];
+  readonly [label="القراءة فقط"];
+  draft [label="تأكيد إنشاء مسودة تدريبية"];
+  storage [shape=diamond,label="التخزين متاح؟",fillcolor="#fff8e9",color="#c9a362"];
+  error [label="إظهار الخطأ، لا تنفيذ",fillcolor="#ffecec",color="#d55b63"];
+  reset [label="إعادة الفحوص إلى البداية"];
+  wizard [label="العودة إلى معالج التهيئة"];
+  completed [label="اكتمال محاكاة من الشاشة 33"];
+  persist [shape=diamond,label="حفظ ملخص محلي؟",fillcolor="#fff8e9",color="#c9a362"];
+  noPersist [label="تنبيه: لم يُحفظ السجل", fillcolor="#fff0de",color="#e0b063"];
+  start->access;access->deny [label="لا"];access->load [label="نعم"];
+  load->filter;filter->dates;dates->invalid [label="لا"];dates->table [label="نعم"];
+  table->detail [label="تفاصيل"];table->csv [label="تصدير"];
+  detail->retry;retry->readonly [label="لا"];retry->draft [label="نعم"];
+  draft->storage;storage->error [label="لا"];storage->reset [label="نعم"];reset->wizard;
+  completed->persist;persist->load [label="نعم"];persist->noPersist [label="لا"];
+}

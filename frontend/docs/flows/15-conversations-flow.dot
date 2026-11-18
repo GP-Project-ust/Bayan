@@ -1,0 +1,31 @@
+digraph BayanHistory {
+  graph [rankdir=TB, bgcolor="#F5F9FD", pad="0.34", nodesep="0.25", ranksep="0.38", label="بيان — مخطط تدفق سجل المحادثات", labelloc=t, fontsize=21, fontname="Noto Sans Arabic", fontcolor="#0A2342"];
+  node [shape=box, style="rounded,filled", fontname="Noto Sans Arabic", fontsize=12, fillcolor="white", color="#B6D4DF", fontcolor="#153658", margin="0.22,0.14"];
+  edge [color="#4A8D9D", arrowsize=0.7, fontname="Noto Sans Arabic", fontsize=10, fontcolor="#406476"];
+  start [label="فتح سجل المحادثات",shape=oval,fillcolor="#0A2342",fontcolor="white",color="#0A2342"];
+  role [label="التحقق التجريبي\nمن صلاحية العرض",shape=diamond,fillcolor="#E1F7F8"];
+  denied [label="رسالة منع الوصول",fillcolor="#FFF0EE",color="#F0B9B0"];
+  load [label="تحميل 12 محادثة تجريبية\nوتعديلات المتصفح"];
+  list [label="عرض السجل والإحصاءات",fillcolor="#D8F4F4"];
+  action [label="اختيار إجراء",shape=diamond,fillcolor="#E1F7F8"];
+  search [label="بحث / تصفية / ترتيب"];
+  view [label="درج التفاصيل\nالرسائل والمصادر المسموحة"];
+  followup [label="سؤال متابعة تجريبي\nدون الاتصال بالخادم"];
+  rename [label="تعديل العنوان\nوالتحقق من المدخلات"];
+  favorite [label="إضافة أو إزالة المفضلة"];
+  confirm [label="طلب تأكيد الحذف",shape=diamond,fillcolor="#FFF3E1"];
+  delete [label="حذف محلي من المعاينة",fillcolor="#FFF0EE"];
+  restore [label="استعادة بيانات العرض"];
+  new [label="فتح محادثة جديدة",shape=oval,fillcolor="#00A6B2",fontcolor="white",color="#00A6B2"];
+  start->role;
+  role->denied[label="لا"];
+  role->load[label="نعم"];
+  load->list->action;
+  action->search;search->list;
+  action->view;view->followup;followup->list;
+  action->rename;rename->list;
+  action->favorite;favorite->list;
+  action->confirm;confirm->delete[label="تأكيد"];delete->list;confirm->list[label="إلغاء"];
+  action->restore;restore->list;
+  action->new;
+}

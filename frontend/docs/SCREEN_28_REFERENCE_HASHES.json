@@ -1,0 +1,12 @@
+{
+  "app/page.tsx": "7632d9e06b222ec4d279cbec71edc66238b301d80788bc147a70d11c10968831",
+  "app/admin/page.tsx": "1e71831de8c561bda1523fadf50d684da1517a5b210006f317410d316ae0c40f",
+  "app/globals.css": "1716690a2cb293a5a660416b672590e013c2d65fa7f5992f0b36a3275ec30de7",
+  "components/ChatView.tsx": "b532280cc6d5188285cd15be7d494530de778add61297bdc15bc3e5b2a63336e",
+  "components/AdminDashboard.tsx": "d190b698fb2aa4a817d3e62ab23d3c0655f1edb57bef9f3acaf64761fea004b8",
+  "components/Sidebar.tsx": "cf8fd10e709c5222f24ab8c540b6e18a7427f945709ecac439a1ec519e9f5511",
+  "lib/access/policy.ts": "74ec3b7f9cdbb4d05cd3d0e678574f1e97301a8056200e21857a35d5a8c104fb",
+  "lib/screen-catalog.json": "523e48f2c0f174ec28cfb13590c493b7ad012df6a12527cbd8b4b3e47a3cdd5b",
+  "design-references/chat-reference.png": "3b9eee56f2847fe75a762a284dc4be5e07ef23a9fd77fde6da0e740ba9f45c11",
+  "design-references/admin-reference.png": "12c56402a85c401e1fe5f36f8dece6ad3b6882eeedb2931cc614de86e023de0a"
+}

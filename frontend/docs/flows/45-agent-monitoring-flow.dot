@@ -1,0 +1,39 @@
+digraph AgentMonitoring {
+  graph [rankdir=TB, bgcolor="white", pad="0.25", nodesep="0.35", ranksep="0.45", fontname="Noto Sans Arabic", label="تدفق شاشة مراقبة الوكلاء الذكيين — بيان", labelloc=t, fontsize=18];
+  node [shape=box, style="rounded,filled", fillcolor="#F5F9FD", color="#BFD4E3", fontname="Noto Sans Arabic", fontsize=11, margin="0.16,0.10"];
+  edge [color="#6D91A8", penwidth=1.25, arrowsize=0.75, fontname="Noto Sans Arabic", fontsize=9];
+  start [label="مسؤول المنصة"];
+  open [label="فتح شاشة مراقبة الوكلاء"];
+  auth [label="التحقق من صلاحية\nplatform.manage", shape=diamond, fillcolor="#FFF7E8", color="#D7A24B"];
+  denied [label="عرض منع الوصول", fillcolor="#FFF0F0", color="#C65B60"];
+  load [label="تحميل تعريفات الوكلاء\nومقاييس العينة", fillcolor="#EAF8FA", color="#00A6B2"];
+  calc [label="تجميع خطوات التتبعات الاصطناعية\nوحساب مؤشرات الأداء"];
+  show [label="عرض البطاقات والمؤشرات", fillcolor="#EAF8FA", color="#00A6B2"];
+  filters [label="البحث والتصفية"];
+  details [label="تفاصيل الوكيل\nالمهمة والمدخلات والمخرجات"];
+  traces [label="هل تتوفر traces.view؟", shape=diamond, fillcolor="#FFF7E8", color="#D7A24B"];
+  traceyes [label="إتاحة رابط التفاصيل المصرح"];
+  traceno [label="إخفاء تتبعات المؤسسة", fillcolor="#FFF5E8", color="#D7A24B"];
+  csv [label="تصدير CSV للملخصات فقط"];
+  links [label="صحة الخدمات ومزودو النماذج"];
+  subgraph cluster_arch { label="المسار المعماري التوضيحي"; color="#D7E7EF"; style="rounded";
+    sup [label="Supervisor", fillcolor="#EAF8FA", color="#00A6B2"];
+    route [label="تحديد نوع الطلب", shape=diamond];
+    sql [label="SQL Agent"];
+    rag [label="RAG Agent"];
+    analyst [label="Analyst Agent\nعند الحاجة لبيانات SQL"];
+    reporter [label="Reporter Agent", fillcolor="#EEF4FB"];
+    sup -> route; route -> sql [label="بيانات"]; route -> rag [label="مستندات"];
+    sql -> analyst [label="تحليل اختياري"]; sql -> reporter; analyst -> reporter; rag -> reporter [label="مراجع"];
+  }
+  start -> open -> auth;
+  auth -> denied [label="لا"];
+  auth -> load [label="نعم"];
+  load -> calc -> show;
+  show -> filters;
+  show -> details -> traces;
+  traces -> traceyes [label="نعم"];
+  traces -> traceno [label="لا"];
+  show -> csv;
+  show -> links;
+}

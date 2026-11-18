@@ -1,0 +1,31 @@
+digraph AuditFlow {
+ graph [rankdir=TB, bgcolor="white", pad="0.3", nodesep="0.32", ranksep="0.53", fontname="Noto Sans Arabic", label="بيان | تدفق مراجعة سجل التدقيق — نموذج تجريبي", labelloc=t, fontsize=19, fontcolor="#0A2342"];
+ node [fontname="Noto Sans Arabic", fontsize=12, style="filled,rounded", shape=box, color="#BCDDE5", fillcolor="#F3F9FC", fontcolor="#0A2342", penwidth=1.25, margin="0.19,0.12"];
+ edge [fontname="Noto Sans Arabic",fontsize=10,color="#54859A",arrowsize=0.72];
+ open [label="فتح سجل التدقيق\n/admin/audit",fillcolor="#E8F7F9"];
+ role [shape=diamond,label="هل الدور مخوّل؟",fillcolor="#FFF4E8",color="#D6B181"];
+ denied [label="رفض الوصول\nبدون كشف الأحداث",fillcolor="#FFF0F2",color="#DFA8B2"];
+ demo [label="تحميل سجلات\nتدريبية ومموّهة"];
+ list [label="بطاقات المؤشرات\nوجدول الأحداث"];
+ filters [label="بحث · فئة · فاعل\nنتيجة · نطاق زمني"];
+ valid [shape=diamond,label="الفترة صحيحة؟",fillcolor="#FFF4E8",color="#D6B181"];
+ invalid [label="رسالة تصحيح الفترة",fillcolor="#FFF0F2"];
+ found [shape=diamond,label="نتائج موجودة؟",fillcolor="#FFF4E8",color="#D6B181"];
+ empty [label="حالة فارغة\nإزالة المرشحات"];
+ action [shape=diamond,label="اختيار الإجراء",fillcolor="#ECF7FA"];
+ drawer [label="تفاصيل الحدث\n+ معرف التتبع",fillcolor="#E6F7F7"];
+ copy [label="نسخ معرّف التتبع"];
+ csv [label="تصدير CSV للنتائج\nمع تحييد الصيغ",fillcolor="#EAF6EE",color="#A7CBB5"];
+ no_network [label="تنزيل محلي فقط\nلا طلبات شبكة",fillcolor="#EAF6EE",color="#A7CBB5"];
+ open->role;
+ role->denied[label="لا"];
+ role->demo[label="نعم"];
+ demo->list->filters->valid;
+ valid->invalid[label="لا"];invalid->filters;
+ valid->found[label="نعم"];
+ found->empty[label="لا"];empty->filters;
+ found->action[label="نعم"];
+ action->drawer[label="تفاصيل"];drawer->copy;
+ action->csv[label="تصدير"];csv->no_network;
+ action->filters[label="تغيير المرشحات"];
+}

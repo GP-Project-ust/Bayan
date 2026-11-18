@@ -1,0 +1,38 @@
+digraph Bayan_Upload {
+  graph [rankdir=TB,bgcolor="#FFFFFF",pad="0.35",nodesep="0.32",ranksep="0.45",splines="spline",fontname="DejaVu Sans",label="بيان — مخطط تدفق رفع المستندات وفهرستها (نموذج تجريبي)",labelloc=t,fontsize=20,fontcolor="#0A2342"];
+  node [shape=box,style="rounded,filled",fontname="DejaVu Sans",fontsize=11,margin="0.18,0.12",fillcolor="#EAF6F9",color="#72B9C5",fontcolor="#0A2342"];
+  edge [fontname="DejaVu Sans",fontsize=10,color="#658AA2",fontcolor="#325D75",arrowsize=0.65];
+  entry [label="فتح /sources/upload"];
+  role [shape=diamond,label="هل الدور مسؤول تقنية المعلومات؟",fillcolor="#FFF7E5",color="#DAB15D"];
+  denied [label="منع الوصول (واجهة فقط)\n403 تجريبي",fillcolor="#FFEFEF",color="#D98383"];
+  choose [label="اختيار أو سحب الملفات\nPDF / DOCX / TXT"];
+  validate [shape=diamond,label="الامتداد والحجم والتكرار\nصالحة؟",fillcolor="#FFF7E5",color="#DAB15D"];
+  reject [label="إظهار سبب الرفض\nإزالة أو اختيار ملف آخر",fillcolor="#FFEFEF",color="#D98383"];
+  queue [label="إضافة إلى قائمة الانتظار"];
+  metadata [label="اختيار التصنيف ومستوى الوصول\nوالجهة المالكة"];
+  metadata_check [shape=diamond,label="البيانات الوصفية صالحة؟",fillcolor="#FFF7E5",color="#DAB15D"];
+  warning [label="تنبيه ببيانات غير صحيحة",fillcolor="#FFEFEF",color="#D98383"];
+  start [label="بدء محاكاة المعالجة"];
+  steps [label="فحص → استقبال → استخراج النص\n→ تقسيم المقاطع → المتجهات",fillcolor="#E7F8F8"];
+  cancel [label="إلغاء / إعادة محاولة",fillcolor="#FFEFEF",color="#D98383"];
+  result [label="انتهت المحاكاة",fillcolor="#E5F7EC",color="#80C5A0"];
+  no_backend [label="لا إرسال فعلي ولا تخزين ملفات\nولا إنشاء فهرس Qdrant",fillcolor="#E5F7EC",color="#80C5A0"];
+  library [label="العودة إلى مكتبة المستندات"];
+  entry -> role;
+  role -> denied [label="لا"];
+  role -> choose [label="نعم"];
+  choose -> validate;
+  validate -> reject [label="لا"];
+  reject -> choose;
+  validate -> queue [label="نعم"];
+  queue -> metadata;
+  metadata -> metadata_check;
+  metadata_check -> warning [label="لا"];
+  warning -> metadata;
+  metadata_check -> start [label="نعم"];
+  start -> steps;
+  steps -> result [label="اكتمال"];
+  steps -> cancel [style=dashed,label="إلغاء"];
+  cancel -> queue;
+  result -> no_backend -> library;
+}

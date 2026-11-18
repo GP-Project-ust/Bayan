@@ -1,0 +1,24 @@
+digraph bayan_library {
+  graph [rankdir=TB, bgcolor="white", pad="0.3", nodesep="0.35", ranksep="0.48", fontname="DejaVu Sans", label="Bayan — Document Library / UC-02", labelloc="t", fontsize=20, fontcolor="#0a2342"];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=12, color="#c7e1e9", fillcolor="#f1f9fc", fontcolor="#0a2342", margin="0.19,0.11"];
+  edge [color="#47899a", fontname="DejaVu Sans", fontsize=10, arrowsize=0.65];
+  a [label="Open /sources", fillcolor="#dceff8"];
+  b [label="Has documents.search?", shape=diamond, fillcolor="#e3f4f6"];
+  denied [label="403-style UI preview\nNo backend authorization", fillcolor="#ffefed", color="#ebbaa9"];
+  list [label="Load nine fictional documents\nCompute demo index counts", fillcolor="#e5f8f2"];
+  filt [label="Arabic search, category,\nstatus and sort"];
+  results [label="Any matches?", shape=diamond];
+  empty [label="Empty state + reset"];
+  browse [label="Card / table view"];
+  details [label="Open document details drawer"];
+  snip [label="Training snippets?", shape=diamond];
+  cite [label="Select page + copy\nFictional citation"];
+  absent [label="No authentic PDF or snippets", fillcolor="#fff7e5", color="#ebd39a"];
+  manage [label="Has sources.manage?", shape=diamond];
+  reindex [label="Local reindex simulation\nNo Qdrant operations", fillcolor="#def7f7"];
+  search [label="Go to /semantic-search", fillcolor="#e3f4f6"];
+  a -> b; b -> denied [label="no"]; b -> list [label="yes"]; list -> filt; filt -> results;
+  results -> empty [label="no"]; empty -> filt; results -> browse [label="yes"];
+  browse -> details; details -> snip; snip -> cite [label="yes"]; snip -> absent [label="no"];
+  browse -> manage; manage -> reindex [label="yes"]; browse -> search;
+}

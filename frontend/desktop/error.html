@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بيان | تنبيه في خادم التطوير</title>
+  <style>
+    :root {
+      --bayan-navy: #0A2342;
+      --bayan-navy-dark: #06162B;
+      --bayan-turquoise: #00A6B2;
+      --bayan-danger: #C52B35;
+      --bayan-warning: #D97706;
+      --bayan-surface: #FAFCFF;
+      --bayan-border: #DCE7F2;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bayan-navy-dark) 0%, var(--bayan-navy) 100%);
+      color: #FFFFFF;
+      font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .error-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(197, 43, 53, 0.4);
+      border-radius: 20px;
+      padding: 36px 32px;
+      max-width: 540px;
+      width: 100%;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+      text-align: center;
+    }
+
+    .icon-alert {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(197, 43, 53, 0.15);
+      border: 2px solid var(--bayan-danger);
+      color: #FF6B75;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px auto;
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #FFFFFF;
+    }
+
+    p.desc {
+      font-size: 14px;
+      color: #B2C7DE;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .log-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      color: #E2E8F0;
+      text-align: left;
+      direction: ltr;
+      max-height: 140px;
+      overflow-y: auto;
+      margin-bottom: 24px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    button {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--bayan-turquoise);
+      color: #FFFFFF;
+    }
+    .btn-primary:hover {
+      background: #008B96;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #E2E8F0;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+  </style>
+</head>
+<body>
+  <div class="error-card">
+    <div class="icon-alert">!</div>
+    <h1>تعذر الاتصال بخادم تطوير بيان</h1>
+    <p class="desc" id="error-message">
+      توقف خادم Next.js المحلي أو واجه مهلة في بدء التشغيل. يمكنك إعادة المحاولة لتشغيل الخادم تلقائيًا.
+    </p>
+
+    <div class="log-box" id="error-logs">جاري فحص حالة الخادم...</div>
+
+    <div class="actions">
+      <button class="btn-primary" onclick="restartServer()">إعادة تشغيل الخادم</button>
+      <button class="btn-secondary" onclick="viewLogs()">عرض ملف السجلات</button>
+    </div>
+  </div>
+
+  <script>
+    function restartServer() {
+      const btn = document.querySelector('.btn-primary');
+      btn.textContent = 'جارٍ إعادة التشغيل...';
+      btn.disabled = true;
+      if (window.bayanDesktop) {
+        window.bayanDesktop.restartServer();
+      } else {
+        window.location.reload();
+      }
+    }
+
+    function viewLogs() {
+      if (window.bayanDesktop) {
+        window.bayanDesktop.openLogs();
+      }
+    }
+
+    if (window.bayanDesktop) {
+      window.bayanDesktop.onServerError((data) => {
+        if (data.message) {
+          document.getElementById('error-message').textContent = data.message;
+        }
+        if (data.details) {
+          document.getElementById('error-logs').textContent = data.details;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+

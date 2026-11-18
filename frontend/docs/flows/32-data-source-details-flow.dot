@@ -1,0 +1,24 @@
+digraph G {
+ graph [rankdir=TB, bgcolor="white", pad=0.35, nodesep=0.34, ranksep=0.46, fontname="DejaVu Sans", label="بيان — تدفق شاشة تفاصيل مصدر البيانات (نموذج تجريبي)", labelloc=t, fontsize=20, fontcolor="#0a2342"];
+ node [shape=box, style="rounded,filled", color="#cbdfea", fillcolor="#f4f9fd", fontcolor="#143955", fontname="DejaVu Sans", fontsize=12, penwidth=1.3, margin="0.17,0.10"];
+ edge [color="#368496",fontname="DejaVu Sans",fontcolor="#365f76",fontsize=10,arrowsize=0.7];
+ A [label="قائمة مصادر البيانات"];
+ B [label="اختيار مصدر / صفحة التفاصيل"];
+ C [shape=diamond,label="صلاحية إدارة\nالمصادر؟",fillcolor="#e7f7f7"];
+ D [shape=diamond,label="معرّف ومصدر\nصالحان؟",fillcolor="#e7f7f7"];
+ E [label="قراءة بيانات العرض المحلية\nومعلومات المصدر"];
+ F [shape=diamond,label="هل المصدر\nمحظور؟",fillcolor="#e7f7f7"];
+ G [label="إخفاء المخطط والفحص\nومسودات المراجعة",fillcolor="#fff2f1",color="#dfc1c0"];
+ H [label="التبويبات: معلومات / جداول /\nتصنيف / عروض / نشاط"];
+ I [shape=diamond,label="الإجراء المختار؟",fillcolor="#e7f7f7"];
+ J [label="جداول وحقول تدريبية فقط"];
+ K [label="نتيجة اختبار محلي\nبلا اتصال شبكة"];
+ L [label="اختيار سبب مراجعة\nمن قائمة محددة"];
+ M [shape=diamond,label="نجح الحفظ\nالمحلي؟",fillcolor="#e7f7f7"];
+ N [label="حفظ مسودة فقط\nدون تعديل الصلاحيات",fillcolor="#eaf8ee",color="#b4ddc1"];
+ O [label="خطأ تخزين واضح",fillcolor="#fff2f1",color="#dfc1c0"];
+ X [label="رفض الوصول",fillcolor="#fff2f1",color="#dfc1c0"];
+ Y [label="رابط غير صالح /\nمصدر غير موجود",fillcolor="#fff2f1",color="#dfc1c0"];
+ P [label="العودة إلى قائمة المصادر",fillcolor="#e1f5f5"];
+ A -> B -> C; C -> X [label="لا"]; C -> D [label="نعم"]; D -> Y [label="لا"]; D -> E [label="نعم"]; E -> F; F -> G [label="نعم"]; F -> H [label="لا"]; H -> I; I -> J [label="المخطط"]; I -> K [label="الفحص"]; I -> L [label="المراجعة"]; I -> P [label="العودة"]; L -> M; M -> N [label="نعم"]; M -> O [label="لا"];
+}

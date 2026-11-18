@@ -1,0 +1,21 @@
+digraph G {
+ graph [rankdir=TB,bgcolor="#f5f9fd",pad=0.35,nodesep=0.42,ranksep=0.47,fontname="Noto Sans Arabic",label="بيان | تدفق إدارة المؤسسات — الشاشة 32",labelloc=t,fontsize=20,fontcolor="#0a2342"];
+ node [fontname="Noto Sans Arabic",fontsize=12,shape=box,style="rounded,filled",color="#bfdce5",fillcolor="white",fontcolor="#183e5a",penwidth=1.4,margin="0.2,0.14"];
+ edge [fontname="Noto Sans Arabic",fontsize=10,color="#4c899d",fontcolor="#2e6476",arrowsize=0.7];
+ A [label="فتح صفحة المؤسسات",fillcolor="#0a2342",fontcolor="white"];
+ B [label="صلاحية إدارة المنصة؟",shape=diamond,fillcolor="#e3f7f8"];
+ C [label="عرض مؤسسات اصطناعية\nومؤشرات تشغيلية وصفية"];
+ X [label="منع الوصول",fillcolor="#fff0f1",color="#e2abb1"];
+ D [label="البحث والتصفية",fillcolor="#f1f9fb"];
+ E [label="تفاصيل مؤسسة\nبدون بيانات داخلية",fillcolor="#f1f9fb"];
+ F [label="تصدير CSV وصفية",fillcolor="#f1f9fb"];
+ G [label="طلب تغيير حالة",shape=diamond,fillcolor="#fff7e6"];
+ H [label="قيد التهيئة؟",shape=diamond,fillcolor="#fff7e6"];
+ I [label="لا يسمح بالتغيير اليدوي",fillcolor="#fff2e6"];
+ J [label="تأكيد الإجراء",fillcolor="#e1f7f6"];
+ K [label="تحديث محلي تجريبي فقط",fillcolor="#e7f8ee"];
+ L [label="معالج التهيئة الذكية",fillcolor="#ecf3ff"];
+ A->B;B->X[label="لا"];B->C[label="نعم"];
+ C->D;C->E;C->F;C->G;C->L;
+ G->H;H->I[label="نعم"];H->J[label="لا"];J->K[label="تأكيد"];
+}

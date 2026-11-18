@@ -1,0 +1,22 @@
+digraph BayanDataSources {
+ graph [rankdir=TB,bgcolor="#F5F9FD",fontname="DejaVu Sans",label="BAYAN | UC-05 - Data Sources Management (Prototype)",labelloc=t,fontsize=19,compound=true,nodesep=.55,ranksep=.63];
+ node [shape=box,style="rounded,filled",fillcolor="white",color="#C9DFEB",fontcolor="#0A2342",fontname="DejaVu Sans",fontsize=11,margin=".21,.15"];
+ edge [color="#008E9C",arrowsize=.75,penwidth=1.4,fontname="DejaVu Sans",fontsize=10];
+ start [label="Open Data Sources /admin/data-sources",fillcolor="#0A2342",fontcolor="white"];
+ role [label="sources.manage allowed?",shape=diamond,fillcolor="#D9F4F5"];
+ deny [label="403 - Access denied (UI preview)",fillcolor="#FCE9EC"];
+ list [label="Catalog of fictional sources + KPI cards",fillcolor="#E5F8F9"];
+ action [label="Choose action",shape=diamond,fillcolor="#D9F4F5"];
+ filter [label="Search / filter / sort / page"];
+ detail [label="View source details, masked endpoint, security level"];
+ test [label="Simulation of connection check",fillcolor="#FFF4E1"];
+ blocked [label="Disabled or blocked?",shape=diamond,fillcolor="#FFF4E1"];
+ unavailable [label="No simulation allowed",fillcolor="#FCE9EC"];
+ result [label="Local illustrative result - no network request",fillcolor="#FFF4E1"];
+ change [label="Confirm enable/disable",fillcolor="#EAF4FE"];
+ protected [label="Blocked security class?",shape=diamond,fillcolor="#FFF4E1"];
+ prevent [label="Reject change"];
+ local [label="Save demo flag in browser only",fillcolor="#EAF4FE"];
+ new [label="Future: connect a new source (screen 23)",style="rounded,dashed"];
+ start -> role;role->deny [label="No"];role->list [label="Yes"];list->action;action->filter [label="Search"];action->detail [label="Details"];action->blocked [label="Test"];blocked->unavailable [label="Yes"];blocked->test [label="No"];test->result;action->protected [label="Toggle"];protected->prevent [label="Yes"];protected->change [label="No"];change->local;action->new [label="Add"];filter->list;detail->list;result->list;local->list;
+}

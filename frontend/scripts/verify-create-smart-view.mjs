@@ -1,0 +1,15 @@
+import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import crypto from 'node:crypto';import {fileURLToPath} from 'node:url';import {createRequire} from 'node:module';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');const require=createRequire(import.meta.url);
+let ts;try{ts=require('typescript');}catch{ts=require('/opt/nvm/versions/node/v22.16.0/lib/node_modules/typescript/lib/typescript.js');}
+const required=['app/admin/smart-views/new/page.tsx','components/smart-view-create/CreateSmartViewScreen.tsx','components/smart-view-create/create-smart-view.css','lib/smart-view-create/wizard.ts','tests/contracts/create-smart-view.test.mjs','tests/e2e/create-smart-view.spec.ts','docs/SCREEN_26_CREATE_SMART_VIEW.md','docs/flows/34-create-smart-view-flow.mmd','docs/flows/34-create-smart-view-flow.svg','docs/flows/34-create-smart-view-flow.png'];
+for(const f of required)assert.ok(fs.existsSync(path.join(root,f))&&fs.statSync(path.join(root,f)).size>100,`Missing: ${f}`);
+let checked=0;function visit(dir){for(const item of fs.readdirSync(dir,{withFileTypes:true})){if(item.isDirectory()){if(!['node_modules','.next','.git'].includes(item.name))visit(path.join(dir,item.name));}else if(item.isFile()&&/\.tsx?$/.test(item.name)){const pathname=path.join(dir,item.name);const source=ts.createSourceFile(pathname,fs.readFileSync(pathname,'utf8'),ts.ScriptTarget.Latest,true,item.name.endsWith('.tsx')?ts.ScriptKind.TSX:ts.ScriptKind.TS);assert.equal(source.parseDiagnostics.length,0,`${pathname}: ${source.parseDiagnostics.map(d=>ts.flattenDiagnosticMessageText(d.messageText,' ')).join('; ')}`);checked++;}}}visit(root);
+const prev='/mnt/data/Bayan-Frontend-Screen-25-Smart-Views';const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+for(const f of ['app/page.tsx','app/admin/page.tsx','app/globals.css','components/ChatView.tsx','components/AdminDashboard.tsx','components/Sidebar.tsx','components/smart-views/smart-views.css','lib/access/policy.ts','lib/data-sources/sources.ts','lib/data-sources/details.ts','lib/smart-views/views.ts','design-references/chat-reference.png','design-references/admin-reference.png'])assert.equal(sha(path.join(root,f)),sha(path.join(prev,f)),`Reference changed: ${f}`);
+const catalog=JSON.parse(fs.readFileSync(path.join(root,'lib/screen-catalog.json'),'utf8'));
+assert.equal(catalog.length,42);assert.ok(catalog.some(x=>x.path==='/admin/smart-views/new'));
+const ui=fs.readFileSync(path.join(root,'components/smart-view-create/CreateSmartViewScreen.tsx'),'utf8');
+assert.doesNotMatch(ui,/\bfetch\s*\(|XMLHttpRequest|axios\.|executeSQL\(/);
+const css=fs.readFileSync(path.join(root,'components/smart-view-create/create-smart-view.css'),'utf8');
+assert.match(css,/@media\(max-width:620px\)/);assert.match(css,/prefers-reduced-motion/);
+console.log(`PASS Screen 26: ${checked} TS/TSX files parsed; 42 routes retained; visual references unchanged; no network calls in new screen.`);

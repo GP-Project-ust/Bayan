@@ -1,0 +1,19 @@
+digraph BayanAuditDetail {
+ graph [rankdir=TB,bgcolor="#ffffff",pad=0.35,nodesep=0.33,ranksep=0.5,fontname="DejaVu Sans",label="Bayan — Audit Event Details Flow (Screen 29)",labelloc=t,fontsize=19,fontcolor="#0A2342"];
+ node [shape=box,style="rounded,filled",fontname="DejaVu Sans",fontsize=11,fillcolor="#EAF7FA",color="#9BCBD4",fontcolor="#123A5A",margin="0.16,0.12"];
+ edge [color="#3D8494",arrowsize=0.7,fontname="DejaVu Sans",fontsize=10];
+ a [label="Open event from Audit Log"];
+ b [label="Authorized: audit.view?",shape=diamond,fillcolor="#F5FBFC"];
+ c [label="Access denied",fillcolor="#FFF0F0",color="#E5A8B2"];
+ d [label="Valid event ID?",shape=diamond];
+ e [label="Missing / Invalid ID",fillcolor="#FFF6E7",color="#DCC18C"];
+ f [label="Event in demo allowlist?",shape=diamond];
+ g [label="Not found",fillcolor="#FFF6E7",color="#DCC18C"];
+ h [label="Read-only event summary",fillcolor="#DFF7EE",color="#7EBEAD"];
+ i [label="Overview + safe metadata"];
+ j [label="Trace ID only; no agent steps"];
+ k [label="Privacy & security policy"];
+ l [label="Copy reference or return to log",fillcolor="#E1F5F7"];
+ a->b;b->c[label="No"];b->d[label="Yes"];d->e[label="No"];d->f[label="Yes"];f->g[label="No"];f->h[label="Yes"];
+ h->i;h->j;h->k;i->l;j->l;k->l;c->l;e->l;g->l;
+}

@@ -1,0 +1,31 @@
+digraph PlatformSettings {
+  graph [rankdir=TB, bgcolor="#ffffff", pad="0.25", nodesep="0.35", ranksep="0.48", fontname="Noto Sans Arabic", label="تدفق إعدادات المنصة — بيان", labelloc=t, fontsize=20, fontcolor="#0A2342"];
+  node [shape=box, style="rounded,filled", fillcolor="#F4FAFC", color="#C9E3EA", penwidth=1.4, fontname="Noto Sans Arabic", fontsize=12, fontcolor="#244D68", margin="0.18,0.12"];
+  edge [color="#00A6B2", penwidth=1.4, arrowsize=0.75, fontname="Noto Sans Arabic", fontsize=10, fontcolor="#58788D"];
+  start [label="فتح إعدادات المنصة", fillcolor="#0A2342", fontcolor="#FFFFFF", color="#0A2342"];
+  auth [label="هل يملك المستخدم صلاحية platform.manage؟", shape=diamond, fillcolor="#EAF8FA"];
+  deny [label="عرض حالة منع الوصول", fillcolor="#FFF4F1", color="#E8C9C2"];
+  load [label="تحميل الإعدادات المحلية أو الافتراضية"];
+  tabs [label="اختيار مجموعة الإعدادات"];
+  edit [label="تعديل القيم"];
+  validate [label="التحقق من النطاقات والأنواع", shape=diamond, fillcolor="#EAF8FA"];
+  errors [label="عرض أخطاء الحقول", fillcolor="#FFF8EC", color="#EAD8B7"];
+  review [label="مراجعة الفروقات"];
+  confirm [label="تأكيد الحفظ؟", shape=diamond, fillcolor="#EAF8FA"];
+  save [label="حفظ نسخة تجريبية في المتصفح", fillcolor="#EAF8EF", color="#C5E5D1"];
+  history [label="إضافة سجل تغيير محلي"];
+  done [label="تحديث الملخص وإظهار التأكيد", fillcolor="#0A2342", fontcolor="#FFFFFF", color="#0A2342"];
+  export [label="تصدير JSON دون أسرار"];
+  start -> auth;
+  auth -> deny [label="لا"];
+  auth -> load [label="نعم"];
+  load -> tabs -> edit -> validate;
+  validate -> errors [label="غير صالحة"];
+  errors -> edit;
+  validate -> review [label="صالحة"];
+  review -> confirm;
+  confirm -> edit [label="لا"];
+  confirm -> save [label="نعم"];
+  save -> history -> done;
+  load -> export [style=dashed, label="اختياري"];
+}

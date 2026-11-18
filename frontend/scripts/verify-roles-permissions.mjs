@@ -1,0 +1,13 @@
+import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import crypto from 'node:crypto';import {fileURLToPath} from 'node:url';import {createRequire} from 'node:module';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const require=createRequire(import.meta.url);let ts;try{ts=require('typescript')}catch{ts=require('/opt/nvm/versions/node/v22.16.0/lib/node_modules/typescript/lib/typescript.js')}
+const required=['app/admin/roles/page.tsx','components/roles-permissions/RolesPermissionsScreen.tsx','components/roles-permissions/roles-permissions.css','lib/access/role-review.ts','tests/contracts/roles-permissions.test.mjs','tests/e2e/roles-permissions.spec.ts','docs/SCREEN_21_ROLES_PERMISSIONS.md','docs/flows/29-roles-permissions-flow.mmd','docs/flows/29-roles-permissions-flow.svg','docs/flows/29-roles-permissions-flow.png'];
+for(const file of required)assert.ok(fs.existsSync(path.join(root,file))&&fs.statSync(path.join(root,file)).size>90,`Missing ${file}`);
+let count=0;function walk(dir){for(const x of fs.readdirSync(dir,{withFileTypes:true})){if(x.isDirectory()&&!['node_modules','.next','.git'].includes(x.name))walk(path.join(dir,x.name));else if(x.isFile()&&/\.tsx?$/.test(x.name)){const file=path.join(dir,x.name);const ast=ts.createSourceFile(file,fs.readFileSync(file,'utf8'),ts.ScriptTarget.Latest,true,x.name.endsWith('.tsx')?ts.ScriptKind.TSX:ts.ScriptKind.TS);assert.equal(ast.parseDiagnostics.length,0,`${file}: ${ast.parseDiagnostics.map(d=>ts.flattenDiagnosticMessageText(d.messageText,' ')).join(' ')}`);count++;}}}walk(root);
+const hash=f=>crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex');
+const base=path.resolve(root,'../Bayan-Frontend-Screen-20-User-Details');
+for(const file of ['app/page.tsx','app/admin/page.tsx','app/globals.css','components/ChatView.tsx','components/AdminDashboard.tsx','components/analytics/AnalyticsScreen.tsx','components/user-management/users.css','components/user-management/UsersManagementScreen.tsx','lib/access/policy.ts','lib/user-management/users.ts','design-references/chat-reference.png','design-references/admin-reference.png'])assert.equal(hash(path.join(root,file)),hash(path.join(base,file)),`Changed approved reference ${file}`);
+const cat=JSON.parse(fs.readFileSync(path.join(root,'lib/screen-catalog.json')));
+assert.equal(cat.length,42);assert.equal(cat.find(x=>x.path==='/admin/roles').title,'الأدوار والصلاحيات');
+assert.match(fs.readFileSync(path.join(root,'components/Sidebar.tsx'),'utf8'),/href="\/admin\/roles"/);
+console.log(`PASS screen 21: ${count} TS/TSX files parsed; 42 catalog records present; canonical RBAC and approved visual references unchanged.`);

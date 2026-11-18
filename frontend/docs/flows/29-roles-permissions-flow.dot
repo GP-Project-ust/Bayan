@@ -1,0 +1,24 @@
+digraph R {
+ graph [rankdir=TB, bgcolor="white",pad="0.28",nodesep="0.28",ranksep="0.42",fontname="DejaVu Sans",label="Bayan · Role and permission review flow (UI demo)",labelloc=t,fontsize=21,fontcolor="#0A2342"];
+ node [shape=box,style="rounded,filled",fontname="DejaVu Sans",fontsize=12,color="#D5E7F1",fillcolor="#F3F9FC",fontcolor="#0A2342",margin=".15,.12"];
+ edge [fontname="DejaVu Sans",fontsize=10,color="#6193A8",fontcolor="#286477",arrowsize=.65];
+ a [label="Open /admin/roles",fillcolor="#0A2342",fontcolor=white];
+ b [label="Can actor manage tenant roles?",shape=diamond,fillcolor="#DDF5F6"];
+ c [label="Show access denied (demo)",fillcolor="#FFF3EC"];
+ d [label="Load canonical read-only RBAC policy"];
+ e [label="4 role cards + 16 capabilities",fillcolor="#E7F8F8"];
+ f [label="Choose action",shape=diamond,fillcolor="#DDF5F6"];
+ g [label="Filter and inspect matrix"];
+ h [label="Inspect role details (drawer)"];
+ i [label="Compare two roles"];
+ j [label="Review request for tenant only?",shape=diamond,fillcolor="#DDF5F6"];
+ k [label="Reject invalid request",fillcolor="#FFF3EC"];
+ l [label="Validate reason, duplicates and limits",shape=diamond,fillcolor="#DDF5F6"];
+ m [label="Save proposal in local browser only",fillcolor="#DFF7EE"];
+ n [label="Display / delete local proposal"];
+ o [label="Canonical policy UNCHANGED",fillcolor="#0A2342",fontcolor=white];
+ a->b;b->c[label="No"];b->d[label="Yes"];d->e;e->f;
+ f->g[label="Filter"];f->h[label="Details"];f->i[label="Compare"];f->j[label="Request"];
+ j->k[label="Invalid"];j->l[label="Tenant-only"];l->k[label="Invalid"];l->m[label="Valid"];m->n;
+ {g h i n k c}->o;
+}

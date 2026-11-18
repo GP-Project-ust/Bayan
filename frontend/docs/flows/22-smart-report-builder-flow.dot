@@ -1,0 +1,26 @@
+digraph report_builder {
+ graph [rankdir=TB, bgcolor="white", pad=0.35, nodesep=0.45, ranksep=0.54, fontname="DejaVu Sans", labelloc=t, label="BAYAN | Smart Report Builder — UI Flow (Screen 14)", fontsize=19, fontcolor="#0A2342"];
+ node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=10, margin="0.22,0.12", color="#DCE7F2", fillcolor="#F5F9FD", fontcolor="#173B58"];
+ edge [color="#7395A7", arrowsize=0.7, fontname="DejaVu Sans", fontsize=9];
+ start [label="Open /reports/new", shape=oval, fillcolor="#0A2342", fontcolor="white", color="#0A2342"];
+ role [label="Can create reports?", shape=diamond, fillcolor="#FFF2D9", color="#EAC07B"];
+ forbidden [label="Forbidden preview\nNo report form", fillcolor="#FDE7E6", color="#EAA5A3"];
+ info [label="STEP 1  ·  Title + objective + type",fillcolor="#DDF7F6",color="#8DDFD9"];
+ v1 [label="Valid metadata?",shape=diamond,fillcolor="#FFF2D9",color="#EAC07B"];
+ sources [label="STEP 2  ·  Sources + matching metrics",fillcolor="#DDF7F6",color="#8DDFD9"];
+ v2 [label="Sources and metrics valid?",shape=diamond,fillcolor="#FFF2D9",color="#EAC07B"];
+ dates [label="STEP 3  ·  Date range + grouping",fillcolor="#DDF7F6",color="#8DDFD9"];
+ v3 [label="Valid calendar range?",shape=diamond,fillcolor="#FFF2D9",color="#EAC07B"];
+ review [label="STEP 4  ·  Review configuration",fillcolor="#E9F1FF",color="#C2D9F4"];
+ action [label="User action?",shape=diamond,fillcolor="#FFF2D9",color="#EAC07B"];
+ draft [label="Download local demo JSON",fillcolor="#E8F8F7",color="#C4E7E5"];
+ confirm [label="Confirm simulation?",shape=diamond,fillcolor="#FFF2D9",color="#EAC07B"];
+ complete [label="Show simulation completed\nNO backend request or real report",fillcolor="#0A2342",fontcolor="white",color="#0A2342"];
+ finish [label="Back to Reports / Start again",shape=oval,fillcolor="#EAF5FC",color="#9EC8DA"];
+ start -> role;role -> forbidden [label="No"];role -> info [label="Yes"];
+ info -> v1;v1 -> info [label="Fix fields",color="#D08B5C"];v1 -> sources [label="Valid"];
+ sources -> v2;v2 -> sources [label="Fix selections",color="#D08B5C"];v2 -> dates [label="Valid"];
+ dates -> v3;v3 -> dates [label="Fix dates",color="#D08B5C"];v3 -> review [label="Valid"];
+ review -> action;action -> info [label="Edit",style=dashed];action -> draft [label="Save config"];draft -> review;action -> confirm [label="Simulate"];
+ confirm -> review [label="Cancel"];confirm -> complete [label="Confirm"];complete -> finish;forbidden -> finish;
+}

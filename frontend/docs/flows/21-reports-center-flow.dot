@@ -1,0 +1,21 @@
+digraph Reports {
+  graph [rankdir=TB,bgcolor="#f7fbfe",pad="0.45",nodesep="0.31",ranksep="0.5",fontname="DejaVu Sans",label="BAYAN — Reports Center / الشاشة 13",labelloc="t",fontsize=24,fontcolor="#0A2342"];
+  node [shape=box,style="rounded,filled",fillcolor="white",color="#c7dce8",fontcolor="#0A2342",fontname="DejaVu Sans",fontsize=13,margin="0.18,0.11"];
+  edge [color="#7babbc",arrowsize=0.8,penwidth=1.25,fontname="DejaVu Sans",fontsize=11];
+  start [label="فتح /reports",fillcolor="#0a2342",fontcolor="white"];
+  view [label="reports.view؟",shape=diamond,fillcolor="#d8f3f5"];
+  deny [label="رفض الوصول التجريبي",fillcolor="#fff1f1",color="#c17373"];
+  list [label="عرض التقارير والمقاييس\n(بيانات مثال محلية)"];
+  filter [label="بحث / تصفية / ترتيب"];
+  choose [label="فتح تقرير"];
+  detail [label="درج التفاصيل والمصدر"];
+  status [label="حالة التقرير؟",shape=diamond,fillcolor="#d8f3f5"];
+  ready [label="مؤشرات وبيانات توضيحية",fillcolor="#ebfafb"];
+  notready [label="انتظار / مسودة / فشل\nلا نتائج جاهزة",fillcolor="#fff7e9"];
+  permission [label="reports.export؟",shape=diamond,fillcolor="#d8f3f5"];
+  csv [label="توليد CSV محلي\nببيانات تجريبية",fillcolor="#dff9ed",color="#63b99d"];
+  noexport [label="حجب التصدير",fillcolor="#fff1f1"];
+  create [label="reports.create؟",shape=diamond,fillcolor="#d8f3f5"];
+  new [label="/reports/new\nقالب المرحلة التالية",fillcolor="#eaf5fc"];
+  start->view;view->deny [label="لا"];view->list [label="نعم"];list->filter;filter->choose;choose->detail;detail->status;status->ready [label="جاهز"];status->notready [label="غير جاهز"];ready->permission;permission->csv [label="نعم"];permission->noexport [label="لا"];list->create;create->new [label="نعم"];
+}

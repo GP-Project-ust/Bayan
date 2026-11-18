@@ -79,14 +79,40 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* واجهة المحادثة — قادمة في Sprint 1 */}
-      <section className="mt-8 rounded-2xl border border-dashed border-bayan-700 bg-bayan-900/30 p-10 text-center">
+      {/* واجهة المحادثة وخريطة الشاشات */}
+      <section className="mt-8 rounded-2xl border border-dashed border-bayan-700 bg-bayan-900/30 p-8 text-center">
         <p className="text-bayan-200">
-          واجهة المحادثة تُبنى في <span className="font-bold text-gold-400">Sprint 1</span>
+          واجهة المحادثة الرسمية تُبنى في <span className="font-bold text-gold-400">Sprint 1</span>
         </p>
         <p className="mt-2 text-sm text-bayan-400">
-          الهيكل الأساسي للواجهة (RTL + اتصال API) جاهز الآن
+          الهيكل الأساسي للواجهة (RTL + اتصال API) جاهز ومكتمل
         </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <a
+            href="/screens"
+            className="rounded-xl bg-gold-500/20 px-4 py-2 text-sm font-semibold text-gold-400 border border-gold-500/40 hover:bg-gold-500/30 transition-colors"
+          >
+            استعراض خريطة الشاشات (42 شاشة)
+          </a>
+          <a
+            href="/prototype-chat"
+            className="rounded-xl bg-bayan-800/60 px-4 py-2 text-sm text-bayan-200 border border-bayan-700 hover:bg-bayan-700/60 transition-colors"
+          >
+            معاينة النموذج الأولي للمحادثة
+          </a>
+          <a
+            href="/conversations"
+            className="rounded-xl bg-bayan-800/60 px-4 py-2 text-sm text-bayan-200 border border-bayan-700 hover:bg-bayan-700/60 transition-colors"
+          >
+            سجل المحادثات
+          </a>
+          <a
+            href="/admin"
+            className="rounded-xl bg-bayan-800/60 px-4 py-2 text-sm text-bayan-200 border border-bayan-700 hover:bg-bayan-700/60 transition-colors"
+          >
+            لوحة الإدارة
+          </a>
+        </div>
       </section>
 
       {/* الوكلاء الخمسة */}

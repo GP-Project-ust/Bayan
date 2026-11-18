@@ -1,0 +1,24 @@
+digraph BayanTraceDetail {
+ graph [rankdir=TB, bgcolor="#f5f9fd", pad="0.38", nodesep="0.33", ranksep="0.43", fontname="Noto Sans Arabic", label="بيان | تدفق شاشة تفاصيل مسار تنفيذ الوكلاء", labelloc=t, fontsize=24, fontcolor="#0A2342"];
+ node [shape=box, style="rounded,filled", fillcolor="white", color="#dce7f2", fontname="Noto Sans Arabic", fontsize=12, fontcolor="#0A2342", margin="0.22,0.15"];
+ edge [fontname="Noto Sans Arabic", fontsize=10, color="#60879c", arrowsize=.75];
+ A [label="فتح تفاصيل مسار الوكلاء", fillcolor="#0A2342",fontcolor="white"];
+ B [label="هل توجد صلاحية عرض؟",shape=diamond,fillcolor="#fff9e9",color="#e4c78d"];
+ C [label="رفض الوصول\nدون عرض بيانات",fillcolor="#fff0f1",color="#e8b5bf"];
+ D [label="التحقق من معرّف التتبع",shape=diamond,fillcolor="#fff9e9",color="#e4c78d"];
+ E [label="مفقود / غير صالح / غير موجود",fillcolor="#fff0f1",color="#e8b5bf"];
+ F [label="تحميل عينة تشغيل اصطناعية ثابتة",fillcolor="#e9f8f9",color="#9bd8dc"];
+ G [label="نظرة عامة\nالنوع والحالة والمدة"];
+ H [label="اختيار تبويب التفاصيل",shape=diamond,fillcolor="#e9f8f9",color="#9bd8dc"];
+ I [label="مخطط زمني للخطوات\nالمدد المتاحة فقط"];
+ J [label="تشخيص وصفي\nنجاح / فشل / رفض / جارية"];
+ K [label="خصوصية وعزل البيانات"];
+ L [label="هل خطوة التنفيذ مكتملة؟",shape=diamond,fillcolor="#fff9e9",color="#e4c78d"];
+ M [label="إظهار المدة والملخص الآمن"];
+ N [label="لا نختلق مددًا أو تقدمًا"];
+ O [label="هل يوجد تدقيق تدريبي مطابق؟",shape=diamond,fillcolor="#fff9e9",color="#e4c78d"];
+ P [label="رابط لحدث التدقيق المتحقق"];
+ Q [label="لا يوجد حدث مرتبط"];
+ R [label="نسخ مرجع آمن / العودة لقائمة المسارات",fillcolor="#0A2342",fontcolor="white"];
+ A->B;B->C[label="لا"];B->D[label="نعم"];D->E[label="لا"];D->F[label="نعم"];F->G;G->H;H->I;H->J;H->K;I->L;L->M[label="نعم"];L->N[label="لا"];G->O;O->P[label="نعم"];O->Q[label="لا"];{M N J K P Q}->R;
+}

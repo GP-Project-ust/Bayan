@@ -1,0 +1,24 @@
+digraph BayanUsers {
+ graph [rankdir=TB, bgcolor="transparent", pad=0.22, nodesep=0.35, ranksep=0.48, fontname="Noto Sans Arabic"];
+ node [shape=box, style="rounded,filled", fontname="Noto Sans Arabic", fontsize=12, fontcolor="#0A2342", color="#00A6B2", fillcolor="#E7F8FA", penwidth=1.4, margin="0.18,0.11"];
+ edge [color="#47778B", fontname="Noto Sans Arabic", fontsize=10, arrowsize=.65];
+ A [label="فتح إدارة المستخدمين\nمن لوحة الإدارة"];
+ B [shape=diamond,label="هل لدى المستخدم\nصلاحية الإدارة؟", fillcolor="#FFF3DE",color="#C28C29"];
+ C [label="منع الوصول التجريبي",fillcolor="#FBE9EC",color="#CB5668"];
+ D [label="تحميل بيانات الحسابات\nالخيالية من المتصفح"];
+ E [label="الجدول والإحصاءات\nوالفلاتر"];
+ F [shape=diamond,label="اختيار الإجراء",fillcolor="#FFF3DE",color="#C28C29"];
+ G [label="بحث وتصفية\nوتنقل بين الصفحات"];
+ H [label="عرض تفاصيل المستخدم"];
+ I [label="إضافة مستخدم\nمع فحص البريد والدور"];
+ J [label="تعديل بيانات الحساب\nمع قواعد الحماية"];
+ K [label="تعطيل أو تنشيط\nبعد التأكيد"];
+ L [label="استعادة\nالبيانات التجريبية"];
+ M [shape=diamond,label="تحقق ناجح؟",fillcolor="#FFF3DE",color="#C28C29"];
+ N [label="رسالة خطأ وتوضيح السبب",fillcolor="#FBE9EC",color="#CB5668"];
+ O [label="تحديث محلي فقط\nدون FastAPI أو قاعدة بيانات"];
+ A->B; B->C [label="لا"]; B->D [label="نعم"]; D->E; E->F;
+ F->G; F->H; F->I; F->J; F->K; F->L;
+ G->E;H->E;L->E;
+ I->M;J->M;K->M; M->N [label="لا"];M->O [label="نعم"];N->E;O->E;
+}

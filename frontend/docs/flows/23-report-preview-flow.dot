@@ -1,0 +1,21 @@
+digraph BayanReportPreview {
+ graph [rankdir=TB,bgcolor="white",pad="0.33",nodesep="0.35",ranksep="0.43",fontname="Noto Kufi Arabic",label="بيان | تدفق معاينة التقرير وتصديره",labelloc=t,fontsize=21,fontcolor="#0A2342"];
+ node [shape=box,style="rounded,filled",fontname="Noto Kufi Arabic",fontsize=11,color="#C9DFE9",fillcolor="#F3F9FC",fontcolor="#163A57",penwidth=1.15,margin="0.16,0.11"];
+ edge [color="#148B99",fontname="Noto Kufi Arabic",fontsize=9,arrowsize=.65];
+ start [label="فتح تقرير من مركز التقارير",fillcolor="#DBF4F5",color="#009AA6"];
+ permission [shape=diamond,label="صلاحية العرض؟",fillcolor="#FFF6E8",color="#E1B465"];
+ forbidden [label="منع الوصول (تجريبي)",fillcolor="#FDEBED",color="#D8A6A8"];
+ exists [shape=diamond,label="التقرير موجود؟",fillcolor="#FFF6E8",color="#E1B465"];
+ missing [label="رسالة: تقرير غير موجود",fillcolor="#FDEBED"];
+ ready [shape=diamond,label="التقرير جاهز؟",fillcolor="#FFF6E8",color="#E1B465"];
+ pending [label="حالة انتظار/مسودة/فشل دون تصدير",fillcolor="#FFF6E8"];
+ pages [label="معاينة صفحتين A4\nالملخص + الجدول والمصادر",fillcolor="#E2F8F4",color="#00A6B2"];
+ rights [shape=diamond,label="صلاحية التصدير؟",fillcolor="#FFF6E8",color="#E1B465"];
+ blocked [label="أزرار التصدير معطلة",fillcolor="#FDEBED"];
+ choice [shape=diamond,label="صيغة التصدير؟",fillcolor="#FFF6E8",color="#E1B465"];
+ csv [label="CSV محلي آمن",fillcolor="#E2F8F4"];
+ xlsx [label="مصنف XLSX حقيقي محلي",fillcolor="#E2F8F4"];
+ pdf [label="طباعة المتصفح → حفظ PDF",fillcolor="#E2F8F4"];
+ done [label="ملف تدريبي فقط\nلا قاعدة بيانات أو API",fillcolor="#DFF3F0",color="#00A6B2"];
+ start->permission;permission->forbidden[label="لا"];permission->exists[label="نعم"];exists->missing[label="لا"];exists->ready[label="نعم"];ready->pending[label="لا"];ready->pages[label="نعم"];pages->rights;rights->blocked[label="لا"];rights->choice[label="نعم"];choice->csv[label="CSV"];choice->xlsx[label="Excel"];choice->pdf[label="PDF"];csv->done;xlsx->done;pdf->done;
+}

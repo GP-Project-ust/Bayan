@@ -1,0 +1,23 @@
+digraph G {
+ graph [rankdir=TB,bgcolor="#f5f9fd",pad=0.35,nodesep=0.35,ranksep=0.43,fontname="Noto Sans Arabic",label="بيان | تدفق التهيئة الذكية — الشاشة 33",labelloc=t,fontsize=19,fontcolor="#0a2342"];
+ node [fontname="Noto Sans Arabic",fontsize=11,shape=box,style="rounded,filled",color="#c0dfe7",fillcolor="white",fontcolor="#183e5a",penwidth=1.4,margin="0.19,0.12"];
+ edge [fontname="Noto Sans Arabic",fontsize=10,color="#4c899d",fontcolor="#2e6476",arrowsize=0.7];
+ A [label="بدء المعالج",fillcolor="#0a2342",fontcolor="white"];
+ B [label="صلاحية مسؤول المنصة؟",shape=diamond,fillcolor="#e3f7f8"];
+ X [label="منع الوصول",fillcolor="#fff0f1",color="#e5b9bf"];
+ C [label="1 — تعريف مؤسسة افتراضية"];
+ D [label="2 — اختيار مصادر البيانات"];
+ E [label="3 — محاكاة تحليل المخطط"];
+ F [label="4 — قوالب العروض المسموحة"];
+ G [label="5 — محاكاة فهرسة الوثائق"];
+ H [label="6 — مراجعة الجاهزية",fillcolor="#eef8fc"];
+ I [label="جميع البنود جاهزة؟",shape=diamond,fillcolor="#fff7e5"];
+ J [label="العودة لتصحيح المرحلة",fillcolor="#fff6e7"];
+ K [label="إقرار وتأكيد المحاكاة",fillcolor="#e6f8ee"];
+ L [label="ملخص JSON تجريبي\nصفر طلبات شبكة وصفر موارد",fillcolor="#e6f8ee"];
+ M [label="حفظ مسودة محلية غير حساسة",fillcolor="#f1f5fc"];
+ A->B;B->X[label="لا"];B->C[label="نعم"];
+ C->D->E->F->G->H->I;
+ I->J[label="لا"];J->C[style=dashed];I->K[label="نعم"];K->L;
+ C->M[style=dashed];F->M[style=dashed];
+}

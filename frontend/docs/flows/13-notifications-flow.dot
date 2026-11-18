@@ -1,0 +1,30 @@
+digraph Notifications {
+  graph [bgcolor="#F5F9FD", rankdir=TB, splines=ortho, nodesep=0.48, ranksep=0.62, margin=0.32, pad=0.4, label="تدفق مركز الإشعارات — بيان", labelloc=t, fontsize=25, fontname="Noto Sans Arabic", fontcolor="#0A2342"];
+  node [shape=box, style="rounded,filled", fontname="Noto Sans Arabic", fontsize=14, margin="0.23,0.13", penwidth=1.2, color="#C9E4EC", fillcolor="#FFFFFF", fontcolor="#0A2342"];
+  edge [color="#328D9A", arrowsize=0.7, penwidth=1.35, fontname="Noto Sans Arabic", fontsize=10, fontcolor="#2C6276"];
+  start [label="أيقونة الجرس", fillcolor="#0A2342", fontcolor="white", color="#0A2342"];
+  page [label="مركز الإشعارات", fillcolor="#0A2342", fontcolor="white", color="#0A2342"];
+  list [label="عرض الإحصاءات والقائمة", fillcolor="#DCF3F6"];
+  decision [shape=diamond, label="اختيار إجراء", fillcolor="#DCF3F6", margin="0.25,0.11"];
+  filter [label="بحث / تصفية الفئات\nوحالات القراءة"];
+  empty [label="نتائج أو حالة فارغة"];
+  details [label="عرض التفاصيل\nوتمييز كمقروء"];
+  read [label="تغيير حالة القراءة"];
+  allread [label="تمييز الكل كمقروء"];
+  reset [label="إعادة بيانات التجربة"];
+  destination [label="رابط صفحة داخل بيان"];
+  note [label="تجربة واجهة فقط — لا اتصال بالخادم", fillcolor="#E6F8EC", color="#A7D5C2", fontsize=11];
+  start -> page -> list -> decision;
+  decision -> filter [label="بحث"];
+  decision -> details [label="تفاصيل"];
+  decision -> allread [label="جماعي"];
+  decision -> reset [label="إعادة"];
+  filter -> empty;
+  details -> read;
+  details -> destination;
+  empty -> note [style=dashed];
+  read -> note [style=dashed];
+  allread -> note [style=dashed];
+  reset -> note [style=dashed];
+  destination -> note [style=dashed];
+}

@@ -1,0 +1,27 @@
+digraph SmartViews {
+ graph [rankdir=TB, bgcolor="#f5f9fd", pad="0.35", nodesep="0.34", ranksep="0.46", splines=ortho];
+ node [shape=box, style="rounded,filled", color="#cadce9", fillcolor="#ffffff", fontname="DejaVu Sans", fontsize=13, fontcolor="#183e5c", margin="0.22,0.14"];
+ edge [color="#00a6b2", penwidth=1.6, arrowsize=.7, fontname="DejaVu Sans", fontsize=10];
+ start [label="فتح إدارة العروض الذكية", color="#0a2342", fillcolor="#0a2342", fontcolor="#ffffff"];
+ auth [shape=diamond, label="صلاحية الإدارة؟",fillcolor="#eaf7f8",color="#00a6b2"];
+ forbidden [label="منع الوصول",fillcolor="#fcebee",color="#edb7c4"];
+ load [label="تحميل أمثلة العروض\nوحالات التخزين المحلية"];
+ safe [label="مطابقة المصدر واستبعاد المحظور"];
+ list [label="عرض البطاقات والجدول",fillcolor="#e8f9f5",color="#a6dcd8"];
+ action [shape=diamond,label="الإجراء؟",fillcolor="#eaf7f8",color="#00a6b2"];
+ filter [label="بحث وتصفية"];
+ drawer [label="تفاصيل العرض والحقول\nونسخ وصف آمن"];
+ eligible [shape=diamond,label="تغيير حالة مسموح؟",fillcolor="#fff6e6",color="#e9d2aa"];
+ denied [label="الإجراء غير متاح",fillcolor="#fcebee",color="#edb7c4"];
+ confirm [label="تأكيد إيقاف أو تنشيط محلي"];
+ saved [shape=diamond,label="حفظ محلي ناجح؟",fillcolor="#fff6e6",color="#e9d2aa"];
+ success [label="تحديث الحالة التجريبية",fillcolor="#e8f9f5",color="#a6dcd8"];
+ fail [label="رسالة خطأ الحفظ",fillcolor="#fcebee",color="#edb7c4"];
+ create [label="واجهة إنشاء عرض جديدة\nالشاشة 26",fillcolor="#eaf2fd",color="#abcbe9"];
+ start->auth;auth->forbidden [label="لا"];auth->load [label="نعم"];load->safe->list->action;
+ action->filter [label="بحث"];filter->list;
+ action->drawer [label="تفاصيل"];drawer->list;
+ action->eligible [label="تغيير حالة"];eligible->denied [label="لا"];denied->list;
+ eligible->confirm [label="نعم"];confirm->saved;saved->success [label="نعم"];saved->fail [label="لا"];success->list;fail->list;
+ action->create [label="إنشاء"];
+}

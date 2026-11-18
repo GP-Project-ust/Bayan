@@ -1,0 +1,43 @@
+/* Screen 02: recovery. Intentionally inherits approved Screen 01 shell and brand. */
+.bayan-recovery-page .bayan-recovery-center { max-width: 518px; }
+.bayan-recovery-symbol { width: 65px; height: 65px; border: 1px solid #c9edf0; color: #048e9d; background: linear-gradient(145deg,#ddf7f8,#edf9fb); border-radius: 19px; display: grid; place-items: center; margin-bottom: 21px; box-shadow:0 9px 22px rgba(10,139,155,.065); }
+.bayan-recovery-page .bayan-login-form-head h1 { margin-top: 9px; }
+.bayan-recovery-page .bayan-login-form-head p { max-width: 480px; }
+.bayan-recovery-page .bayan-recovery-card { margin-top: 7px; }
+.bayan-recovery-page .bayan-recovery-card form { gap: 17px; }
+.bayan-recovery-hint { display: flex; gap: 9px; align-items: start; color:#607d91; background:#f2f8fc; border:1px solid #deebf3; padding: 11px 12px; border-radius: 10px; font-size: 12px; line-height: 1.85; }
+.bayan-recovery-hint svg { flex: 0 0 auto; margin-top: 3px; color:#0099a5; }
+.bayan-recovery-steps { display:flex; align-items:center; justify-content:space-between; gap:7px; padding:24px 9px 6px; }
+.bayan-recovery-steps>div { display:flex; flex-direction:column; align-items:center; text-align:center; gap:5px; min-width:88px; }
+.bayan-recovery-steps>div>span { width:35px;height:35px;border-radius:11px;display:grid;place-items:center;background:#e8f7f8;color:#008c99;border:1px solid #c9ebef; }
+.bayan-recovery-steps>div:not(:first-child)>span { color:#7890a3;background:#e9f0f6;border-color:#dce6ef; }
+.bayan-recovery-steps strong { font-size:11px;font-weight:850;color:#254661; }
+.bayan-recovery-steps small {font-size:10px;color:#7a90a0;}
+.bayan-recovery-step-line { flex:1;height:1px;min-width:7px;background:#cddfeb;transform:translateY(-17px); }
+.bayan-recovery-preview-warning {display:flex;gap:8px;align-items:flex-start;margin:12px 0 0;padding:10px 12px;border-radius:9px;font-size:11px;line-height:1.9;color:#746238;background:#fff9e7;border:1px solid #f6eac8;}
+.bayan-recovery-preview-warning svg {flex:0 0 auto;margin-top:3px;color:#bd8b12;}
+.bayan-recovery-result {text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:32px;padding-bottom:32px;}
+.bayan-recovery-success-icon {width:70px;height:70px;display:grid;place-items:center;background:#e0f6ee;border:1px solid #c2eadb;color:#16996a;border-radius:50%;}
+.bayan-recovery-result h2 {font-weight:900;font-size:22px;color:#113c52;}
+.bayan-recovery-result>p{font-size:13px;line-height:2;color:#627b8f;max-width:415px;}
+.bayan-recovery-result>p strong{color:#19495a;}
+.bayan-recovery-result-note{display:flex;align-items:flex-start;gap:9px;background:#eef8fc;border:1px solid #d8eaf3;padding:12px 13px;border-radius:10px;text-align:right;color:#486d81;font-size:12px;line-height:1.85;}
+.bayan-recovery-result-note svg{flex:0 0 auto;color:#118fa3;margin-top:3px;}
+.bayan-recovery-result-actions{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;width:100%;margin-top:2px;}
+.bayan-recovery-return-link,.bayan-recovery-retry{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:10px;min-height:44px;padding:9px 16px;font-size:12px;font-weight:850;border:1px solid #d7e5ee;}
+.bayan-recovery-return-link{color:#fff;background:linear-gradient(100deg,#00818f,#00a6b2);border-color:transparent;}
+.bayan-recovery-retry{color:#236179;background:#f5fafc;}
+.bayan-recovery-return-link:hover{filter:brightness(1.06);}
+.bayan-recovery-retry:hover{background:#e8f5f9;}
+.bayan-recovery-page :is(button,a,input):focus-visible {outline:3px solid #00a6b2;outline-offset:3px;}
+@media (max-width:540px) {
+ .bayan-recovery-symbol{width:53px;height:53px;border-radius:14px;margin-bottom:12px;}
+ .bayan-recovery-steps{padding-inline:0;gap:3px;}
+ .bayan-recovery-steps>div{min-width:78px;}
+ .bayan-recovery-steps strong{font-size:10px;}
+ .bayan-recovery-steps small{font-size:9px;}
+ .bayan-recovery-result{padding-inline:14px;}
+}
+@media (prefers-reduced-motion: reduce) {
+ .bayan-recovery-page *, .bayan-recovery-page *::before, .bayan-recovery-page *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+}

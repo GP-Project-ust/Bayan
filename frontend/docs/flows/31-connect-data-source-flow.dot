@@ -1,0 +1,20 @@
+digraph ConnectSource {
+  graph [rankdir=TB,bgcolor="white",pad="0.28",nodesep="0.32",ranksep="0.40",label="بيان — تدفق إعداد مصدر بيانات تجريبي",labelloc=t,fontsize=20,fontname="DejaVu Sans",fontcolor="#0A2342"];
+  node [shape=box,style="rounded,filled",fillcolor="#F2F9FC",color="#B9D8E6",fontname="DejaVu Sans",fontsize=12,fontcolor="#0A2342",margin="0.20,0.12"];
+  edge [color="#37788E",fontname="DejaVu Sans",fontsize=10,fontcolor="#37788E",arrowsize=.7];
+  begin [label="مصادر البيانات ← ربط مصدر جديد",fillcolor="#0A2342",fontcolor="white"];
+  auth [label="التحقق من صلاحية إدارة المصادر",shape=diamond,fillcolor="#E3F5FA"];
+  forbid [label="رفض الوصول",fillcolor="#FFF0F0",color="#E6B4BB"];
+  info [label="1. تعريف المصدر ونوعه",fillcolor="#E8F7F9"];
+  conn [label="2. عنوان تدريبي example.invalid\nدون كلمات مرور أو شبكة"];
+  security [label="3. نطاق وتصنيف وإقرار الأمان"];
+  validate [label="فحص صحة الحقول",shape=diamond,fillcolor="#FFF6E8"];
+  test [label="4. محاكاة تحقق محلية فقط",fillcolor="#E8F7F9"];
+  review [label="5. مراجعة وتأكيد الحفظ"];
+  save [label="حفظ البيانات الوصفية محليًا",shape=diamond,fillcolor="#FFF6E8"];
+  failure [label="فشل التخزين ← إعادة المحاولة",fillcolor="#FFF0F0",color="#E6B4BB"];
+  success [label="مصدر تجريبي pending / disabled\nيظهر في قائمة المصادر",fillcolor="#DFF6EB",color="#7BC5AB"];
+  begin -> auth; auth -> forbid [label="غير مخوّل"]; auth -> info [label="مخوّل"];
+  info -> conn -> security -> validate; validate -> info [label="خطأ",constraint=false]; validate -> test [label="صحيح"];
+  test -> review -> save; save -> failure [label="فشل"]; failure -> review [constraint=false]; save -> success [label="نجاح"];
+}

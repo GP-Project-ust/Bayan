@@ -1,0 +1,85 @@
+/*
+  Bayan Design System — Stage 1: Foundation tokens
+  This stylesheet deliberately declares ONLY --bayan-* variables.
+  Legacy application colors and layout remain untouched.
+  Reference: approved Bayan UI Style Guide board, 2026.
+*/
+:root {
+  /* Brand: exact values from the approved style guide */
+  --bayan-brand-navy: #0A2342;
+  --bayan-brand-turquoise: #00A6B2;
+  --bayan-brand-navy-hover: #123255;
+  --bayan-brand-turquoise-hover: #008B96;
+  /* Accessible solid buttons with white text (brand turquoise itself is an accent). */
+  --bayan-action-primary: #007681;
+  --bayan-action-primary-hover: #006B77;
+
+  /* Neutrals and foregrounds */
+  --bayan-surface-app: #F5F9FD;
+  --bayan-surface-card: #FFFFFF;
+  --bayan-surface-raised: #FAFCFF;
+  --bayan-surface-soft: #EAF7F8;
+  --bayan-surface-info: #EAF2FF;
+  --bayan-border-subtle: #DCE7F2;
+  --bayan-text-primary: #122B48;
+  --bayan-text-secondary: #52677F;
+  --bayan-text-inverse: #FFFFFF;
+
+  /* Feedback / semantic colors: design proposals, not backend status */
+  --bayan-feedback-success: #188D57;
+  --bayan-feedback-success-bg: #E4F7ED;
+  --bayan-feedback-warning: #9A6700;
+  --bayan-feedback-warning-bg: #FFF2D5;
+  --bayan-feedback-danger: #C52B35;
+  --bayan-feedback-danger-bg: #FCE9EB;
+  --bayan-feedback-info: #2368A2;
+  --bayan-feedback-info-bg: #E8F1FB;
+
+  /* Type scale inspired by the approved Cairo style guide */
+  --bayan-font-family: "Cairo", "Noto Sans Arabic", "Noto Kufi Arabic", Tahoma, Arial, sans-serif;
+  --bayan-font-mono: "Cascadia Code", Consolas, "DejaVu Sans Mono", monospace;
+  --bayan-text-xs: 0.75rem;  /* 12px */
+  --bayan-text-sm: 0.875rem; /* 14px */
+  --bayan-text-md: 1rem;     /* 16px */
+  --bayan-text-lg: 1.125rem; /* 18px */
+  --bayan-text-xl: 1.5rem;   /* 24px */
+  --bayan-text-2xl: 2rem;    /* 32px */
+  --bayan-line-height-body: 1.75;
+  --bayan-line-height-heading: 1.4;
+  --bayan-weight-regular: 400;
+  --bayan-weight-semibold: 600;
+  --bayan-weight-bold: 700;
+
+  /* 4px spacing scale */
+  --bayan-space-1: 0.25rem;
+  --bayan-space-2: 0.5rem;
+  --bayan-space-3: 0.75rem;
+  --bayan-space-4: 1rem;
+  --bayan-space-5: 1.25rem;
+  --bayan-space-6: 1.5rem;
+  --bayan-space-8: 2rem;
+  --bayan-space-10: 2.5rem;
+  --bayan-space-12: 3rem;
+  --bayan-space-16: 4rem;
+
+  --bayan-radius-sm: 6px;
+  --bayan-radius-md: 10px;
+  --bayan-radius-lg: 16px;
+  --bayan-radius-xl: 22px;
+  --bayan-radius-pill: 999px;
+
+  --bayan-shadow-xs: 0 1px 2px rgba(10,35,66,.06);
+  --bayan-shadow-sm: 0 3px 10px rgba(10,35,66,.08);
+  --bayan-shadow-md: 0 6px 20px rgba(10,35,66,.12);
+  --bayan-shadow-lg: 0 16px 45px rgba(10,35,66,.16);
+
+  --bayan-size-control-sm: 36px;
+  --bayan-size-control-md: 44px;
+  --bayan-size-control-lg: 52px;
+  --bayan-focus-ring: 0 0 0 3px rgba(0,166,178,.24);
+  --bayan-motion-fast: 120ms;
+  --bayan-motion-normal: 200ms;
+  --bayan-z-sticky: 30;
+  --bayan-z-overlay: 70;
+  --bayan-z-modal: 100;
+}

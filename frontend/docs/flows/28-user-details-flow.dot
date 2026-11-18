@@ -1,0 +1,27 @@
+digraph BayanUserDetails {
+ graph [rankdir=TB,bgcolor="#F5F9FD",pad="0.35",nodesep="0.29",ranksep="0.43",fontname="DejaVu Sans",label="بيان | مخطط تدفق شاشة تفاصيل المستخدم",labelloc=t,fontsize=20,fontcolor="#0A2342"];
+ node [shape=box,style="rounded,filled",fillcolor="#FFFFFF",color="#B8D9E5",penwidth=1.35,fontname="DejaVu Sans",fontsize=12,fontcolor="#0A2342",margin="0.2,0.13"];
+ edge [color="#138B9B",arrowsize=.75,fontname="DejaVu Sans",fontsize=10,fontcolor="#397485"];
+ a [label="فتح صفحة تفاصيل المستخدم\nمن الإدارة أو بعد الإضافة",fillcolor="#0A2342",fontcolor="white"];
+ b [shape=diamond,label="الدور مخوّل؟",fillcolor="#E3F5F7"];
+ c [label="رفض الوصول",fillcolor="#FFF0ED",color="#F0BAB3"];
+ d [label="التحقق من معرّف المستخدم"];
+ e [shape=diamond,label="المعرّف صحيح؟",fillcolor="#E3F5F7"];
+ f [label="رابط غير صالح",fillcolor="#FFF0ED",color="#F0BAB3"];
+ g [label="قراءة بيانات العرض المشتركة"];
+ h [shape=diamond,label="السجل موجود؟",fillcolor="#E3F5F7"];
+ i [label="المستخدم غير موجود",fillcolor="#FFF0ED",color="#F0BAB3"];
+ j [label="عرض الهوية والحالة والصلاحيات",fillcolor="#D7F3F0",color="#77C9C3"];
+ k [shape=diamond,label="اختيار إجراء",fillcolor="#E3F5F7"];
+ l [label="البيانات | الصلاحيات | النشاط"];
+ m [label="تعديل البيانات أو تغيير الدور"];
+ n [label="تأكيد التعطيل أو التنشيط"];
+ o [shape=diamond,label="العملية مسموحة؟",fillcolor="#E3F5F7"];
+ p [label="رفض الإجراء المحمي",fillcolor="#FFF0ED",color="#F0BAB3"];
+ q [label="حفظ البيانات محليًا"];
+ r [shape=diamond,label="نجح التخزين؟",fillcolor="#E3F5F7"];
+ s [label="إظهار النجاح وتسجيل حدث محلي",fillcolor="#E7F7E9",color="#94CDA1"];
+ t [label="رسالة فشل الحفظ",fillcolor="#FFF0ED",color="#F0BAB3"];
+ a->b;b->c [label="لا"];b->d [label="نعم"];d->e;e->f [label="لا"];e->g [label="نعم"];g->h;h->i [label="لا"];h->j [label="نعم"];j->k;
+ k->l [label="عرض"];k->m [label="تعديل"];k->n [label="حالة"];m->o;n->o;o->p [label="لا"];o->q [label="نعم"];q->r;r->s [label="نعم"];r->t [label="لا"];
+}

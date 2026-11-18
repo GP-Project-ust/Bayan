@@ -1,0 +1,24 @@
+digraph BayanModels {
+ graph [rankdir=TB, bgcolor="#ffffff", pad="0.25", nodesep="0.34", ranksep="0.48", splines=ortho, fontname="DejaVu Sans"];
+ node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=15, margin="0.20,0.13", color="#76bfc9", fillcolor="#eaf8fa", fontcolor="#0a2342"];
+ edge [color="#6a9da9", penwidth=1.6, fontname="DejaVu Sans", fontsize=11, arrowsize=.7];
+ a [label="فتح إدارة مزودي النماذج"];
+ b [shape=diamond, label="هل الدور مسؤول المنصة؟", fillcolor="#fff5df", color="#d5aa6c"];
+ c [label="رفض الوصول\nللدور غير المخول",fillcolor="#fff1ee",color="#dfa8a8"];
+ d [label="قراءة مزودين ونماذج افتراضية\nدون أسرار أو اتصالات"];
+ e [label="البحث والتصفية\nحسب النوع والحالة والمهمة"];
+ f [shape=diamond,label="الإجراء المطلوب",fillcolor="#e8f2fd", color="#78a5c6"];
+ g [label="عرض تفاصيل المزود\nوالنماذج المرتبطة"];
+ h [label="تحرير مسودة النموذج\nالتفعيل وحدود الاستخدام"];
+ i [shape=diamond,label="المدخلات صالحة؟",fillcolor="#fff5df",color="#d5aa6c"];
+ j [label="رفض القيم غير الصالحة",fillcolor="#fff1ee",color="#dfa8a8"];
+ k [label="حفظ بيانات غير حساسة\nفي المتصفح فقط"];
+ l [label="فحص جاهزية توضيحي\nدون أي طلب شبكة"];
+ m [label="عرض نجاح أو تحذير\nأو تعذر تجريبي"];
+ n [label="CSV بيانات وصفية\nمع حماية صيغ Excel"];
+ z [label="لا اتصالات حقيقية\nلا كشف للمفاتيح",fillcolor="#f0f5f8",color="#7c9aad"];
+ a->b;b->c[label="لا"];b->d[label="نعم"];d->e;e->f;
+ f->g[label="تفاصيل"];f->h[label="إعداد"];h->i;i->j[label="لا"];i->k[label="نعم"];
+ f->l[label="فحص"];l->m;f->n[label="تصدير"];
+ k->z;m->z;n->z;g->z;
+}

@@ -1,0 +1,34 @@
+digraph DocumentViewer {
+ graph [rankdir=TB, bgcolor="white", pad=0.35, nodesep=0.43, ranksep=0.60, fontname="DejaVu Sans", label="بيان | تدفق عارض المستندات — الشاشة 11", labelloc=t, fontsize=25, fontcolor="#0A2342", splines=ortho];
+ node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=15, color="#CBDDEB", fillcolor="#F5F9FD", fontcolor="#0A2342", penwidth=1.4, margin="0.20,0.13"];
+ edge [color="#477B96", arrowsize=0.8, penwidth=1.4, fontname="DejaVu Sans", fontsize=12];
+ start [label="فتح مستند من المكتبة\nأو نتيجة البحث الدلالي",fillcolor="#DDF5F7"];
+ resolve [label="قراءة معرّف المستند\nوالصفحة والمقتطف"]; valid [shape=diamond, label="المستند موجود؟",fillcolor="#FFF2D5"];
+ access [shape=diamond,label="الدور مخوّل\nللعرض؟",fillcolor="#FFF2D5"];
+ denied [label="حالة رفض الوصول\n(معاينة دور تجريبية)",fillcolor="#FCE9EB"];
+ missing [label="مستند غير موجود\nالعودة إلى المكتبة",fillcolor="#FCE9EB"];
+ metadata [label="عرض بيانات المستند\nوالأدوات والفهرس",fillcolor="#EAF7F8"];
+ choose [label="اختيار الصفحة\nأو المقتطف المرتبط"]; pagevalid [shape=diamond,label="رقم الصفحة صحيح؟",fillcolor="#FFF2D5"];
+ invalid [label="رسالة خطأ للصفحة\nمع إبقاء العرض الحالي",fillcolor="#FCE9EB"];
+ snippet [shape=diamond,label="توجد عينة مقطع\nلهذه الصفحة؟",fillcolor="#FFF2D5"];
+ shown [label="عرض مقتطف تجريبي\nمع تمييز بصري",fillcolor="#E1F4F0"];
+ empty [label="إظهار عدم توفر النص\nلا اختلاق محتوى PDF",fillcolor="#EDF2F8"];
+ copy [label="نسخ رابط الصفحة\nأو استشهاد غير موثّق",fillcolor="#EAF7F8"];
+ returnlib [label="العودة إلى المكتبة\nأو البحث الدلالي",fillcolor="#DDF5F7"];
+ note [label="عند التكامل الحقيقي:\nفحص المستأجر والتصنيف\nوتقديم PDF مصرح به",style="rounded,dashed,filled",fillcolor="#F4F9FE"];
+ start -> resolve -> valid;
+ valid -> missing [label="لا"];
+ valid -> access [label="نعم"];
+ access -> denied [label="لا"];
+ access -> metadata [label="نعم"];
+ metadata -> choose -> pagevalid;
+ pagevalid -> invalid [label="لا"];
+ invalid -> choose;
+ pagevalid -> snippet [label="نعم"];
+ snippet -> shown [label="نعم"];
+ snippet -> empty [label="لا"];
+ shown -> copy;
+ empty -> returnlib;
+ copy -> returnlib;
+ returnlib -> note [style=dashed];
+}

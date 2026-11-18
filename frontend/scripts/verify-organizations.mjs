@@ -1,0 +1,13 @@
+import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import assert from 'node:assert/strict';import {fileURLToPath} from 'node:url';import {createRequire} from 'node:module';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');const require=createRequire(import.meta.url);
+let ts;try{ts=require('typescript');}catch{ts=require('/opt/nvm/versions/node/v22.16.0/lib/node_modules/typescript/lib/typescript.js');}
+const needed=['app/platform/organizations/page.tsx','components/organizations/OrganizationsScreen.tsx','components/organizations/organizations.css','lib/organizations/organizations.ts','docs/SCREEN_32_ORGANIZATIONS.md','docs/flows/40-organizations-flow.mmd','docs/flows/40-organizations-flow.png','docs/flows/40-organizations-flow.svg','tests/contracts/organizations.test.mjs','tests/e2e/organizations.spec.ts'];
+for(const file of needed){const f=path.join(root,file);assert.ok(fs.existsSync(f)&&fs.statSync(f).size>100,`Missing ${file}`);}
+const reference=JSON.parse(fs.readFileSync(path.join(root,'docs/SCREEN_28_REFERENCE_HASHES.json'),'utf8'));
+for(const [f,sha] of Object.entries(reference)){assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(root,f))).digest('hex'),sha,`Reference modified: ${f}`);}
+const catalog=JSON.parse(fs.readFileSync(path.join(root,'lib/screen-catalog.json'),'utf8'));assert.equal(catalog.length,42);assert.equal(catalog.find(x=>x.path==='/platform/organizations')?.group,'المنصة');
+let count=0;function walk(dir){for(const d of fs.readdirSync(dir,{withFileTypes:true})){if(d.isDirectory()){if(!['node_modules','.next','.git'].includes(d.name))walk(path.join(dir,d.name));continue;}if(!/\.tsx?$/.test(d.name))continue;const f=path.join(dir,d.name),src=fs.readFileSync(f,'utf8');const ast=ts.createSourceFile(f,src,ts.ScriptTarget.Latest,true,d.name.endsWith('tsx')?ts.ScriptKind.TSX:ts.ScriptKind.TS);assert.equal(ast.parseDiagnostics.length,0,`${f}: ${ast.parseDiagnostics.map(x=>ts.flattenDiagnosticMessageText(x.messageText,' '))}`);count++;}}walk(root);
+const css=fs.readFileSync(path.join(root,'components/organizations/organizations.css'),'utf8');assert.match(css,/@media\(max-width:720px\)/);assert.match(css,/prefers-reduced-motion/);
+const route=fs.readFileSync(path.join(root,'app/platform/organizations/page.tsx'),'utf8');assert.match(route,/OrganizationsScreen/);
+const ui=fs.readFileSync(path.join(root,'components/organizations/OrganizationsScreen.tsx'),'utf8');assert.match(ui,/href="\/platform\/onboarding"/);
+console.log(`PASS screen32: ${count} TS/TSX files parsed; 42 routes; design references intact; platform navigation connected.`);

@@ -1,0 +1,31 @@
+digraph G {
+ graph [rankdir=TB,bgcolor="#ffffff",pad="0.34",nodesep="0.42",ranksep="0.48",fontname="DejaVu Sans",label="بيان | تدفق مراجعة القيم الشاذة — نموذج تجريبي",labelloc="t",fontsize=20,fontcolor="#0A2342"];
+ node [shape=box,style="rounded,filled",fillcolor="#EAF9FA",color="#00A6B2",fontcolor="#0A2342",fontname="DejaVu Sans",fontsize=12,margin="0.20,0.14",penwidth=1.5];
+ edge [color="#3A8090",fontname="DejaVu Sans",fontsize=10,arrowsize=0.75];
+ start [label="فتح شاشة القيم الشاذة"];
+ permit [shape=diamond,label="صلاحية العرض؟",fillcolor="#FFF3DE",color="#D6A34E"];
+ denied [label="منع الوصول التجريبي",fillcolor="#FCEAED",color="#CF7481"];
+ mock [label="تحميل بيانات تدريبية\nوخط أساس افتراضي"];
+ filters [label="تصفية حسب الفترة والكلية\nوالقسم والخطورة والحالة"];
+ any [shape=diamond,label="توجد نتائج؟",fillcolor="#FFF3DE",color="#D6A34E"];
+ empty [label="لا توجد نتائج\nإعادة ضبط الفلاتر",fillcolor="#F1F6FA"];
+ list [label="إحصاءات ومخططات\nوجدول الحالات"];
+ action [shape=diamond,label="الإجراء",fillcolor="#FFF3DE",color="#D6A34E"];
+ details [label="عرض المقارنة\nوالسبب التوضيحي"];
+ review [label="تغيير حالة المراجعة\nمحليًا فقط"];
+ export [label="تنزيل CSV تجريبي\nإن وجدت صلاحية"];
+ back [label="العودة إلى التحليلات"];
+ start -> permit;
+ permit -> denied [label="لا"];
+ permit -> mock [label="نعم"];
+ mock -> filters -> any;
+ any -> empty [label="لا"];
+ empty -> filters;
+ any -> list [label="نعم"];
+ list -> action;
+ action -> details [label="تفاصيل"];
+ details -> review;
+ review -> list;
+ action -> export [label="تصدير"];
+ action -> back [label="عودة"];
+}

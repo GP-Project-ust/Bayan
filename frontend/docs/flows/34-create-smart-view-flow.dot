@@ -1,0 +1,22 @@
+digraph CreateSmartView {
+ graph [rankdir=TB,bgcolor="transparent",pad="0.3",nodesep="0.35",ranksep="0.52",splines=polyline,fontname="DejaVu Sans"];
+ node [shape=box,style="filled,rounded",fontname="DejaVu Sans",fontsize=13,penwidth=1.2,color="#C6D9E7",fillcolor="#F5F9FD",fontcolor="#0A2342",margin="0.18,0.14"];
+ edge [fontname="DejaVu Sans",fontsize=11,color="#188E9D",arrowsize=0.8];
+ start [label="بدء إنشاء عرض ذكي",shape=oval,fillcolor="#0A2342",fontcolor="white",color="#0A2342"];
+ role [label="صلاحية إدارة العروض؟",shape=diamond,fillcolor="#EAF7FA"];
+ denied [label="رفض الوصول",fillcolor="#FFF0F2",color="#D78C95"];
+ first [label="الاسم والوصف ومصدر تجريبي"];
+ source [label="المصدر مؤهل وله مخطط؟",shape=diamond,fillcolor="#EAF7FA"];
+ second [label="اختيار جدول وحقول مسموحة"];
+ fields [label="الحقول آمنة؟",shape=diamond,fillcolor="#EAF7FA"];
+ third [label="التصنيف والتصفية الرمزية"];
+ classify [label="التصنيف كافٍ؟",shape=diamond,fillcolor="#EAF7FA"];
+ preview [label="معاينة تعريف JSON / SQL تصوري\nبدون تنفيذ",fillcolor="#D8F4F6"];
+ ack [label="إقرار المستخدم؟",shape=diamond,fillcolor="#EAF7FA"];
+ review [label="المراجعة النهائية"];
+ check [label="مساحة واسم فريد؟",shape=diamond,fillcolor="#EAF7FA"];
+ save [label="حفظ مسودة محلية فقط",fillcolor="#CFEFE8"];
+ list [label="ظهور المسودة في قائمة العروض"];
+ end [label="انتهاء — دون نشر أو اتصال",shape=oval,fillcolor="#0A2342",fontcolor="white",color="#0A2342"];
+ start->role;role->denied [label="لا"];role->first[label="نعم"];first->source;source->first[label="لا"];source->second[label="نعم"];second->fields;fields->second[label="لا"];fields->third[label="نعم"];third->classify;classify->third[label="لا"];classify->preview[label="نعم"];preview->ack;ack->preview[label="لا"];ack->review[label="نعم"];review->check;check->review[label="لا"];check->save[label="نعم"];save->list;list->end;
+}

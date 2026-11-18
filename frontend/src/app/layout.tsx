@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "@/styles/bayan-tokens.css";
+import "@/styles/bayan-responsive.css";
+import "@/styles/bayan-legacy.css";
 
 export const metadata: Metadata = {
   title: "بيان — المساعد المؤسسي الذكي",

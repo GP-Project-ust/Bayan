@@ -1,0 +1,18 @@
+digraph health {
+ graph [rankdir=TB, bgcolor="white", label="Bayan — System Health Monitoring (Synthetic)", labelloc=t, fontsize=22, fontname="DejaVu Sans", pad=.35, nodesep=.35, ranksep=.5];
+ node [shape=box,style="rounded,filled",fontname="DejaVu Sans",fontsize=12, color="#bedee8",fillcolor="#f0f9fc",fontcolor="#123b55",margin="0.18,0.11"];
+ edge [color="#00a6b2",penwidth=1.5,arrowsize=.8];
+ a [label="Open System Health",fillcolor="#0a2342",fontcolor="white"];
+ b [shape=diamond,label="Platform admin?",fillcolor="#def5f7"];
+ c [label="Access denied",fillcolor="#ffedef"];
+ d [label="Synthetic metrics + clear notice"];
+ e [shape=diamond,label="Select tab",fillcolor="#def5f7"];
+ f [label="Filter services"];
+ g [label="Service details"];
+ h [label="Local check\n0 network requests",fillcolor="#e8f7ee"];
+ i [label="Safe CSV export"];
+ j [label="Filter alerts"];
+ k [label="Alert details + correlation ID"];
+ l [label="Safe alerts CSV"];
+ a->b;b->c[label="No"];b->d[label="Yes"];d->e;e->f[label="Services"];e->j[label="Alerts"];f->g;f->h;f->i;j->k;j->l;
+}

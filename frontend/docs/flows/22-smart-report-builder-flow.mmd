@@ -1,0 +1,32 @@
+flowchart TD
+  A([فتح صفحة إنشاء تقرير /reports/new]) --> B{هل الدور يمتلك reports.create؟}
+  B -- لا --> C[إظهار منع الوصول 403 في معاينة الواجهة]
+  B -- نعم --> D[الخطوة 1: إدخال العنوان والهدف ونوع التقرير]
+  D --> E{التحقق من البيانات}
+  E -- غير صحيح --> D
+  E -- صحيح --> F[الخطوة 2: اختيار المصادر والمؤشرات المسموحة]
+  F --> G{هل تم اختيار مصادر ومؤشرات متوافقة؟}
+  G -- لا --> F
+  G -- نعم --> H[الخطوة 3: تحديد الفترة والتجميع والمخرجات]
+  H --> I{التحقق من صحة الفترة}
+  I -- غير صحيح --> H
+  I -- صحيح --> J[الخطوة 4: مراجعة إعدادات التقرير]
+  J --> K{الإجراء}
+  K -- تعديل --> D
+  K -- تنزيل JSON --> L[تنزيل إعدادات تدريبية محليًا]
+  K -- تأكيد --> M[إظهار نافذة التأكيد]
+  M --> N{تأكيد المحاكاة؟}
+  N -- لا --> J
+  N -- نعم --> O[إظهار اكتمال المحاكاة فقط]
+  O --> P[عودة لمركز التقارير أو إعداد نموذج جديد]
+  L --> J
+  C --> Q([انتهاء المعاينة])
+  P --> Q
+  classDef primary fill:#0A2342,color:white,stroke:#0A2342,stroke-width:2px;
+  classDef highlight fill:#DCF8F7,color:#075F69,stroke:#00A6B2,stroke-width:1px;
+  classDef decision fill:#FFF4E1,color:#785019,stroke:#DDA753,stroke-width:1px;
+  classDef finish fill:#EDF3FA,color:#143B5B,stroke:#7BA0BA;
+  class A,D,F,H,J,O primary;
+  class B,E,G,I,K,N decision;
+  class L,M,P highlight;
+  class C,Q finish;

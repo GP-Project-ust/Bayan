@@ -1,0 +1,25 @@
+digraph BayanAnalytics {
+ graph [rankdir=TB, bgcolor="#ffffff", dpi=150, pad=0.3, nodesep=0.3, ranksep=0.5, fontname="DejaVu Sans", label="BAYAN  |  Analytics Dashboard  |  Screen 16", labelloc=t, fontsize=20, fontcolor="#0a2342"];
+ node [fontname="DejaVu Sans",fontsize=11,shape=box,style="rounded,filled",fillcolor="#f5f9fd",color="#c5dce8",fontcolor="#143d5c",margin="0.2,0.12"];
+ edge [color="#2c879c", arrowsize=0.7,fontname="DejaVu Sans",fontsize=10,fontcolor="#385872"];
+ open [label="01  /analytics\nفتح لوحة المؤشرات", fillcolor="#0a2342", fontcolor="white",color="#0a2342"];
+ allow [label="02  فحص الصلاحية\nanalytics.view?",shape=diamond,fillcolor="#e7f5f8"];
+ deny [label="منع الوصول\nرسالة عربية واضحة",fillcolor="#fff0ef",color="#ecc6c2"];
+ filters [label="03  فلاتر العرض\nالشهر • الكلية • القسم",fillcolor="#e4f7f7"];
+ snapshot [label="04  لقطة شهر واحد\nمن دون جمع الأشهر",fillcolor="#eff7fb"];
+ metrics [label="05  مؤشرات KPI\nالنجاح والحضور المرجح",fillcolor="#eff7fb"];
+ trend [label="06  الاتجاه الزمني\nحتى الشهر المختار",fillcolor="#eff7fb"];
+ breakdown [label="07  الكليات والأقسام\nمخططات + جدول",fillcolor="#eff7fb"];
+ ui [label="08  تحديث الشاشة\nبيانات تدريبية واضحة",fillcolor="#dff5ef"];
+ action [label="09  إجراء المستخدم",shape=diamond,fillcolor="#e7f5f8"];
+ details [label="فتح درج تفاصيل القسم",fillcolor="#f1f7fe"];
+ reports [label="التقارير السابقة\n/reports",fillcolor="#f1f7fe"];
+ export [label="صلاحية reports.export?",shape=diamond,fillcolor="#e7f5f8"];
+ off [label="تعطيل التصدير",fillcolor="#fff2ea"];
+ csv [label="CSV للّقطة المحددة\nتحذير: بيانات تجريبية",fillcolor="#dff5ef"];
+ open -> allow;allow -> deny [label="لا"];allow -> filters [label="نعم"];
+ filters -> snapshot;snapshot -> {metrics trend breakdown};{metrics trend breakdown} -> ui;
+ ui -> action;action -> details [label="تفاصيل"];details -> ui;
+ action -> reports [label="تقارير"];action -> filters [label="تغيير الفلاتر"];
+ action -> export [label="CSV"];export -> off [label="لا"];export -> csv [label="نعم"];csv -> ui;
+}

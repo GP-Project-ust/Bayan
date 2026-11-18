@@ -1,0 +1,18 @@
+digraph BayanDetails {
+ graph [rankdir=TB,bgcolor="white",pad=0.35,nodesep=0.36,ranksep=0.55,fontname="DejaVu Sans",label="BAYAN | Conversation Details — Screen 08 (demo flow)",labelloc=t,fontsize=18,fontcolor="#0A2342"];
+ node [shape=box,style="rounded,filled",fontname="DejaVu Sans",fontsize=12,margin="0.15,0.11",fillcolor="#F5F9FD",color="#B4CEDD",fontcolor="#0A2342"];
+ edge [color="#4D91A3",arrowsize=0.7];
+ start [label="Open /conversations/chat-ID",fillcolor="#0A2342",fontcolor=white];
+ access [label="Check demo UI role",shape=diamond,fillcolor="#E1F7F8"];
+ denied [label="Access denied",fillcolor="#FCE8E9"];
+ storage [label="Read validated sample + local changes"];
+ found [label="ID found and not deleted?",shape=diamond,fillcolor="#E1F7F8"];
+ missing [label="Not found / deleted\nBack to conversation list",fillcolor="#FFF1E1"];
+ detail [label="Display header + summary + tabs",fillcolor="#D8F3F5"];
+ messages [label="Messages\n+ local mock follow-up"];
+ source [label="Citations\n(subject to sources permission)"];
+ technical [label="Read-only SQL + trace\n(subject to permissions)"];
+ manage [label="Rename / Star / Delete\nValidated local changes"];
+ start->access;access->denied[label="No"];access->storage[label="Yes"];storage->found;found->missing[label="No"];found->detail[label="Yes"];
+ detail->messages;detail->source;detail->technical;detail->manage;
+}

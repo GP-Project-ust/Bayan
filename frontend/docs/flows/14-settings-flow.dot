@@ -1,0 +1,30 @@
+digraph bayan_settings {
+  graph [rankdir=TB, bgcolor="#F5F9FD", pad="0.4", nodesep="0.38", ranksep="0.6", fontname="Noto Sans Arabic", label="بيان | مخطط تدفق إعدادات المستخدم", labelloc=t, fontsize=25, fontcolor="#0A2342"];
+  node [fontname="Noto Sans Arabic", fontsize=15, shape=box, style="rounded,filled", penwidth=1.5, color="#DCE7F2", fillcolor="white", fontcolor="#122B48", margin="0.26,0.16"];
+  edge [fontname="Noto Sans Arabic", fontsize=11, color="#7497AA", arrowsize=.75, penwidth=1.4, fontcolor="#41637A"];
+  start [label="فتح صفحة الإعدادات", shape=ellipse, color="#00A6B2", fillcolor="#EAF7F8"];
+  read [label="قراءة وحماية قيم التخزين المحلي"];
+  valid [label="هل بيانات المعاينة صالحة؟", shape=diamond, color="#98BBD0", fillcolor="#EAF2FF"];
+  defaults [label="اعتماد القيم الافتراضية", fillcolor="#FFF9ED"];
+  edit [label="اختيار القسم وتعديل التفضيلات"];
+  access [label="تصفية عرض SQL والمراجع والتصدير\nحسب الدور التجريبي", fillcolor="#EDF8FC", color="#91CED5"];
+  preview [label="تحديث المعاينة الفورية"];
+  action [label="اختيار الإجراء", shape=diamond, color="#98BBD0", fillcolor="#EAF2FF"];
+  save [label="تنقية القيم وحفظها في المتصفح"];
+  cancel [label="إلغاء التغييرات غير المحفوظة"];
+  reset [label="تأكيد استعادة الافتراضيات"];
+  result [label="رسالة نجاح أو خطأ محلية", color="#00A6B2", fillcolor="#EAF7F8"];
+  note [label="التحقق من صلاحيات الحساب وSQL\nيتم على Backend فقط", shape=note, fontcolor="#825F22", color="#E8D6A2", fillcolor="#FFF9ED"];
+  start -> read -> valid;
+  valid -> defaults [label="لا"];
+  valid -> edit [label="نعم"];
+  defaults -> edit;
+  edit -> access -> preview -> action;
+  action -> save [label="حفظ"];
+  action -> cancel [label="إلغاء"];
+  action -> reset [label="إعادة تعيين"];
+  save -> result;
+  cancel -> result;
+  reset -> defaults;
+  access -> note [style=dashed, color="#D6B87F", constraint=false];
+}
