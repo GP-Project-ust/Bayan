@@ -87,20 +87,16 @@ function RolesBody() {
 
   // RBAC Audit Trail state
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
-   setGroupsList(getPermissionGroups());
 
-   const handleRbacChange = () => {
-     setCustomRolesList(getCustomRoles());
-     setAuditLogs(getAuditLog());
-     setGroupsList(getPermissionGroups());
-   };
-   window.addEventListener(RBAC_STATE_CHANGE_EVENT, handleRbacChange);
-   return () => window.removeEventListener(RBAC_STATE_CHANGE_EVENT, handleRbacChange);
- },[]);
+  useEffect(() => {
+    setCustomRolesList(getCustomRoles());
+    setAuditLogs(getAuditLog());
+    setGroupsList(getPermissionGroups());
 
     const handleRbacChange = () => {
       setCustomRolesList(getCustomRoles());
       setAuditLogs(getAuditLog());
+      setGroupsList(getPermissionGroups());
     };
     window.addEventListener(RBAC_STATE_CHANGE_EVENT, handleRbacChange);
     return () => window.removeEventListener(RBAC_STATE_CHANGE_EVENT, handleRbacChange);
