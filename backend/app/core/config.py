@@ -38,6 +38,11 @@ class Settings(BaseSettings):
     # فارغ = يفرَّغ تلقائياً إلى ollama_base_url (يضبط فقط لخادم تضمين مستقل)
     embedding_base_url: str = ""
 
+    # ---------- وكيل SQL — Issue #6 (Waleed) ----------
+    # سقف صفوف الاستعلام: مستقل عن حد عرض الواجهة (50 في schemas/chat.py)
+    # يُضبط عبر متغير البيئة SQL_MAX_ROWS في .env
+    sql_max_rows: int = 1000
+
     # ---------- أدوات التطوير ----------
     # واجهة الاختبار الموحدة (/dev/playground) — تعطَّل في بيئة الإنتاج لاحقاً
     enable_playground: bool = True

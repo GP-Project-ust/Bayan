@@ -1,13 +1,12 @@
-"""اختبارات واجهة الاختبار الموحدة (/dev/playground) ووكيل SQL."""
+"""اختبارات واجهة الاختبار الموحدة (/dev/playground) فقط.
+
+ملاحظة: اختبارات وكيل SQL نُقلت إلى test_sql_agent.py (Issue #6 — Waleed).
+"""
 
 import psycopg
 import pytest
 
-from app.agents.sql_agent import (
-    execute_readonly,
-    guard_sql,
-    match_template,
-)
+from app.agents.sql_agent import execute_readonly
 from app.core.config import get_settings
 
 # ---------------------------------------------------------------------------
@@ -36,41 +35,7 @@ def test_playground_is_single_file_offline(client):
 
 
 # ---------------------------------------------------------------------------
-# حارس SQL — القواعد القاطعة للسلامة
-# ---------------------------------------------------------------------------
-
-
-def test_guard_accepts_select_only():
-    assert guard_sql("SELECT * FROM v_program_stats LIMIT 10;").startswith("SELECT")
-
-
-def test_guard_rejects_destructive_statements():
-    for evil in [
-        "DROP TABLE op_student",
-        "DELETE FROM res_partner",
-        "UPDATE op_student SET gender='x'",
-        "INSERT INTO op_course VALUES (1, 'x')",
-        "GRANT ALL ON op_student TO public",
-    ]:
-        with pytest.raises(ValueError, match="الحارس يرفض"):
-            guard_sql(evil)
-
-
-def test_guard_rejects_multi_statement_injection():
-    with pytest.raises(ValueError, match="عبارة واحدة"):
-        guard_sql("SELECT 1; DROP TABLE op_student")
-
-
-def test_template_matching_covers_core_questions():
-    sql, view, _ = match_template("من الطلاب الذين عليهم رسوم متأخرة؟")
-    assert view == "v_fees_summary" and "outstanding" in sql
-    sql, view, _ = match_template("كم عدد الطلاب في كل برنامج؟")
-    assert view == "v_program_stats" and "program_name" in sql
-
-
-# ---------------------------------------------------------------------------
 # التنفيذ الفعلي على القاعدة التجريبية — يتخطى تلقائياً إن غابت القاعدة
-# (في CI تعمل القاعدة دائماً؛ محلياً: make dev-db)
 # ---------------------------------------------------------------------------
 
 
