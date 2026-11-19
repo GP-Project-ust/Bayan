@@ -303,17 +303,33 @@ def sql_agent_node(state: AgentState) -> dict:
             else:
                 rows_truncated = False
 
+            # بناء ملخص نصي أنيق للبيانات المسترجعة ليظهر مباشرة في واجهة المحادثة
+            if rows:
+                lines = [f"نفّذت استعلاماً آمناً ({len(rows)} صف خلال {duration_s} ثانية):\n"]
+                for i, r in enumerate(rows[:10], start=1):
+                    row_str = " | ".join(f"{k}: {v}" for k, v in r.items())
+                    lines.append(f"{i}. {row_str}")
+                if len(rows) > 10:
+                    lines.append(f"\n... و {len(rows) - 10} صفاً إضافياً.")
+                answer_text = "\n".join(lines)
+            else:
+                answer_text = (
+                    f"نفّذت استعلاماً آمناً خلال {duration_s} ثانية، "
+                    "ولم يتم العثور على صفوف مطابقة."
+                )
+
             # نجاح التنفيذ!
             return {
                 "sql_query": safe_sql,
                 "query_results": rows,
                 "rows_truncated": rows_truncated,
-                "answer": (
-                    f"نفّذت استعلاماً آمناً ({len(rows)} صف خلال {duration_s} ثانية)."
-                ),
+                "answer": answer_text,
                 "agent_trace": [{
                     "agent": SQL_AGENT_NAME,
-                    "note": f"تنفيذ قراءة فقط: {len(rows)} صف (المحاولة {attempt} من {MAX_ATTEMPTS})",
+                    "note": (
+                        f"تنفيذ قراءة فقط: {len(rows)} صف "
+                        f"(المحاولة {attempt} من {MAX_ATTEMPTS})"
+                    ),
                     "status": "done",
                     "sql": safe_sql,
                     "rows_count": len(rows),
