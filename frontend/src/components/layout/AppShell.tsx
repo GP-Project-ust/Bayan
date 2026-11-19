@@ -14,6 +14,13 @@ type AppShellProps = {
   onHistory?: (title: string) => void;
   activeChat?: string;
   userLabel?: string;
+  renderSidebar?: (props: {
+    compact: boolean;
+    menuOpen: boolean;
+    onClose: () => void;
+    onNavigate: () => void;
+    asideRef: React.Ref<HTMLElement>;
+  }) => ReactNode;
 };
 
 /**
@@ -24,6 +31,7 @@ type AppShellProps = {
 export function AppShell({
   mode, children, layoutClassName, workspaceClassName,
   onNewChat, onHistory, activeChat, userLabel,
+  renderSidebar,
 }: AppShellProps) {
   const pathname = usePathname();
   const [compact, setCompact] = useState(false);
@@ -94,12 +102,22 @@ export function AppShell({
       {compact && menuOpen && (
         <button className="bayan-mobile-scrim" type="button" aria-label="إغلاق القائمة الجانبية" onClick={closeMenu} tabIndex={-1} />
       )}
-      <Sidebar
-        mode={mode} asideRef={sidebarRef} compact={compact} menuOpen={menuOpen}
-        onClose={closeMenu} onNavigate={closeMenu}
-        onNewChat={() => { closeMenu(); onNewChat?.(); }}
-        onHistory={(title) => { closeMenu(); onHistory?.(title); }} activeChat={activeChat}
-      />
+      {renderSidebar ? (
+        renderSidebar({
+          compact,
+          menuOpen,
+          onClose: closeMenu,
+          onNavigate: closeMenu,
+          asideRef: sidebarRef,
+        })
+      ) : (
+        <Sidebar
+          mode={mode} asideRef={sidebarRef} compact={compact} menuOpen={menuOpen}
+          onClose={closeMenu} onNavigate={closeMenu}
+          onNewChat={() => { closeMenu(); onNewChat?.(); }}
+          onHistory={(title) => { closeMenu(); onHistory?.(title); }} activeChat={activeChat}
+        />
+      )}
       <main ref={workspaceRef} className={`workspace ${workspaceClassName}`} id="bayan-main-content" tabIndex={-1}>
         <TopBar
           admin={mode === "admin"} userLabel={userLabel}
