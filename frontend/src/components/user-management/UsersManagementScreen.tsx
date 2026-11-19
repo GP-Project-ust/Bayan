@@ -1,10 +1,10 @@
 'use client';
-import {useEffect,useMemo,useState} from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
- Activity,ArrowLeft,BadgeCheck,ChevronLeft,ChevronRight,Clock3,ContactRound,Eye,FilterX,
- Info,LockKeyhole,Pencil,Plus,Search,Shield,ShieldCheck,SlidersHorizontal,
- UserCog,UserRound,UserRoundMinus,UserRoundPlus,UsersRound,RefreshCcw,Building2
+    Activity, ArrowLeft, BadgeCheck, ChevronLeft, ChevronRight, Clock3, ContactRound, Eye, FilterX,
+    Info, LockKeyhole, Pencil, Plus, Search, Shield, ShieldCheck, SlidersHorizontal,
+    UserCog, UserRound, UserRoundMinus, UserRoundPlus, UsersRound, RefreshCcw, Building2
 } from 'lucide-react';
 import {AdminLayout} from '@/components/layout';
 import {Badge,Button,Dialog,Drawer,Toast} from '@/components/ui';
@@ -13,10 +13,10 @@ import {DemoAccessProvider,DemoRolePicker,useDemoAccess} from '@/components/acce
 import {userDetailsHref} from '@/lib/user-management/details';
 import {getUserOverrides,appendAuditEntry,getCustomRoles,type CustomRole} from '@/lib/access/enterprise-rbac';
 import {
- DEMO_USERS,USERS_DEMO_NOTE,createUser,demoActorId,demoInstitution,departments,
- editUser,filterUsers,initialUserFilters,restoreUserFixtures,setUserStatus,
- userRoleLabels,userStatusLabels,userTotals,validateUserDraft,type TenantRole,
- type AccountStatus,type UserDraft,type UserFilters,type UserRecord
+    DEMO_USERS, USERS_DEMO_NOTE, createUser, demoActorId, demoInstitution, departments,
+    editUser, filterUsers, initialUserFilters, restoreUserFixtures, setUserStatus,
+    userRoleLabels, userStatusLabels, userTotals, validateUserDraft, type TenantRole,
+    type AccountStatus, type UserDraft, type UserFilters, type UserRecord
 } from '@/lib/user-management/users';
 
 type Notice={title:string;message:string;tone:'success'|'warning'|'danger'|'info'};
@@ -170,4 +170,4 @@ function UsersBody(){
   {notice&&<div className="bum-toast"><Toast {...notice} onClose={()=>setNotice(null)}/></div>}
  </div>;
 }
-export function UsersManagementScreen(){return <DemoAccessProvider initialRole="it_admin"><AdminLayout variant="feature"><UsersBody/></AdminLayout></DemoAccessProvider>;}
+export function UsersManagementScreen() { return <DemoAccessProvider initialRole="it_admin"><AdminLayout variant="feature"><UsersBody /></AdminLayout></DemoAccessProvider>; }
