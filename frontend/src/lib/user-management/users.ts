@@ -4,8 +4,9 @@ export type AccountStatus = 'active'|'disabled';
 export type UserRecord = {
   id:string; name:string; email:string; role:TenantRole; status:AccountStatus;
   department:string; institution:string; joined:string; lastSeen:string;
+  customRoleId?: string;
 };
-export type UserDraft = Pick<UserRecord,'name'|'email'|'department'|'role'>;
+export type UserDraft = Pick<UserRecord,'name'|'email'|'department'|'role'> & { customRoleId?: string };
 export type UserFilters = {search:string;role:TenantRole|'all';status:AccountStatus|'all';department:string;sort:'newest'|'name'|'oldest'};
 export type UserChange = {ok:true;users:UserRecord[]}|{ok:false;error:string};
 export const demoInstitution='جامعة بيان النموذجية — بيانات افتراضية';
@@ -51,7 +52,7 @@ export function userTotals(users:UserRecord[]){return{total:users.length,active:
 export function createUser(users:UserRecord[],draft:UserDraft):UserChange{
  const errors=validateUserDraft(draft,users);if(Object.keys(errors).length)return {ok:false,error:Object.values(errors)[0]};
  const next=Math.max(0,...users.map(u=>Number(u.id.replace('USR-',''))||0))+1;
- const entry:UserRecord={id:`USR-${String(next).padStart(3,'0')}`,name:draft.name.trim().replace(/\s+/g,' '),email:normalizeEmail(draft.email),role:draft.role,status:'active',department:draft.department,institution:demoInstitution,joined:new Date().toISOString().slice(0,10),lastSeen:'لم يسجل الدخول (نموذج)'};
+ const entry:UserRecord={id:`USR-${String(next).padStart(3,'0')}`,name:draft.name.trim().replace(/\s+/g,' '),email:normalizeEmail(draft.email),role:draft.role,status:'active',department:draft.department,institution:demoInstitution,joined:new Date().toISOString().slice(0,10),lastSeen:'لم يسجل الدخول (نموذج)',...(draft.customRoleId?{customRoleId:draft.customRoleId}:{})};
  return {ok:true,users:[...users,entry]};
 }
 export function editUser(users:UserRecord[],id:string,draft:UserDraft,actorId=demoActorId):UserChange{
@@ -59,7 +60,7 @@ export function editUser(users:UserRecord[],id:string,draft:UserDraft,actorId=de
  const errors=validateUserDraft(draft,users,id);if(Object.keys(errors).length)return{ok:false,error:Object.values(errors)[0]};
  if(id===actorId&&draft.role!==user.role)return{ok:false,error:'لا يمكن تعديل دور الحساب الإداري الحالي في المعاينة.'};
  if(user.role==='it_admin'&&user.status==='active'&&draft.role!=='it_admin'&&userTotals(users).admins<=1)return{ok:false,error:'لا يمكن إزالة دور آخر مسؤول تقنية معلومات نشط.'};
- return {ok:true,users:users.map(u=>u.id===id?{...u,name:draft.name.trim().replace(/\s+/g,' '),email:normalizeEmail(draft.email),role:draft.role,department:draft.department}:u)};
+ return {ok:true,users:users.map(u=>u.id===id?{...u,name:draft.name.trim().replace(/\s+/g,' '),email:normalizeEmail(draft.email),role:draft.role,department:draft.department,customRoleId:draft.customRoleId}:u)};
 }
 export function setUserStatus(users:UserRecord[],id:string,next:AccountStatus,actorId=demoActorId):UserChange{
  const user=users.find(u=>u.id===id);if(!user)return{ok:false,error:'المستخدم غير موجود.'};

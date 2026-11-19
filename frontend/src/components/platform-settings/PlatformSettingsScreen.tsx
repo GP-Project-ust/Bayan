@@ -5,12 +5,20 @@ import Link from 'next/link';
 import {
   Activity, AlertTriangle, ArrowLeft, BellRing, Bot, Check, CheckCircle2, ChevronLeft,
   Download, Globe2, History, Info, LockKeyhole, RotateCcw, Save, Settings2,
-  ShieldCheck, SlidersHorizontal, Timer, Undo2,
+  ShieldCheck, SlidersHorizontal, Timer, Undo2, UserCheck, UserPlus, Users, UserX,
 } from 'lucide-react';
 import { PlatformLayout } from '@/components/layout/PlatformLayout';
 import { Button, Dialog, Toast } from '@/components/ui';
 import { DemoAccessProvider, DemoRolePicker, useDemoAccess } from '@/components/access/DemoAccess';
 import { StatePanel } from '@/components/states';
+import { PermissionMatrix } from '@/components/access/PermissionMatrix';
+import {
+  getPlatformAdmins,
+  togglePlatformAdminStatus,
+  addPlatformAdminAccount,
+  type PlatformAdminAccount,
+  RBAC_STATE_CHANGE_EVENT,
+} from '@/lib/access/enterprise-rbac';
 import {
   DEFAULT_PLATFORM_SETTINGS, PLATFORM_SETTINGS_NOTICE, PLATFORM_SETTINGS_STORAGE_KEY,
   PROVIDER_LABELS, TIMEZONE_LABELS, clonePlatformSettings, createSettingsHistoryEntry,
@@ -19,7 +27,7 @@ import {
   type PlatformTimezone, type SettingsHistoryEntry,
 } from '@/lib/platform-settings/settings';
 
-type Tab = 'general' | 'query' | 'audit' | 'ai';
+type Tab = 'general' | 'query' | 'audit' | 'ai' | 'admins';
 type Notice = { title: string; message: string; tone: 'success' | 'warning' | 'danger' | 'info' };
 const number = (value: number) => new Intl.NumberFormat('ar-EG').format(value);
 const tabs: Array<{ id: Tab; label: string; icon: typeof Settings2 }> = [
@@ -27,6 +35,7 @@ const tabs: Array<{ id: Tab; label: string; icon: typeof Settings2 }> = [
   { id: 'query', label: 'الاستعلامات', icon: Timer },
   { id: 'audit', label: 'التدقيق والاحتفاظ', icon: ShieldCheck },
   { id: 'ai', label: 'النماذج والحدود', icon: Bot },
+  { id: 'admins', label: 'مسؤولو المنصة والصلاحيات', icon: Users },
 ];
 
 function Field({ label, hint, children, error, id }: { label: string; hint?: string; children: ReactNode; error?: string; id: string }) {
@@ -55,6 +64,13 @@ function Screen() {
   const [reviewOpen, setReviewOpen] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
 
+  // Platform Admins Management State
+  const [platformAdmins, setPlatformAdmins] = useState<PlatformAdminAccount[]>(() => getPlatformAdmins());
+  const [addAdminOpen, setAddAdminOpen] = useState(false);
+  const [newAdminName, setNewAdminName] = useState('');
+  const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [newAdminDept, setNewAdminDept] = useState('');
+
   useEffect(() => {
     try {
       const loaded = parseStoredPlatformSettings(window.localStorage.getItem(PLATFORM_SETTINGS_STORAGE_KEY));
@@ -65,7 +81,51 @@ function Screen() {
       setNotice({ title: 'تعذر قراءة المسودة المحلية', message: 'استُخدمت القيم الافتراضية لهذه الجلسة دون تغيير إعدادات الخادم.', tone: 'warning' });
     }
     setHydrated(true);
+
+    const handleRbacChange = () => {
+      setPlatformAdmins(getPlatformAdmins());
+    };
+    window.addEventListener(RBAC_STATE_CHANGE_EVENT, handleRbacChange);
+    return () => window.removeEventListener(RBAC_STATE_CHANGE_EVENT, handleRbacChange);
   }, []);
+
+  function handleAddAdmin() {
+    if (!newAdminName.trim() || !newAdminEmail.trim()) {
+      setNotice({ title: 'حقول ناقصة', message: 'يرجى إدخال الاسم والبريد الإلكتروني لمسؤول المنصة.', tone: 'warning' });
+      return;
+    }
+    const result = addPlatformAdminAccount({
+      name: newAdminName.trim(),
+      email: newAdminEmail.trim(),
+      department: newAdminDept.trim() || 'إدارة المنصة السيادية',
+      phone: '+967 770 000 000',
+      status: 'active',
+      assignedGroups: ['grp_platform_governance'],
+      customOverrides: {},
+      twoFactorEnabled: true,
+    }, { id: 'ADM-001', name: 'مدير المنصة الرئيسي', role: 'platform_admin' });
+    if (result.ok) {
+      setPlatformAdmins(getPlatformAdmins());
+      setAddAdminOpen(false);
+      setNewAdminName('');
+      setNewAdminEmail('');
+      setNewAdminDept('');
+      setNotice({ title: 'تمت إضافة مسؤول المنصة', message: 'أُضيف الحساب الجديد بنجاح مع الصلاحيات السيادية وسُجِّل في سجل التدقيق.', tone: 'success' });
+    } else {
+      setNotice({ title: 'تعذر إضافة المسؤول', message: result.error || 'حدث خطأ أثناء الإضافة', tone: 'danger' });
+    }
+  }
+
+  function handleToggleAdminStatus(admin: PlatformAdminAccount) {
+    const result = togglePlatformAdminStatus(admin.id, { id: 'ADM-001', name: 'مدير المنصة الرئيسي', role: 'platform_admin' });
+    if (result.ok) {
+      setPlatformAdmins(getPlatformAdmins());
+      const actionLabel = admin.status === 'active' ? 'إيقاف' : 'تنشيط';
+      setNotice({ title: `تم ${actionLabel} الحساب`, message: `تم تعديل حالة الحساب ${admin.name} بنجاح.`, tone: 'success' });
+    } else {
+      setNotice({ title: 'إجراء غير مسموح (حماية ضد الإغلاق الذاتي)', message: result.error || 'لا يمكن إيقاف الحساب', tone: 'danger' });
+    }
+  }
 
   const issues = useMemo(() => validatePlatformSettings(draft), [draft]);
   const changes = useMemo(() => diffPlatformSettings(saved, draft), [saved, draft]);
@@ -200,6 +260,70 @@ function Screen() {
             <Field id="bps-concurrency" label="الطلبات المتزامنة القصوى" hint="النطاق: 1–64 طلبًا متزامنًا." error={currentErrors.get('ai.maxConcurrentRequests')}><NumberInput id="bps-concurrency" value={draft.ai.maxConcurrentRequests} min={1} max={64} suffix="طلب" onChange={value => updateAi('maxConcurrentRequests', value)}/></Field>
             <div className="bps-info-card bps-info-card--wide"><LockKeyhole size={19}/><div><strong>إدارة الأسرار خارج الواجهة</strong><p>لا توجد حقول لمفاتيح API أو كلمات المرور. تُحفظ بيانات الاعتماد مستقبلًا في مخزن أسرار على الخادم، ولا تُعاد إلى المتصفح.</p><Link href="/platform/models">فتح إدارة مزودي النماذج <ArrowLeft size={14}/></Link></div></div>
           </div>}
+
+          {activeTab === 'admins' && <div className="bps-admins-view" data-testid="settings-admins-fields" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                <h4 style={{ fontSize: 14, fontWeight: 900, color: '#0a2342', margin: 0 }}>سجل مسؤولي المنصة وحوكمة البنية التحتية</h4>
+                <p style={{ fontSize: 10, color: '#718da0', margin: '4px 0 0' }}>
+                  مسؤولو المنصة يملكون صلاحيات حوكمة النظام والبيئات فقط، وتُحظر عليهم صلاحيات بيانات المستأجرين بصورة قاطعة (Sovereign Separation).
+                </p>
+              </div>
+              <Button size="sm" onClick={() => setAddAdminOpen(true)} leadingIcon={<UserPlus size={15}/>}>
+                إضافة مسؤول منصة جديد
+              </Button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: 12 }}>
+              {platformAdmins.map(admin => (
+                <div key={admin.id} style={{
+                  padding: '14px 16px',
+                  background: '#fcfeff',
+                  border: '1px solid #dce8f0',
+                  borderRadius: 12,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <strong style={{ fontSize: 12, color: '#0a2342', display: 'block' }}>{admin.name}</strong>
+                      <span style={{ fontSize: 9, color: '#7891a2', direction: 'ltr', display: 'inline-block' }}>{admin.email}</span>
+                    </div>
+                    <span style={{
+                      padding: '2px 8px',
+                      borderRadius: 14,
+                      fontSize: 9,
+                      fontWeight: 900,
+                      background: admin.status === 'active' ? '#e9f8ef' : '#fdf2f2',
+                      color: admin.status === 'active' ? '#1d8a5b' : '#b64e4e',
+                    }}>
+                      {admin.status === 'active' ? 'نشط' : 'موقوف'}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 9, color: '#55768d', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    <span>القسم: {admin.department || 'إدارة المنصة السيادية'}</span>
+                    <span>المصادقة: {admin.twoFactorEnabled !== false ? '2FA مفعل ✓' : '2FA غير مفعل'}</span>
+                  </div>
+                  <div style={{ fontSize: 8, color: '#91a5b3', marginTop: 'auto', paddingTop: 6, borderTop: '1px solid #f0f4f8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>آخر نشاط: {admin.lastActive}</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      style={{ fontSize: 9, height: 26, padding: '0 8px' }}
+                      onClick={() => handleToggleAdminStatus(admin)}
+                    >
+                      {admin.status === 'active' ? <><UserX size={11} style={{ marginLeft: 3 }} /> إيقاف الحساب</> : <><UserCheck size={11} style={{ marginLeft: 3 }} /> تنشيط الحساب</>}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop: 14, paddingTop: 16, borderTop: '1px solid #e7eff4' }}>
+              <PermissionMatrix scope="platform" interactive={false} title="مصفوفة الصلاحيات السيادية للمنصة (Platform Scope)" />
+            </div>
+          </div>}
         </div>
         {issues.length > 0 && <div className="bps-validation" role="alert"><AlertTriangle size={18}/><div><strong>توجد قيم تحتاج إلى تصحيح</strong><ul>{issues.map(issue => <li key={issue.field}>{issue.message}</li>)}</ul></div></div>}
         <div className="bps-footer-actions"><span><Info size={15}/> {changed ? `${number(changes.length)} تغييرًا بانتظار المراجعة` : 'لا توجد تغييرات معلقة'}</span><div><Button size="sm" variant="outline" disabled={!changed} onClick={discardDraft} leadingIcon={<Undo2 size={15}/>}>إلغاء التعديلات</Button><Button size="sm" disabled={!changed || issues.length > 0 || !hydrated} onClick={beginReview} leadingIcon={<Save size={15}/>}>مراجعة وحفظ التغييرات</Button></div></div>
@@ -215,6 +339,41 @@ function Screen() {
 
     <Dialog open={reviewOpen && allowed} onClose={() => setReviewOpen(false)} title="مراجعة تغييرات إعدادات المنصة" description="تحقق من القيم قبل حفظ النسخة التجريبية محليًا." footer={<><Button variant="outline" onClick={() => setReviewOpen(false)}>العودة للتعديل</Button><Button onClick={confirmSave} leadingIcon={<CheckCircle2 size={16}/>}>تأكيد الحفظ المحلي</Button></>}>
       <div className="bps-review" data-testid="settings-review-dialog"><div className="bps-review-notice"><Info size={17}/> {PLATFORM_SETTINGS_NOTICE}</div><p>عدد التغييرات: <strong>{number(changes.length)}</strong></p><div className="bps-review-table"><div className="bps-review-head"><span>الإعداد</span><span>القيمة الحالية</span><span>القيمة الجديدة</span></div>{changes.map(change => <div key={change.field}><strong>{change.label}</strong><span>{change.before}</span><b>{change.after}</b></div>)}</div><div className="bps-review-warning"><AlertTriangle size={17}/> لن يتم تطبيق أي تغيير على Backend أو على المؤسسات؛ هذه نسخة محلية للمعاينة فقط.</div></div>
+    </Dialog>
+
+    <Dialog
+      open={addAdminOpen && allowed}
+      onClose={() => setAddAdminOpen(false)}
+      title="إضافة مسؤول منصة جديد"
+      description="إضافة حساب إداري للمنصة مع حوكمة البنية التحتية والامتثال لسياسة الأمان."
+      footer={
+        <>
+          <Button variant="outline" onClick={() => setAddAdminOpen(false)}>إلغاء</Button>
+          <Button onClick={handleAddAdmin} leadingIcon={<UserPlus size={16} />}>تأكيد الإضافة</Button>
+        </>
+      }
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div className="bps-field">
+          <label htmlFor="admin-name">الاسم الكامل</label>
+          <input id="admin-name" type="text" value={newAdminName} onChange={e => setNewAdminName(e.target.value)} placeholder="مثال: م. فهد الحربي" />
+        </div>
+        <div className="bps-field">
+          <label htmlFor="admin-email">البريد الإلكتروني الرسمي</label>
+          <input id="admin-email" type="email" dir="ltr" value={newAdminEmail} onChange={e => setNewAdminEmail(e.target.value)} placeholder="fahad@bayan-platform.internal" />
+        </div>
+        <div className="bps-field">
+          <label htmlFor="admin-dept">القسم / الدور الوظيفي</label>
+          <input id="admin-dept" type="text" value={newAdminDept} onChange={e => setNewAdminDept(e.target.value)} placeholder="عمليات المنصة والأمان السحابي" />
+        </div>
+        <div className="bps-info-card">
+          <ShieldCheck size={19} />
+          <div>
+            <strong>الأمان الإلزامي لحسابات المنصة</strong>
+            <p>يتم تفعيل المصادقة الثنائية (2FA) تلقائيًا لجميع مسؤولي المنصة، وتُسجَّل هذه العملية في سجل التدقيق غير القابل للتعديل.</p>
+          </div>
+        </div>
+      </div>
     </Dialog>
     {notice && <div className="bps-toast"><Toast title={notice.title} message={notice.message} tone={notice.tone} onClose={() => setNotice(null)}/></div>}
   </main>;

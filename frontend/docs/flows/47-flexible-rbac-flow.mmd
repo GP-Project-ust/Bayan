@@ -1,0 +1,33 @@
+flowchart TD
+    Start([بدء طلب الوصول لمورد أو إجراء]) --> CheckScope{فحص النطاق السيادي}
+    
+    CheckScope -->|مورد منصة وحساب مؤسسي| DenyPlatform[حجب قطعي - عزل سيادي للمنصة]
+    CheckScope -->|مورد مؤسسي وحساب منصة| DenyTenant[حجب قطعي - حظر بيانات المستأجرين]
+    CheckScope -->|النطاق متطابق| CheckUserOverride{هل يوجد استثناء صريح للمستخدم؟}
+    
+    CheckUserOverride -->|استثناء DENY| UserDeny[حجب صريح User Override DENY]
+    CheckUserOverride -->|استثناء ALLOW| UserAllow[منح صريح User Override ALLOW]
+    CheckUserOverride -->|لا يوجد استثناء| CheckCustomRoles{هل للدور المخصص حق الصلاحية؟}
+    
+    CheckCustomRoles -->|نعم| RoleCustomAllow[منح موروث Inherited Custom ALLOW]
+    CheckCustomRoles -->|لا| CheckBaseRole{هل للدور الأساسي المدمج حق الصلاحية؟}
+    
+    CheckBaseRole -->|نعم| RoleBaseAllow[منح موروث Inherited Base ALLOW]
+    CheckBaseRole -->|لا| ImplicitDeny[حجب ضمني افتراضي Default Implicit DENY]
+    
+    UserDeny --> FinalDecision([القرار: DENY])
+    DenyPlatform --> FinalDecision
+    DenyTenant --> FinalDecision
+    ImplicitDeny --> FinalDecision
+    
+    UserAllow --> FinalAllow([القرار: ALLOW])
+    RoleCustomAllow --> FinalAllow
+    RoleBaseAllow --> FinalAllow
+    
+    subgraph AuditTrail [التوثيق الفوري في سجل التدقيق]
+        LogAction[تسجيل الحدث: الفاعل، العملية، الهدف، التوقيت، السبب]
+    end
+    
+    UserDeny -.-> LogAction
+    UserAllow -.-> LogAction
+    RoleCustomAllow -.-> LogAction

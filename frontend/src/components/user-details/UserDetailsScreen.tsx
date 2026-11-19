@@ -23,6 +23,7 @@ import {
   findUserById,fixtureActivity,normalizeRequestedUserId,roleChangeAllowed,
   USER_DETAILS_STORAGE_KEY,type UserPreviewActivity
 } from '@/lib/user-management/details';
+import {PermissionMatrix} from '@/components/access/PermissionMatrix';
 
 type Tab='overview'|'permissions'|'activity';
 type Notice={title:string;message:string;tone:'success'|'warning'|'danger'|'info'};
@@ -145,6 +146,11 @@ function Body({requestedId}:{requestedId:string|null}){
                 <p className="bud-info"><Info size={17}/> لا تعرض الصفحة كلمة مرور أو رمز وصول أو جلسات فعلية؛ هذه بيانات تعريفية وهمية فقط.</p></div>}
               {tab==='permissions'&&<div data-testid="user-permissions"><div className="bud-heading"><ShieldCheck size={20}/><div><h3>صلاحيات الدور: {userRoleLabels[user.role]}</h3><p>صلاحيات عرض مقترحة لهذا الدور في نموذج بيان؛ تُفرض الصلاحيات الحقيقية بالخادم.</p></div></div>
                 <div className="bud-permissions">{permissions.map(cap=><div className="bud-permission" key={cap}><CheckCircle2 size={19}/><span>{capabilityLabels[cap]}</span><small dir="ltr">{cap}</small></div>)}</div>
+                <div style={{marginTop:'1.5rem',borderTop:'1px solid var(--bayan-border)',paddingTop:'1.25rem'}}>
+                  <h4 style={{margin:'0 0 0.5rem',fontSize:'1rem',color:'var(--bayan-gold)'}}>مصفوفة الصلاحيات والاستثناءات الفردية للمستخدم</h4>
+                  <p style={{fontSize:'0.85rem',color:'var(--bayan-text-muted)',margin:'0 0 1rem'}}>يمكن لمسؤول تقنية المعلومات منح استثناء صريح (ALLOW) أو حجب صريح (DENY) أو استعادة التوريث لحظياً.</p>
+                  <PermissionMatrix userId={user.id} scope="organization" interactive={true}/>
+                </div>
                 <p className="bud-info"><LockKeyhole size={17}/> دور مسؤول المنصة مستقل، ولا يحصل تلقائيًا على صلاحية إدارة مستخدمي المؤسسة. لا يجوز الاعتماد على هذه القائمة لاتخاذ قرار وصول حقيقي.</p></div>}
               {tab==='activity'&&<div data-testid="user-activity"><div className="bud-heading"><Activity size={20}/><div><h3>النشاط والإجراءات التوضيحية</h3><p>أحداث نموذجية من السجلات الوهمية، مع إجراءات أجريتها في هذه الصفحة فقط.</p></div></div>
                 <ol className="bud-timeline">{activity.map(event=><li key={event.id}><span className={event.kind==='local'?'bud-dot local':'bud-dot'}/><div><div className="bud-event-header"><strong>{event.title}</strong><time>{event.date}</time></div><p>{event.detail}</p><span className="bud-event-kind">{event.kind==='fixture'?'بيانات افتراضية':'إجراء محلي في الجلسة'}</span></div></li>)}</ol>

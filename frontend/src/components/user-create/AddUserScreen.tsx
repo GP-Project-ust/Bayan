@@ -9,6 +9,8 @@ import {Button,Dialog} from '@/components/ui';
 import {StatePanel} from '@/components/states';
 import {DemoAccessProvider,DemoRolePicker,useDemoAccess} from '@/components/access/DemoAccess';
 import {userDetailsHref} from '@/lib/user-management/details';
+import {appendAuditEntry, getCustomRoles, type CustomRole} from '@/lib/access/enterprise-rbac';
+import {capabilityLabels} from '@/lib/access/policy';
 import {DEMO_USERS,USERS_DEMO_NOTE,createUser,demoInstitution,departments,restoreUserFixtures,userRoleLabels,validateUserDraft,type TenantRole,type UserDraft,type UserRecord} from '@/lib/user-management/users';
 
 const STORAGE_KEY='bayan.demo.users.v1';
@@ -39,6 +41,7 @@ function Body(){
  const [isSaving,setIsSaving]=useState(false);
  const [loaded,setLoaded]=useState(false);
  const [existing,setExisting]=useState<UserRecord[]>(DEMO_USERS);
+ const customRoles = useMemo(() => getCustomRoles().filter(r => r.scope === 'organization'), []);
  useEffect(()=>{setExisting(readExisting());setLoaded(true);},[]);
  const dirty=useMemo(()=>Boolean(draft.name.trim()||draft.email.trim()||draft.department!==EMPTY_DRAFT.department||draft.role!==EMPTY_DRAFT.role),[draft]);
  const normalizedName=draft.name.trim().replace(/\s+/g,' ');
@@ -66,6 +69,7 @@ function Body(){
    // Persist before showing success. Failure must NOT claim a saved user.
    localStorage.setItem(STORAGE_KEY,JSON.stringify(result.users));
    setExisting(result.users);setCreated(result.users[result.users.length-1]);setAskConfirm(false);
+   appendAuditEntry({actorId:'USR-003',actorName:'مسؤول التقنية',actorRole:'مسؤول تقنية المعلومات',scope:'organization',tenantId:demoInstitution,operation:'USER_CREATED',targetId:result.users[result.users.length-1]?.id||'USR-NEW',targetName:draft.name,details:`إضافة مستخدم جديد: ${draft.name} (${draft.email}) بدور ${userRoleLabels[draft.role]}`,reason:'إضافة مستخدم'});
   }catch{setGeneralError('تعذّر حفظ السجل في التخزين المحلي للمتصفح. لم تُضَف بيانات جديدة.');setAskConfirm(false);}
   finally{setIsSaving(false);}
  }
