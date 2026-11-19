@@ -25,8 +25,16 @@ import {
  getCustomRoles,
  createCustomRole,
  updateCustomRole,
+ deleteCustomRole,
+ getPermissionGroups,
+ createPermissionGroup,
+ updatePermissionGroup,
+ deletePermissionGroup,
  ORGANIZATION_PERMISSION_GROUPS,
+ PLATFORM_PERMISSION_GROUPS,
  type CustomRole,
+ type PermissionGroup,
+ type Scope,
  getAuditLog,
  type AuditLogEntry,
  RBAC_STATE_CHANGE_EVENT
@@ -68,15 +76,29 @@ function RolesBody(){
  // RBAC Audit Trail state
  const [auditLogs,setAuditLogs]=useState<AuditLogEntry[]>([]);
 
+ // Permission groups state
+ const [groupsList, setGroupsList] = useState<PermissionGroup[]>([]);
+ const [groupScopeFilter, setGroupScopeFilter] = useState<'all' | 'organization' | 'platform'>('organization');
+ const [groupModalOpen, setGroupModalOpen] = useState(false);
+ const [editingGroup, setEditingGroup] = useState<PermissionGroup | null>(null);
+ const [groupDraftTitle, setGroupDraftTitle] = useState('');
+ const [groupDraftDesc, setGroupDraftDesc] = useState('');
+ const [groupDraftScope, setGroupDraftScope] = useState<Scope>('organization');
+ const [groupDraftCaps, setGroupDraftCaps] = useState<Capability[]>([]);
+ const [groupModalError, setGroupModalError] = useState<string | null>(null);
+ const [deletingGroupId, setDeletingGroupId] = useState<string | null>(null);
+
  useEffect(()=>{
    try{const stored=localStorage.getItem(ROLE_REVIEW_STORAGE_KEY);if(stored!==null)setRequests(restoreReviewRequests(JSON.parse(stored)));}catch{setNotice({title:'تعذّر تحميل مسودات المراجعة',message:'ستظهر قائمة خالية حتى تتوفر بيانات صالحة.',tone:'warning'});}
    try{const stored=localStorage.getItem(USER_STORAGE_KEY);if(stored!==null)setUsers(restoreUserFixtures(JSON.parse(stored)));}catch{/* show fixtures */}
    setCustomRolesList(getCustomRoles());
    setAuditLogs(getAuditLog());
+   setGroupsList(getPermissionGroups());
 
    const handleRbacChange = () => {
      setCustomRolesList(getCustomRoles());
      setAuditLogs(getAuditLog());
+     setGroupsList(getPermissionGroups());
    };
    window.addEventListener(RBAC_STATE_CHANGE_EVENT, handleRbacChange);
    return () => window.removeEventListener(RBAC_STATE_CHANGE_EVENT, handleRbacChange);
@@ -158,6 +180,67 @@ function RolesBody(){
   }
  }
 
+ function openNewGroupModal(){
+  setEditingGroup(null);
+  setGroupDraftTitle('');
+  setGroupDraftDesc('');
+  setGroupDraftScope('organization');
+  setGroupDraftCaps(['reports.view', 'reports.export']);
+  setGroupModalError(null);
+  setGroupModalOpen(true);
+ }
+
+ function openEditGroupModal(g:PermissionGroup){
+  setEditingGroup(g);
+  setGroupDraftTitle(g.titleAr);
+  setGroupDraftDesc(g.descriptionAr);
+  setGroupDraftScope(g.scope);
+  setGroupDraftCaps([...g.capabilities]);
+  setGroupModalError(null);
+  setGroupModalOpen(true);
+ }
+
+ function toggleGroupCapability(cap:Capability){
+  setGroupDraftCaps(prev=>prev.includes(cap)?prev.filter(c=>c!==cap):[...prev,cap]);
+ }
+
+ function handleSaveGroup(e?:FormEvent){
+  if(e)e.preventDefault();
+  if(!groupDraftTitle.trim()){setGroupModalError('يرجى إدخال اسم مجموعة الصلاحيات.');return;}
+  if(groupDraftCaps.length===0){setGroupModalError('يجب اختيار صلاحية واحدة على الأقل في المجموعة.');return;}
+  const actorInfo={id:'USR-003',name:'م. أحمد الشامي',role:actor};
+  if(editingGroup){
+    const res=updatePermissionGroup(editingGroup.id,{
+      titleAr:groupDraftTitle.trim(),
+      descriptionAr:groupDraftDesc.trim(),
+      capabilities:groupDraftCaps
+    },actorInfo);
+    if(!res.ok){setGroupModalError(res.error||'فشل تحديث المجموعة.');return;}
+    setNotice({title:'تم التحديث بنجاح',message:`تم تحديث حزمة الصلاحيات «${groupDraftTitle}».`,tone:'success'});
+  } else {
+    const res=createPermissionGroup({
+      titleAr:groupDraftTitle.trim(),
+      descriptionAr:groupDraftDesc.trim(),
+      scope:groupDraftScope,
+      capabilities:groupDraftCaps
+    },actorInfo);
+    if(!res.ok){setGroupModalError(res.error||'فشل إنشاء المجموعة.');return;}
+    setNotice({title:'تم إنشاء الحزمة',message:`تمت إضافة حزمة الصلاحيات «${groupDraftTitle}» بنجاح.`,tone:'success'});
+  }
+  setGroupModalOpen(false);
+  setGroupsList(getPermissionGroups());
+ }
+
+ function handleDeleteGroup(){
+  if(!deletingGroupId)return;
+  const actorInfo={id:'USR-003',name:'م. أحمد الشامي',role:actor};
+  const res=deletePermissionGroup(deletingGroupId,actorInfo);
+  if(!res.ok){setNotice({title:'تعذر الحذف',message:res.error||'فشل حذف المجموعة.',tone:'danger'});}
+  else{setNotice({title:'تم الحذف',message:'تم حذف حزمة الصلاحيات المخصصة بنجاح.',tone:'success'});}
+  setDeletingGroupId(null);
+  setGroupsList(getPermissionGroups());
+ }
+
  return <div className="ban brp" dir="rtl" data-testid="roles-permissions-screen">
   <nav className="ban-breadcrumb" aria-label="مسار التنقل"><Link href="/admin">لوحة الإدارة</Link><ChevronLeft size={15}/><Link href="/admin/users">إدارة المستخدمين</Link><ChevronLeft size={15}/><span aria-current="page">الأدوار والصلاحيات</span></nav>
   <header className="ban-hero brp-hero"><div><span className="ban-eyebrow"><ShieldCheck size={17}/> الإدارة · UC-04</span><h1>إدارة الأدوار والصلاحيات</h1><p>مراجعة الأدوار الأربعة ومصفوفة الوصول ومقارنة الامتيازات ومحرك الصلاحيات المرن للمؤسسة.</p><div className="ban-hero-tags"><span><LockKeyhole size={14}/> مبدأ أقل امتياز</span><span><Shield size={14}/> فصل المنصة عن المؤسسة</span><span><ClipboardCheck size={14}/> مراجعة الصلاحيات</span></div></div><div className="ban-hero-art" aria-hidden="true"><ShieldCheck size={66}/><i/></div></header>
@@ -216,20 +299,44 @@ function RolesBody(){
    {mainView==='groups'&&<section className="ban-panel brp-section" style={{marginBottom:'2rem'}}>
      <div className="ban-section-header">
        <div>
-         <h2><Building2 size={20}/> مجموعات وحزم الصلاحيات المؤسسية</h2>
-         <p>حزم وظيفية تدمج الصلاحيات المترابطة لتسهيل الإسناد والمراجعة الأمنية الموحدة.</p>
+         <h2><Building2 size={20}/> مجموعات وحزم الصلاحيات المؤسسية والمنصة</h2>
+         <p>حزم وظيفية تدمج الصلاحيات المترابطة لتسهيل الإسناد والحوكمة وإدارة التفويضات الموحدة.</p>
+       </div>
+       <div style={{display:'flex',gap:'0.5rem',alignItems:'center',flexWrap:'wrap'}}>
+         <div style={{display:'inline-flex',borderRadius:'8px',background:'rgba(255,255,255,0.06)',padding:'2px'}}>
+           <button type="button" onClick={()=>setGroupScopeFilter('organization')} style={{padding:'4px 12px',borderRadius:'6px',fontSize:'0.8125rem',border:'none',background:groupScopeFilter==='organization'?'rgba(251,191,36,0.18)':'transparent',color:groupScopeFilter==='organization'?'#fbbf24':'var(--bayan-text-muted)',fontWeight:groupScopeFilter==='organization'?700:500,cursor:'pointer'}}>حزم المؤسسة</button>
+           <button type="button" onClick={()=>setGroupScopeFilter('platform')} style={{padding:'4px 12px',borderRadius:'6px',fontSize:'0.8125rem',border:'none',background:groupScopeFilter==='platform'?'rgba(251,191,36,0.18)':'transparent',color:groupScopeFilter==='platform'?'#fbbf24':'var(--bayan-text-muted)',fontWeight:groupScopeFilter==='platform'?700:500,cursor:'pointer'}}>حزم المنصة</button>
+           <button type="button" onClick={()=>setGroupScopeFilter('all')} style={{padding:'4px 12px',borderRadius:'6px',fontSize:'0.8125rem',border:'none',background:groupScopeFilter==='all'?'rgba(251,191,36,0.18)':'transparent',color:groupScopeFilter==='all'?'#fbbf24':'var(--bayan-text-muted)',fontWeight:groupScopeFilter==='all'?700:500,cursor:'pointer'}}>كافة الحزم ({groupsList.length})</button>
+         </div>
+         <Button size="sm" variant="primary" leadingIcon={<Plus size={16}/>} onClick={openNewGroupModal}>إنشاء حزمة صلاحيات مخصصة</Button>
        </div>
      </div>
      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill, minmax(320px, 1fr))',gap:'1rem',marginTop:'1rem'}}>
-       {ORGANIZATION_PERMISSION_GROUPS.map(g=><article key={g.id} style={{background:'rgba(255,255,255,0.03)',border:'1px solid var(--bayan-border)',borderRadius:'0.75rem',padding:'1.25rem'}}>
-         <h3 style={{margin:0,fontSize:'1rem',color:'#fff'}}>{g.titleAr}</h3>
-         <p style={{fontSize:'0.85rem',color:'var(--bayan-text-muted)',margin:'0.5rem 0 1rem'}}>{g.descriptionAr}</p>
-         <div style={{display:'flex',flexDirection:'column',gap:'0.4rem'}}>
+       {groupsList.filter(g => groupScopeFilter === 'all' || g.scope === groupScopeFilter).map(g=><article key={g.id} style={{background:'rgba(255,255,255,0.03)',border:'1px solid var(--bayan-border)',borderRadius:'0.75rem',padding:'1.25rem',display:'flex',flexDirection:'column',gap:'0.75rem'}}>
+         <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+           <div>
+             <h3 style={{margin:0,fontSize:'1rem',color:'#fff'}}>{g.titleAr}</h3>
+             <small style={{color:'var(--bayan-text-muted)'}}>{g.scope === 'platform' ? 'نطاق المنصة المركزية' : 'نطاق المؤسسة'}</small>
+           </div>
+           {g.isSystemGroup ? (
+             <Badge tone="info">حزمة نظام أساسية</Badge>
+           ) : (
+             <Badge tone="warning">حزمة مخصصة</Badge>
+           )}
+         </div>
+         <p style={{fontSize:'0.85rem',color:'var(--bayan-text-muted)',margin:0}}>{g.descriptionAr || 'لا يوجد وصف تفصيلي للحزمة.'}</p>
+         <div style={{display:'flex',flexDirection:'column',gap:'0.4rem',marginTop:'0.5rem'}}>
            {g.capabilities.map(cap=><div key={cap} style={{display:'flex',alignItems:'center',gap:'0.5rem',fontSize:'0.8125rem'}}>
              <CheckCircle2 size={15} style={{color:'#10b981'}}/>
-             <span>{capabilityLabels[cap]}</span>
+             <span>{capabilityLabels[cap] || cap}</span>
              <small style={{color:'var(--bayan-text-muted)',marginRight:'auto'}} dir="ltr">{cap}</small>
            </div>)}
+         </div>
+         <div style={{display:'flex',justifyContent:'flex-end',gap:'0.5rem',marginTop:'auto',borderTop:'1px solid rgba(255,255,255,0.05)',paddingTop:'0.75rem'}}>
+           <Button size="sm" variant="outline" leadingIcon={<Pencil size={14}/>} onClick={()=>openEditGroupModal(g)}>تعديل الصلاحيات</Button>
+           {!g.isSystemGroup && (
+             <Button size="sm" variant="danger" leadingIcon={<Trash2 size={14}/>} onClick={()=>setDeletingGroupId(g.id)}>حذف الحزمة</Button>
+           )}
          </div>
        </article>)}
      </div>
@@ -376,6 +483,103 @@ function RolesBody(){
        </div>
      </div>
    </form>}
+  </Dialog>
+
+  {/* Group Create / Edit Dialog */}
+  <Dialog
+    open={groupModalOpen}
+    onClose={() => setGroupModalOpen(false)}
+    title={editingGroup ? `تعديل حزمة الصلاحيات: ${editingGroup.titleAr}` : 'إنشاء حزمة صلاحيات وظيفية مخصصة'}
+    description="تجميع الصلاحيات في حزمة إدارية موحدة تسهل الحوكمة وتخصيص التفويضات"
+    footer={
+      <>
+        <Button variant="outline" onClick={() => setGroupModalOpen(false)}>إلغاء</Button>
+        <Button variant="primary" onClick={() => handleSaveGroup()}>{editingGroup ? 'حفظ التعديلات' : 'إنشاء الحزمة'}</Button>
+      </>
+    }
+  >
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '0.5rem 0', textAlign: 'right' }}>
+      {groupModalError && (
+        <div style={{ padding: '0.5rem 0.75rem', borderRadius: '6px', background: 'rgba(239,68,68,0.15)', color: '#f87171', fontSize: '0.85rem' }}>
+          {groupModalError}
+        </div>
+      )}
+      <div>
+        <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem' }}>اسم الحزمة العربي <b>*</b>:</label>
+        <input
+          style={{ width: '100%', padding: '0.6rem 0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--bayan-border)', borderRadius: '0.5rem', color: '#fff' }}
+          value={groupDraftTitle}
+          onChange={(e) => setGroupDraftTitle(e.target.value)}
+          placeholder="مثال: حزمة المراجعة الأكاديمية والاعتماد"
+          required
+        />
+      </div>
+      <div>
+        <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem' }}>الوصف الوظيفي:</label>
+        <textarea
+          rows={2}
+          style={{ width: '100%', padding: '0.6rem 0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--bayan-border)', borderRadius: '0.5rem', color: '#fff', resize: 'vertical' }}
+          value={groupDraftDesc}
+          onChange={(e) => setGroupDraftDesc(e.target.value)}
+          placeholder="وصف الغرض من هذه الحزمة والمهام المنوطة بها..."
+        />
+      </div>
+      {!editingGroup && (
+        <div>
+          <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem' }}>نطاق الحزمة <b>*</b>:</label>
+          <select
+            style={{ width: '100%', padding: '0.6rem 0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--bayan-border)', borderRadius: '0.5rem', color: '#fff' }}
+            value={groupDraftScope}
+            onChange={(e) => {
+              const sc = e.target.value as Scope;
+              setGroupDraftScope(sc);
+              setGroupDraftCaps(sc === 'platform' ? ['platform.manage'] : ['reports.view']);
+            }}
+          >
+            <option value="organization">نطاق المؤسسة (جامعة بيان)</option>
+            <option value="platform">نطاق المنصة (البنية التحتية والتشغيل)</option>
+          </select>
+        </div>
+      )}
+      <div>
+        <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>
+          الصلاحيات المندرجة تحت الحزمة ({groupDraftCaps.length}) <b>*</b>:
+        </label>
+        <div style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.4rem', border: '1px solid var(--bayan-border)', borderRadius: '0.5rem', padding: '0.5rem' }}>
+          {capabilities
+            .filter((c) => (groupDraftScope === 'platform' ? ['platform.manage', 'onboarding.run'].includes(c) : !['platform.manage'].includes(c)))
+            .map((cap) => (
+              <label key={cap} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer', padding: '0.2rem' }}>
+                <input
+                  type="checkbox"
+                  checked={groupDraftCaps.includes(cap)}
+                  onChange={() => toggleGroupCapability(cap)}
+                />
+                <span style={{ color: '#fff' }}>{capabilityLabels[cap]}</span>
+                <small style={{ color: 'var(--bayan-text-muted)', marginRight: 'auto' }} dir="ltr">{cap}</small>
+              </label>
+            ))}
+        </div>
+      </div>
+    </div>
+  </Dialog>
+
+  {/* Delete Group Dialog */}
+  <Dialog
+    open={Boolean(deletingGroupId)}
+    onClose={() => setDeletingGroupId(null)}
+    title="تأكيد حذف حزمة الصلاحيات"
+    description="هذا الإجراء محلي في المتصفح ويزيل تعريف الحزمة المخصصة"
+    footer={
+      <>
+        <Button variant="outline" onClick={() => setDeletingGroupId(null)}>إلغاء</Button>
+        <Button variant="danger" onClick={handleDeleteGroup}>تأكيد الحذف</Button>
+      </>
+    }
+  >
+    <p style={{ margin: 0, fontSize: '0.9rem', color: '#cbd5e1' }}>
+      هل تريد بالتأكيد حذف حزمة الصلاحيات المخصصة «{groupsList.find((g) => g.id === deletingGroupId)?.titleAr}»؟ لن يؤثر ذلك على الصلاحيات المعينة مسبقاً للمستخدمين.
+    </p>
   </Dialog>
 
   <Dialog open={confirmReset&&authorized} onClose={()=>setConfirmReset(false)} title="مسح مقترحات المراجعة" description="إزالة جميع المسودات التجريبية من هذا المتصفح" footer={<><Button variant="outline" onClick={()=>setConfirmReset(false)}>إلغاء</Button><Button variant="danger" onClick={reset}>مسح المسودات</Button></>}><p className="brp-confirm">هل تريد مسح {requests.length} مقترح مراجعة؟ لن يؤثر ذلك على صلاحيات حقيقية.</p></Dialog>

@@ -5,6 +5,7 @@ const root = path.resolve(__dirname, '..');
 const appDir = path.join(root, 'src', 'app');
 const serverTargetDir = path.join(root, '.next', 'server', 'app');
 const staticTargetDir = path.join(root, '.next', 'static', 'chunks', 'app');
+const typesTargetDir = path.join(root, '.next', 'types', 'app');
 
 function mirrorDirs(src, dest) {
   if (!fs.existsSync(dest)) {
@@ -22,4 +23,5 @@ function mirrorDirs(src, dest) {
 
 mirrorDirs(appDir, serverTargetDir);
 mirrorDirs(appDir, staticTargetDir);
-console.log('Pre-created directory tree for .next/server/app and .next/static/chunks/app');
+mirrorDirs(appDir, typesTargetDir);
+console.log('Pre-created directory tree for .next/server/app, .next/static/chunks/app, and .next/types/app');
