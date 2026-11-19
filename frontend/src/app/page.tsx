@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { getHealth } from "@/lib/api";
 import type { ComponentStatus } from "@/types";
 
@@ -88,30 +89,30 @@ export default function HomePage() {
           الهيكل الأساسي للواجهة (RTL + اتصال API) جاهز ومكتمل
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <a
+          <Link
             href="/screens"
             className="rounded-xl bg-gold-500/20 px-4 py-2 text-sm font-semibold text-gold-400 border border-gold-500/40 hover:bg-gold-500/30 transition-colors"
           >
             استعراض خريطة الشاشات (42 شاشة)
-          </a>
-          <a
+          </Link>
+          <Link
             href="/prototype-chat"
             className="rounded-xl bg-bayan-800/60 px-4 py-2 text-sm text-bayan-200 border border-bayan-700 hover:bg-bayan-700/60 transition-colors"
           >
             معاينة النموذج الأولي للمحادثة
-          </a>
-          <a
+          </Link>
+          <Link
             href="/conversations"
             className="rounded-xl bg-bayan-800/60 px-4 py-2 text-sm text-bayan-200 border border-bayan-700 hover:bg-bayan-700/60 transition-colors"
           >
             سجل المحادثات
-          </a>
-          <a
+          </Link>
+          <Link
             href="/admin"
             className="rounded-xl bg-bayan-800/60 px-4 py-2 text-sm text-bayan-200 border border-bayan-700 hover:bg-bayan-700/60 transition-colors"
           >
             لوحة الإدارة
-          </a>
+          </Link>
         </div>
       </section>
 
