@@ -8,6 +8,7 @@ import {
   RefreshCw, ShieldCheck, Wifi, WifiOff,
 } from 'lucide-react';
 import { StatePanel } from '@/components/states';
+import { ORGANIZATION_ROUTES } from '@/lib/routes';
 
 const INCIDENT_REFERENCE = 'BAYAN-503';
 
@@ -42,7 +43,7 @@ export function UnavailableScreen() {
   return (
     <main className="b503-page" dir="rtl">
       <header className="b503-header">
-        <Link href="/" className="b503-brand" aria-label="بيان — الصفحة الرئيسية">
+        <Link href={ORGANIZATION_ROUTES.home} className="b503-brand" aria-label="بيان — الصفحة الرئيسية">
           <span className="b503-brand-mark"><ShieldCheck size={25}/></span>
           <span><strong>بيان</strong><small>مساعد مؤسسي عربي ذكي</small></span>
         </Link>
@@ -96,7 +97,7 @@ export function UnavailableScreen() {
               <RefreshCw size={17} className={retrying ? 'b503-spin' : ''}/>
               {retrying ? 'جارٍ إعادة المحاولة...' : 'إعادة المحاولة الآن'}
             </button>
-            <Link href="/" className="b503-secondary"><Home size={17}/> الصفحة الرئيسية</Link>
+            <Link href={ORGANIZATION_ROUTES.home} className="b503-secondary"><Home size={17}/> الصفحة الرئيسية</Link>
           </div>
 
           <div className="b503-help">

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Keyboard, Laptop, Menu, Palette, ShieldCheck, Smartphone, Tablet } from "lucide-react";
+import { ORGANIZATION_ROUTES, AUXILIARY_ROUTES } from "@/lib/routes";
 import { ResponsivePlayground } from "./playground";
 import "./showcase.css";
 
@@ -12,8 +13,8 @@ export default function ResponsiveDesignPage() {
   return <main className="b6-page" dir="rtl">
     <div className="b6-container">
       <nav className="b6-header" aria-label="الانتقال بين مراحل التصميم">
-        <Link href="/design-system" className="b6-brand"><Palette size={22}/><strong>بيان</strong><span>Design System · 06 / 07</span></Link>
-        <Link href="/design-system/states-permissions"><ArrowRight size={17}/> المرحلة الخامسة</Link>
+        <Link href={AUXILIARY_ROUTES.designSystem} className="b6-brand"><Palette size={22}/><strong>بيان</strong><span>Design System · 06 / 07</span></Link>
+        <Link href={AUXILIARY_ROUTES.designSystemStatesPermissions}><ArrowRight size={17}/> المرحلة الخامسة</Link>
       </nav>
       <section className="b6-hero">
         <div>
@@ -41,7 +42,7 @@ export default function ResponsiveDesignPage() {
         </div>
         <p className="b6-manual-note">ملاحظة: هذه القائمة توثق ما جرى تصميمه برمجيًا، وليست شهادة اجتياز WCAG. يلزم اختبار فعلي بالمتصفح وقارئات الشاشة قبل اعتماد الإنتاج.</p>
       </section>
-      <footer className="b6-footer"><Link href="/">واجهة المحادثة</Link><Link href="/admin">لوحة الإدارة</Link><Link href="/design-system/components">مكتبة المكونات</Link><Link href="/screens">خريطة الشاشات</Link></footer>
+      <footer className="b6-footer"><Link href={ORGANIZATION_ROUTES.home}>واجهة المحادثة</Link><Link href={ORGANIZATION_ROUTES.dashboard}>لوحة الإدارة</Link><Link href={AUXILIARY_ROUTES.designSystemComponents}>مكتبة المكونات</Link><Link href={AUXILIARY_ROUTES.screens}>خريطة الشاشات</Link></footer>
     </div>
   </main>;
 }

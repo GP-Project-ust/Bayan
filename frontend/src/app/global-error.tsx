@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { AlertTriangle, RotateCcw, Home, Sparkles } from "lucide-react";
+import { ORGANIZATION_ROUTES } from "@/lib/routes";
 
 export default function GlobalError({
   error,
@@ -107,7 +108,7 @@ export default function GlobalError({
             </button>
 
             <a
-              href="/"
+              href={ORGANIZATION_ROUTES.home}
               style={{
                 display: "inline-flex",
                 alignItems: "center",

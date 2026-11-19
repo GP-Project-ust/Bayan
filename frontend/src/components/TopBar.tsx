@@ -2,6 +2,7 @@
 import type { Ref } from "react";
 import Link from "next/link";
 import { Bell, ChevronDown, Menu, UserRound, X } from "lucide-react";
+import { ORGANIZATION_ROUTES } from "@/lib/routes";
 
 export default function TopBar({
   admin = false, userLabel, menuOpen = false, onMenuToggle, menuButtonRef,
@@ -15,11 +16,11 @@ export default function TopBar({
       aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة الرئيسية"} onClick={onMenuToggle}>
       {menuOpen ? <X size={24}/> : <Menu size={24}/>}
     </button>
-    <Link href="/profile" className="user-menu" aria-label={`الملف الشخصي: ${userLabel ?? (admin ? "مسؤول النظام" : "مستخدم الجامعة")}`}>
+    <Link href={ORGANIZATION_ROUTES.profile} className="user-menu" aria-label={`الملف الشخصي: ${userLabel ?? (admin ? "مسؤول النظام" : "مستخدم الجامعة")}`}>
       <span className="avatar-circle"><UserRound size={23} fill="currentColor"/></span>
       <ChevronDown size={17}/><b>{userLabel ?? (admin ? "مسؤول النظام" : "مستخدم الجامعة")}</b>
     </Link>
     <span className="topbar-split" aria-hidden="true"/>
-    <Link href="/notifications" className="notification-icon" aria-label="فتح مركز الإشعارات"><Bell size={26}/><i aria-hidden="true"/></Link>
+    <Link href={ORGANIZATION_ROUTES.notifications} className="notification-icon" aria-label="فتح مركز الإشعارات"><Bell size={26}/><i aria-hidden="true"/></Link>
   </header>;
 }

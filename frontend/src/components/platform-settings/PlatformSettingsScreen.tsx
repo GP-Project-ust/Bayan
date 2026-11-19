@@ -12,6 +12,7 @@ import { Button, Dialog, Toast } from '@/components/ui';
 import { DemoAccessProvider, DemoRolePicker, useDemoAccess } from '@/components/access/DemoAccess';
 import { StatePanel } from '@/components/states';
 import { PermissionMatrix } from '@/components/access/PermissionMatrix';
+import { PLATFORM_ROUTES } from '@/lib/routes';
 import {
   getPlatformAdmins,
   togglePlatformAdminStatus,
@@ -213,7 +214,7 @@ function Screen() {
   const ActiveTabIcon = activeTabConfig?.icon ?? Settings2;
 
   return <main className="ban borg bps" dir="rtl" data-testid="platform-settings-screen">
-    <nav className="ban-breadcrumb" aria-label="مسار التنقل"><Link href="/platform/agents">إدارة المنصة</Link><ChevronLeft size={15} /><span aria-current="page">إعدادات المنصة</span></nav>
+    <nav className="ban-breadcrumb" aria-label="مسار التنقل"><Link href={PLATFORM_ROUTES.agents}>إدارة المنصة</Link><ChevronLeft size={15} /><span aria-current="page">إعدادات المنصة</span></nav>
     <header className="ban-hero borg-hero bps-hero">
       <div><span className="ban-eyebrow"><Settings2 size={17} /> Platform Configuration · Settings</span><h1>إعدادات المنصة</h1><p>إدارة القيم العامة وسياسات الاستعلام والاحتفاظ بسجلات التدقيق وحدود تشغيل مزودي النماذج.</p><div className="ban-hero-tags"><span><ShieldCheck size={14} /> مسؤول المنصة</span><span><LockKeyhole size={14} /> لا تتضمن أسرار اتصال</span><span><SlidersHorizontal size={14} /> مراجعة قبل الحفظ</span></div></div>
       <div className="ban-hero-art" aria-hidden="true"><Settings2 size={76} /><i /></div>
@@ -258,7 +259,7 @@ function Screen() {
             <Field id="bps-model" label="اسم النموذج الافتراضي" hint="اسم تعريف النموذج فقط، وليس مفتاح API أو عنوان اتصال." error={currentErrors.get('ai.defaultModel')}><input id="bps-model" type="text" dir="ltr" value={draft.ai.defaultModel} onChange={event => updateAi('defaultModel', event.target.value)} placeholder="qwen2.5:14b" /></Field>
             <Field id="bps-rpm" label="حد الطلبات في الدقيقة" hint="النطاق: 1–600 طلب لكل دقيقة." error={currentErrors.get('ai.requestsPerMinute')}><NumberInput id="bps-rpm" value={draft.ai.requestsPerMinute} min={1} max={600} suffix="طلب/دقيقة" onChange={value => updateAi('requestsPerMinute', value)} /></Field>
             <Field id="bps-concurrency" label="الطلبات المتزامنة القصوى" hint="النطاق: 1–64 طلبًا متزامنًا." error={currentErrors.get('ai.maxConcurrentRequests')}><NumberInput id="bps-concurrency" value={draft.ai.maxConcurrentRequests} min={1} max={64} suffix="طلب" onChange={value => updateAi('maxConcurrentRequests', value)} /></Field>
-            <div className="bps-info-card bps-info-card--wide"><LockKeyhole size={19} /><div><strong>إدارة الأسرار خارج الواجهة</strong><p>لا توجد حقول لمفاتيح API أو كلمات المرور. تُحفظ بيانات الاعتماد مستقبلًا في مخزن أسرار على الخادم، ولا تُعاد إلى المتصفح.</p><Link href="/platform/models">فتح إدارة مزودي النماذج <ArrowLeft size={14} /></Link></div></div>
+            <div className="bps-info-card bps-info-card--wide"><LockKeyhole size={19} /><div><strong>إدارة الأسرار خارج الواجهة</strong><p>لا توجد حقول لمفاتيح API أو كلمات المرور. تُحفظ بيانات الاعتماد مستقبلًا في مخزن أسرار على الخادم، ولا تُعاد إلى المتصفح.</p><Link href={PLATFORM_ROUTES.models}>فتح إدارة مزودي النماذج <ArrowLeft size={14} /></Link></div></div>
           </div>}
 
           {activeTab === 'admins' && <div className="bps-admins-view" data-testid="settings-admins-fields" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>

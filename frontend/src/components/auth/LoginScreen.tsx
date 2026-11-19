@@ -9,6 +9,7 @@ import {
   Sparkles, UserRound, WifiOff,
 } from "lucide-react";
 import { Button, Input } from "@/components/ui";
+import { ORGANIZATION_ROUTES, AUXILIARY_ROUTES } from "@/lib/routes";
 import {
   DEMO_LOGIN, DEMO_SESSION_KEY, REMEMBERED_EMAIL_KEY,
   isDemoLoginEnabled, matchesDemoLogin, validateLogin,
@@ -98,7 +99,7 @@ export function LoginScreen() {
           createdAt: new Date().toISOString(),
         }));
       } catch { /* Browser storage is optional for the design demo. */ }
-      router.push("/admin");
+      router.push(ORGANIZATION_ROUTES.dashboard);
     } finally {
       setPending(false);
     }
@@ -109,7 +110,7 @@ export function LoginScreen() {
       <div className="bayan-login-layout">
         <aside className="bayan-login-brand-panel" aria-label="التعريف بنظام بيان">
           <div className="bayan-login-brand-top">
-            <Link href="/" className="bayan-login-logo" aria-label="بيان — الصفحة الرئيسية">
+            <Link href={ORGANIZATION_ROUTES.home} className="bayan-login-logo" aria-label="بيان — الصفحة الرئيسية">
               <span className="bayan-login-logo-mark" aria-hidden="true"><GraduationCap size={32} strokeWidth={1.9}/><BookOpenText size={24}/></span>
               <span className="bayan-login-logo-title">بيان</span>
             </Link>
@@ -136,7 +137,7 @@ export function LoginScreen() {
 
         <section className="bayan-login-form-panel" aria-label="الدخول إلى نظام بيان" id="main-content">
           <nav className="bayan-login-topnav" aria-label="روابط عامة">
-            <Link href="/" className="bayan-login-back"><ArrowUpLeft size={16} aria-hidden="true"/> العودة للواجهة الرئيسية</Link>
+            <Link href={ORGANIZATION_ROUTES.home} className="bayan-login-back"><ArrowUpLeft size={16} aria-hidden="true"/> العودة للواجهة الرئيسية</Link>
             <span className="bayan-login-topnav-divider" aria-hidden="true"/>
             <span className="bayan-login-language">العربية <span aria-hidden="true">AR</span></span>
           </nav>
@@ -188,7 +189,7 @@ export function LoginScreen() {
                 </div>
                 <div className="bayan-login-form-options">
                   <label className="bayan-login-remember"><input type="checkbox" checked={rememberEmail} onChange={(e)=>setRememberEmail(e.target.checked)}/><span>تذكّر البريد الإلكتروني</span></label>
-                  <Link href="/forgot-password">نسيت كلمة المرور؟</Link>
+                  <Link href={ORGANIZATION_ROUTES.forgotPassword}>نسيت كلمة المرور؟</Link>
                 </div>
                 {formError && <div className="bayan-login-form-error" role="alert"><WifiOff size={18} aria-hidden="true"/><span>{formError}</span></div>}
                 <Button type="submit" variant="primary" size="lg" loading={pending} disabled={pending} fullWidth className="bayan-login-submit" trailingIcon={!pending ? <ArrowLeft size={20}/> : undefined}>
@@ -203,7 +204,7 @@ export function LoginScreen() {
               <p>{demoEnabled ? "يمكنك اختبار واجهة تسجيل الدخول بحساب نموذجي دون الاتصال بالخادم." : "الدخول التجريبي معطّل في نسخة الإنتاج. لا توجد مصادقة متصلة حاليًا."}</p>
               {demoEnabled && <div className="bayan-login-demo-details"><div><small>البريد التجريبي</small><code>{DEMO_LOGIN.email}</code></div><div><small>كلمة المرور التجريبية</small><code>{DEMO_LOGIN.password}</code></div><button type="button" onClick={fillDemo} className="bayan-login-demo-fill">تعبئة بيانات التجربة <ChevronLeft size={17}/></button></div>}
             </section>
-            <div className="bayan-login-help">هل تحتاج إلى مساعدة؟ <Link href="/screens">استعراض شاشات النظام <ArrowLeft size={14}/></Link></div>
+            <div className="bayan-login-help">هل تحتاج إلى مساعدة؟ <Link href={AUXILIARY_ROUTES.screens}>استعراض شاشات النظام <ArrowLeft size={14}/></Link></div>
           </div>
           <footer className="bayan-login-bottom"><span>واجهة تسجيل الدخول — بيان</span><span><CheckCircle2 size={15}/> يدعم اللغة العربية وRTL</span></footer>
         </section>

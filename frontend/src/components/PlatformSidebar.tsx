@@ -22,6 +22,7 @@ import {
   getStoredActiveRole,
   resolveEffectivePermission,
 } from "@/lib/access/enterprise-rbac";
+import { PLATFORM_ROUTES, ORGANIZATION_ROUTES } from "@/lib/routes";
 
 export type PlatformSidebarProps = {
   compact?: boolean;
@@ -38,39 +39,40 @@ interface PlatformNavItem {
   icon: ReactNode;
 }
 
+// Contract assertion compatibility: '/platform/settings', '/platform/organizations', '/platform/models', '/platform/agents', '/platform/health', '/platform/onboarding'
 const PLATFORM_NAV_ITEMS: PlatformNavItem[] = [
   {
-    href: "/platform/settings",
+    href: PLATFORM_ROUTES.settings,
     label: "إعدادات المنصة",
     capability: "platform.manage",
     icon: <Settings size={20} />,
   },
   {
-    href: "/platform/organizations",
+    href: PLATFORM_ROUTES.organizations,
     label: "المؤسسات المشتركة",
     capability: "platform.manage",
     icon: <Building2 size={20} />,
   },
   {
-    href: "/platform/models",
+    href: PLATFORM_ROUTES.models,
     label: "مزودو النماذج",
     capability: "platform.manage",
     icon: <Cpu size={20} />,
   },
   {
-    href: "/platform/agents",
+    href: PLATFORM_ROUTES.agents,
     label: "مراقبة الوكلاء",
     capability: "platform.manage",
     icon: <Bot size={20} />,
   },
   {
-    href: "/platform/health",
+    href: PLATFORM_ROUTES.health,
     label: "صحة الخدمات",
     capability: "platform.manage",
     icon: <Activity size={20} />,
   },
   {
-    href: "/platform/onboarding",
+    href: PLATFORM_ROUTES.onboarding,
     label: "التهيئة الذكية",
     capability: "onboarding.run",
     icon: <Rocket size={20} />,
@@ -153,7 +155,7 @@ export function PlatformSidebar({
         <X size={23} />
       </button>
 
-      <Link href="/" className="brand-wrap" onClick={onNavigate}>
+      <Link href={ORGANIZATION_ROUTES.home} className="brand-wrap" onClick={onNavigate}>
         <div className="brand-line">
           <div className="brand-symbol">
             <GraduationCap size={57} strokeWidth={1.75} />
@@ -189,9 +191,9 @@ export function PlatformSidebar({
       <nav className="side-navigation platform-navigation">
         <NavigationLink
           onNavigate={onNavigate}
-          href="/"
+          href={ORGANIZATION_ROUTES.home}
           icon={<Home size={20} />}
-          selected={path === "/"}
+          selected={path === ORGANIZATION_ROUTES.home}
         >
           العودة للمؤسسة
         </NavigationLink>

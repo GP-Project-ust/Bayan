@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Button, Input } from "@/components/ui";
 import { AuthBrandPanel } from "@/components/auth/AuthBrandPanel";
+import { ORGANIZATION_ROUTES } from "@/lib/routes";
 import {
   passwordRules, passwordStrength, validateResetForm,
   type ResetFormErrors, type ResetPreviewMode,
@@ -97,7 +98,7 @@ export function ResetPasswordScreen({ initialMode }: { initialMode: ResetPreview
         <AuthBrandPanel />
         <section className="bayan-login-form-panel" id="main-content" aria-label="إعادة تعيين كلمة المرور في بيان">
           <nav className="bayan-login-topnav" aria-label="روابط عامة">
-            <Link href="/login" className="bayan-login-back"><ArrowRight size={16} aria-hidden="true"/> العودة لتسجيل الدخول</Link>
+            <Link href={ORGANIZATION_ROUTES.login} className="bayan-login-back"><ArrowRight size={16} aria-hidden="true"/> العودة لتسجيل الدخول</Link>
             <span className="bayan-login-topnav-divider" aria-hidden="true"/>
             <span className="bayan-login-language">العربية <span aria-hidden="true">AR</span></span>
           </nav>
@@ -204,9 +205,9 @@ export function ResetPasswordScreen({ initialMode }: { initialMode: ResetPreview
                   ? "تم التحقق من حقول كلمة المرور ومحاكاة عملية الحفظ محليًا فقط. لم تُرسل البيانات ولم تُغيَّر كلمة مرور حسابك."
                   : state === "missing" ? "تحتاج عملية التعيين الحقيقية إلى رابط صادر من الخادم بعد طلب الاستعادة." : subtitle}</p>
                 <div className="bayan-recovery-result-actions bayan-reset-result-actions">
-                  {isCompleted ? <Link href="/login" className="bayan-recovery-return-link"><ArrowRight size={17}/> العودة لتسجيل الدخول</Link>
-                    : <Link href="/forgot-password" className="bayan-recovery-return-link"><ArrowRight size={17}/> طلب استعادة جديد</Link>}
-                  {initialMode !== "unavailable" && !isCompleted && <Link href="/reset-password?preview=valid" className="bayan-recovery-retry"><Sparkles size={16}/> تجربة الواجهة</Link>}
+                  {isCompleted ? <Link href={ORGANIZATION_ROUTES.login} className="bayan-recovery-return-link"><ArrowRight size={17}/> العودة لتسجيل الدخول</Link>
+                    : <Link href={ORGANIZATION_ROUTES.forgotPassword} className="bayan-recovery-return-link"><ArrowRight size={17}/> طلب استعادة جديد</Link>}
+                  {initialMode !== "unavailable" && !isCompleted && <Link href={`${ORGANIZATION_ROUTES.resetPassword}?preview=valid`} className="bayan-recovery-retry"><Sparkles size={16}/> تجربة الواجهة</Link>}
                 </div>
               </div>
             )}
@@ -221,12 +222,12 @@ export function ResetPasswordScreen({ initialMode }: { initialMode: ResetPreview
             {initialMode !== "unavailable" && (
               <div className="bayan-reset-preview-switches" aria-label="روابط اختبار حالات الاستعادة">
                 <span>استعراض الحالات:</span>
-                <Link href="/reset-password?preview=valid">رابط صالح للتجربة</Link>
-                <Link href="/reset-password?preview=expired">رابط منتهي</Link>
-                <Link href="/reset-password?preview=invalid">رابط غير صالح</Link>
+                <Link href={`${ORGANIZATION_ROUTES.resetPassword}?preview=valid`}>رابط صالح للتجربة</Link>
+                <Link href={`${ORGANIZATION_ROUTES.resetPassword}?preview=expired`}>رابط منتهي</Link>
+                <Link href={`${ORGANIZATION_ROUTES.resetPassword}?preview=invalid`}>رابط غير صالح</Link>
               </div>
             )}
-            <div className="bayan-login-help">هل تحتاج إلى المساعدة؟ <Link href="/forgot-password">استعادة كلمة المرور <ArrowLeft size={14}/></Link></div>
+            <div className="bayan-login-help">هل تحتاج إلى المساعدة؟ <Link href={ORGANIZATION_ROUTES.forgotPassword}>استعادة كلمة المرور <ArrowLeft size={14}/></Link></div>
           </div>
           <footer className="bayan-login-bottom"><span>تعيين كلمة المرور — بيان</span><span><CheckCircle2 size={15}/> نموذج تفاعلي RTL</span></footer>
         </section>

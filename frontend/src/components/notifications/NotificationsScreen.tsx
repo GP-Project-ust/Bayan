@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { ChatLayout } from "@/components/layout";
 import { Badge, Button, Drawer, Toast } from "@/components/ui";
+import { ORGANIZATION_ROUTES } from "@/lib/routes";
 import {
   categories, demoNotifications, filterNotifications, markAllRead,
   notificationStats, priorities, setNotificationRead,
@@ -108,7 +109,7 @@ function NotificationsBody() {
 
   return <div className="bayan-notices">
     <nav className="bayan-notices-crumb" aria-label="مسار التنقل">
-      <Link href="/">الرئيسية</Link><ChevronLeft size={15} aria-hidden="true"/><span aria-current="page">مركز الإشعارات</span>
+      <Link href={ORGANIZATION_ROUTES.home}>الرئيسية</Link><ChevronLeft size={15} aria-hidden="true"/><span aria-current="page">مركز الإشعارات</span>
     </nav>
 
     <header className="bayan-notices-hero">

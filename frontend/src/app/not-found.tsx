@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Home, ArrowRight, FileQuestion, Sparkles, HelpCircle } from "lucide-react";
+import { ORGANIZATION_ROUTES } from "@/lib/routes";
 
 export default function NotFound() {
   const router = useRouter();
@@ -106,7 +107,7 @@ export default function NotFound() {
           }}
         >
           <Link
-            href="/"
+            href={ORGANIZATION_ROUTES.home}
             style={{
               display: "inline-flex",
               alignItems: "center",

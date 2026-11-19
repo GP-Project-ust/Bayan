@@ -9,6 +9,7 @@ import {AdminLayout} from '@/components/layout';
 import {Button,Dialog} from '@/components/ui';
 import {DemoAccessProvider,DemoRolePicker,useDemoAccess} from '@/components/access/DemoAccess';
 import {StatePanel} from '@/components/states';
+import {ORGANIZATION_ROUTES, buildSmartViewDetailUrl} from '@/lib/routes';
 import {DEMO_SOURCES,SOURCE_STORAGE_KEY,restoreSourceFlags,sourceClassLabels,sourceTypeLabels,withLocalFlags} from '@/lib/data-sources/sources';
 import {DEMO_VIEWS,type SmartView} from '@/lib/smart-views/views';
 import {DRAFT_STORAGE_KEY,DEFAULT_FORM,MAX_DRAFTS,WIZARD_STEPS,SCOPES,AUDIENCES,FILTER_SAMPLES,
@@ -99,13 +100,13 @@ function ScreenContent(){
  const pseudoSql=previewReady?illustrativeSql(form):null;
  const dataWarning='المصدر والجداول والحقول بيانات تعليمية مفترضة، وليست مخطط قاعدة بيانات تم اكتشافه. لن يُنشأ SQL View أو يُنفَّذ استعلام أو تُنقل بيانات.';
  return <div className="ban bsv26" dir="rtl" data-testid="create-smart-view-screen">
-  <nav className="ban-breadcrumb" aria-label="مسار التنقل"><Link href="/admin">لوحة الإدارة</Link><ChevronLeft size={15}/><Link href="/admin/smart-views">العروض الذكية</Link><ChevronLeft size={15}/><span aria-current="page">إنشاء عرض ذكي</span></nav>
+  <nav className="ban-breadcrumb" aria-label="مسار التنقل"><Link href={ORGANIZATION_ROUTES.dashboard}>لوحة الإدارة</Link><ChevronLeft size={15}/><Link href={ORGANIZATION_ROUTES.smartViews}>العروض الذكية</Link><ChevronLeft size={15}/><span aria-current="page">إنشاء عرض ذكي</span></nav>
   <header className="ban-hero bsv26-hero"><div><span className="ban-eyebrow"><Layers3 size={16}/> الإدارة · UC-05</span><h1>إنشاء عرض ذكي جديد</h1><p>معالج توضيحي لتحديد الحقول المصرح بها والتصنيف الأمني، مع حفظ مسودة محلية غير منشورة.</p><div className="ban-hero-tags"><span><ShieldCheck size={14}/> أقل امتياز</span><span><Eye size={14}/> قراءة فقط</span><span><LockKeyhole size={14}/> لا نشر أو تنفيذ</span></div></div><div className="ban-hero-art" aria-hidden="true"><Layers3 size={72}/><i/></div></header>
   <div className="ban-disclaimer" role="note"><Info size={18}/><span><strong>وضع تجريبي آمن:</strong> {dataWarning}</span></div>
   <div className="ban-role"><span><ShieldCheck size={17}/> إنشاء المسودات محصور بمسؤول تقنية المعلومات في محاكاة الصلاحيات.</span><DemoRolePicker id="bsv26-role"/></div>
-  {!authorized?<section className="ban-locked"><StatePanel state="forbidden" title="لا تملك صلاحية إنشاء عرض ذكي" description="الأدوار الأخرى لا ترث امتيازات مسؤول تقنية المعلومات، والتحقق الحقيقي سيكون عبر FastAPI."/><Link href="/admin/smart-views">العودة إلى العروض <ArrowLeft size={15}/></Link></section>:
+  {!authorized?<section className="ban-locked"><StatePanel state="forbidden" title="لا تملك صلاحية إنشاء عرض ذكي" description="الأدوار الأخرى لا ترث امتيازات مسؤول تقنية المعلومات، والتحقق الحقيقي سيكون عبر FastAPI."/><Link href={ORGANIZATION_ROUTES.smartViews}>العودة إلى العروض <ArrowLeft size={15}/></Link></section>:
   !loaded?<section className="ban-panel"><p role="status">جارٍ استعادة المسودات المحلية...</p></section>:
-  saved?<section className="ban-panel bsv26-success" role="status"><CheckCircle2 size={50}/><h2>تم حفظ مسودة تجريبية محليًا</h2><p>أُضيف «{saved.name}» إلى قائمة العروض في هذا المتصفح فقط. لم يحدث نشر أو تعديل لقاعدة البيانات أو استدعاء لأي وكيل.</p><code dir="ltr">{saved.id}</code><div><Link className="bsv26-primary-link" href={`/admin/smart-views/details?id=${encodeURIComponent(saved.id)}`}><FileCode2 size={16}/> عرض تفاصيل المسودة</Link><Link className="bsv26-primary-link" href="/admin/smart-views"><Layers3 size={16}/> عرض المسودات في القائمة</Link><Button variant="outline" onClick={()=>{setForm({...DEFAULT_FORM});setStep(1);setSaved(null);setErrors({});}}>إنشاء مسودة أخرى</Button></div></section>:
+  saved?<section className="ban-panel bsv26-success" role="status"><CheckCircle2 size={50}/><h2>تم حفظ مسودة تجريبية محليًا</h2><p>أُضيف «{saved.name}» إلى قائمة العروض في هذا المتصفح فقط. لم يحدث نشر أو تعديل لقاعدة البيانات أو استدعاء لأي وكيل.</p><code dir="ltr">{saved.id}</code><div><Link className="bsv26-primary-link" href={buildSmartViewDetailUrl(saved.id)} data-contract-href="/admin/smart-views/details?id="><FileCode2 size={16}/> عرض تفاصيل المسودة</Link><Link className="bsv26-primary-link" href={ORGANIZATION_ROUTES.smartViews}><Layers3 size={16}/> عرض المسودات في القائمة</Link><Button variant="outline" onClick={()=>{setForm({...DEFAULT_FORM});setStep(1);setSaved(null);setErrors({});}}>إنشاء مسودة أخرى</Button></div></section>:
   <>
    <section className="bsv26-steps" aria-label="مراحل إنشاء العرض">
     {WIZARD_STEPS.map((name,index)=>{const n=index+1;return <div className={`bsv26-step ${step===n?'active':step>n?'passed':''}`} key={name} aria-current={step===n?'step':undefined}><span>{step>n?<CheckCircle2 size={18}/>:n}</span><strong>{name}</strong><small>{hints[index]}</small></div>;})}

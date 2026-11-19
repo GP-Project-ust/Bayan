@@ -79,6 +79,12 @@ export const AUXILIARY_ROUTES = {
   unavailable: "/unavailable",
   screens: "/screens",
   designSystem: "/design-system",
+  designSystemStatesPermissions: "/design-system/states-permissions",
+  designSystemComponents: "/design-system/components",
+  designSystemBayanComponents: "/design-system/bayan-components",
+  designSystemLayouts: "/design-system/layouts",
+  designSystemResponsive: "/design-system/responsive",
+  designSystemQuality: "/design-system/quality",
 } as const;
 
 export const APP_ROUTES = {

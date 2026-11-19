@@ -11,6 +11,7 @@ import {
 import { ChatLayout } from "@/components/layout";
 import { Badge, Button, Card, Dialog, Input, Toast } from "@/components/ui";
 import { DemoAccessProvider, useDemoAccess } from "@/components/access/DemoAccess";
+import { ORGANIZATION_ROUTES, AUXILIARY_ROUTES } from "@/lib/routes";
 import { capabilityLabels, roleMeta, rolePermissions } from "@/lib/access/policy";
 import {
   cleanProfile, demoIdentity, initialProfile, validateProfile,
@@ -105,12 +106,12 @@ function ProfileBody() {
 
   return <div className={`bayan-profile ${compactDensity?"bayan-profile--compact":""}`}>
     <nav className="bayan-profile-breadcrumb" aria-label="مسار التنقل">
-      <Link href="/">الرئيسية</Link><ChevronLeft size={15} aria-hidden="true"/><span aria-current="page">الملف الشخصي</span>
+      <Link href={ORGANIZATION_ROUTES.home}>الرئيسية</Link><ChevronLeft size={15} aria-hidden="true"/><span aria-current="page">الملف الشخصي</span>
     </nav>
     <header className="bayan-profile-titlebar">
       <div><span className="bayan-profile-eyebrow"><Sparkles size={17}/> حساب المستخدم</span>
         <h1>الملف الشخصي</h1><p>بيانات الحساب والمؤسسة والأذونات وإعدادات العرض.</p></div>
-      <Link className="bayan-profile-back" href="/"><ArrowRight size={18}/> العودة للمحادثة</Link>
+      <Link className="bayan-profile-back" href={ORGANIZATION_ROUTES.home}><ArrowRight size={18}/> العودة للمحادثة</Link>
     </header>
     <div className="bayan-profile-demo-banner" role="note"><Info size={19} aria-hidden="true"/><span><strong>وضع المعاينة التجريبية:</strong> جميع المعلومات المعروضة أمثلة توضيحية، ولا توجد جلسة مستخدم حقيقية أو حفظ في قاعدة البيانات.</span></div>
     <section className="bayan-profile-hero" aria-label="ملخص الحساب التجريبي">
@@ -177,7 +178,7 @@ function ProfileBody() {
           {showPermissionsDetails && <ul className="bayan-profile-permission-list">{rolePermissions[role].map(capability=><li key={capability}><CheckCircle2 size={19}/><span>{capabilityLabels[capability]}</span><code dir="ltr">{capability}</code></li>)}</ul>}
           <div className="bayan-profile-warning"><ShieldQuestion size={19}/><p>الصلاحيات المعروضة لا تسمح بالوصول إلى أي بيانات. يجب التحقق من هوية المستخدم والمؤسسة وأذوناته على خادم FastAPI لكل طلب.</p></div>
         </Card>
-        <aside className="bayan-profile-side-stack"><div className="bayan-profile-side-card"><span className="bayan-profile-side-icon"><Fingerprint size={28}/></span><h3>من يمنح الصلاحيات؟</h3><p>لا يغير المستخدم دوره ذاتيًا. يحدد المسؤول المخوّل الدور بحسب سياسة المؤسسة، ويطبق الخادم قيود الوصول.</p><Link href="/screens">خريطة شاشات النظام <ArrowLeft size={15}/></Link></div></aside>
+        <aside className="bayan-profile-side-stack"><div className="bayan-profile-side-card"><span className="bayan-profile-side-icon"><Fingerprint size={28}/></span><h3>من يمنح الصلاحيات؟</h3><p>لا يغير المستخدم دوره ذاتيًا. يحدد المسؤول المخوّل الدور بحسب سياسة المؤسسة، ويطبق الخادم قيود الوصول.</p><Link href={AUXILIARY_ROUTES.screens}>خريطة شاشات النظام <ArrowLeft size={15}/></Link></div></aside>
       </div>}
 
       {activeTab === "preferences" && <div className="bayan-profile-grid">
@@ -194,13 +195,13 @@ function ProfileBody() {
       {activeTab === "security" && <div className="bayan-profile-grid">
         <Card className="bayan-profile-card bayan-profile-card--main" title="أمان الحساب" description="خيارات التعريف والحماية المتاحة في نموذج الواجهة.">
           <div className="bayan-profile-security-list">
-            <div><span className="bayan-profile-security-icon"><KeyRound size={23}/></span><section><h3>كلمة المرور</h3><p>يمكنك تجربة تدفق استعادة الحساب، لكن لا يُنفذ تغيير حقيقي دون Backend.</p></section><Link href="/forgot-password" className="bayan-profile-secondary-action">طلب استعادة <ArrowLeft size={17}/></Link></div>
+            <div><span className="bayan-profile-security-icon"><KeyRound size={23}/></span><section><h3>كلمة المرور</h3><p>يمكنك تجربة تدفق استعادة الحساب، لكن لا يُنفذ تغيير حقيقي دون Backend.</p></section><Link href={ORGANIZATION_ROUTES.forgotPassword} className="bayan-profile-secondary-action">طلب استعادة <ArrowLeft size={17}/></Link></div>
             <div><span className="bayan-profile-security-icon"><Fingerprint size={23}/></span><section><h3>التحقق بخطوتين</h3><p>يتطلب تفعيلًا آمنًا على الخادم؛ غير متاح في هذا النموذج.</p></section><Badge tone="warning">غير متصل</Badge></div>
             <div><span className="bayan-profile-security-icon"><ClipboardCheck size={23}/></span><section><h3>الأجهزة والجلسات النشطة</h3><p>لا توجد جلسات حقيقية متصلة يمكن عرضها أو إلغاؤها في المعاينة.</p></section><Badge tone="neutral">بانتظار الربط</Badge></div>
           </div>
           <div className="bayan-profile-warning"><Info size={19}/><p>لا تختبر كلمات مرورك الحقيقية على الشاشات التجريبية. لا يجري هذا النموذج طلبات دخول أو تغيير حسابات.</p></div>
         </Card>
-        <aside className="bayan-profile-side-stack"><div className="bayan-profile-side-card"><span className="bayan-profile-side-icon"><LockKeyhole size={26}/></span><h3>سياسة الأمان</h3><p>ستُضاف إدارة الجلسات وتغيير كلمة المرور والتحقق بخطوتين بعد تحديد عقود API وآلية المصادقة مع فريق Backend.</p><Link href="/login">صفحة تسجيل الدخول <ArrowLeft size={15}/></Link></div></aside>
+        <aside className="bayan-profile-side-stack"><div className="bayan-profile-side-card"><span className="bayan-profile-side-icon"><LockKeyhole size={26}/></span><h3>سياسة الأمان</h3><p>ستُضاف إدارة الجلسات وتغيير كلمة المرور والتحقق بخطوتين بعد تحديد عقود API وآلية المصادقة مع فريق Backend.</p><Link href={ORGANIZATION_ROUTES.login}>صفحة تسجيل الدخول <ArrowLeft size={15}/></Link></div></aside>
       </div>}
     </section>
 

@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Button, Input } from "@/components/ui";
 import { AuthBrandPanel } from "@/components/auth/AuthBrandPanel";
+import { ORGANIZATION_ROUTES } from "@/lib/routes";
 import { isRecoveryPreviewEnabled, validateRecoveryEmail } from "@/lib/auth/recovery";
 
 type RecoveryState = "form" | "preview-confirmed";
@@ -65,7 +66,7 @@ export function ForgotPasswordScreen() {
         <AuthBrandPanel />
         <section className="bayan-login-form-panel" id="main-content" aria-label="استعادة كلمة المرور في نظام بيان">
           <nav className="bayan-login-topnav" aria-label="روابط عامة">
-            <Link href="/login" className="bayan-login-back"><ArrowRight size={16} aria-hidden="true"/> العودة لتسجيل الدخول</Link>
+            <Link href={ORGANIZATION_ROUTES.login} className="bayan-login-back"><ArrowRight size={16} aria-hidden="true"/> العودة لتسجيل الدخول</Link>
             <span className="bayan-login-topnav-divider" aria-hidden="true"/>
             <span className="bayan-login-language">العربية <span aria-hidden="true">AR</span></span>
           </nav>
@@ -117,7 +118,7 @@ export function ForgotPasswordScreen() {
                 <p>تم التحقق من شكل عنوان البريد في المتصفح فقط. <strong>لم نرسل أي رسالة، ولم ننشئ رابطًا لإعادة تعيين كلمة المرور.</strong></p>
                 <div className="bayan-recovery-result-note"><Info size={19} aria-hidden="true"/><span>بعد ربط الخدمة الحقيقية، ستظهر رسالة موحدة لجميع الطلبات الصحيحة شكليًا لحماية خصوصية الحسابات.</span></div>
                 <div className="bayan-recovery-result-actions">
-                  <Link href="/login" className="bayan-recovery-return-link"><ArrowRight size={18} aria-hidden="true"/> العودة لتسجيل الدخول</Link>
+                  <Link href={ORGANIZATION_ROUTES.login} className="bayan-recovery-return-link"><ArrowRight size={18} aria-hidden="true"/> العودة لتسجيل الدخول</Link>
                   <button type="button" onClick={resetForm} className="bayan-recovery-retry">إدخال بريد آخر</button>
                 </div>
               </div>
@@ -131,7 +132,7 @@ export function ForgotPasswordScreen() {
               <div><span><KeyRound size={17}/></span><strong>تعيين كلمة جديدة</strong><small>الخطوة 3</small></div>
             </div>
             <p className="bayan-recovery-preview-warning"><Clock3 size={15} aria-hidden="true"/> <strong>وضع معاينة:</strong> الخطوتان الثانية والثالثة موضحتان للتصميم فقط ولم تُنفّذا بعد.</p>
-            <div className="bayan-login-help">هل تذكرت كلمة المرور؟ <Link href="/login">تسجيل الدخول <ArrowLeft size={14}/></Link></div>
+            <div className="bayan-login-help">هل تذكرت كلمة المرور؟ <Link href={ORGANIZATION_ROUTES.login}>تسجيل الدخول <ArrowLeft size={14}/></Link></div>
           </div>
           <footer className="bayan-login-bottom"><span>استعادة كلمة المرور — بيان</span><span><CheckCircle2 size={15}/> يدعم اللغة العربية وRTL</span></footer>
         </section>

@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import catalogData from '@/lib/screen-catalog.json';
+import { ORGANIZATION_ROUTES } from '@/lib/routes';
 import {
   Activity, ArrowUpLeft, CheckCircle2, ChevronDown, CircleDot,
   ExternalLink, Filter, LayoutGrid, List, Search, ShieldCheck, X,
@@ -59,24 +60,24 @@ export function ScreensCatalog() {
   return (
     <main className="sc-page" dir="rtl">
       <header className="sc-header">
-        <Link href="/" className="sc-brand" aria-label="بيان — الرئيسية">
-          <span className="sc-brand-mark"><ShieldCheck size={24}/></span>
+        <Link href={ORGANIZATION_ROUTES.home} className="sc-brand" aria-label="بيان — الرئيسية">
+          <span className="sc-brand-mark"><ShieldCheck size={24} /></span>
           <span><strong>بيان</strong><small>خريطة النظام</small></span>
         </Link>
         <div className="sc-header-actions">
-          <span className="sc-secure"><Activity size={14}/> فهرس الواجهات</span>
-          <Link href="/" className="sc-home-link">الرئيسية <ArrowUpLeft size={15}/></Link>
+          <span className="sc-secure"><Activity size={14} /> فهرس الواجهات</span>
+          <Link href={ORGANIZATION_ROUTES.home} className="sc-home-link">الرئيسية <ArrowUpLeft size={15} /></Link>
         </div>
       </header>
 
       <section className="sc-container">
         <div className="sc-intro">
           <div>
-            <div className="sc-kicker"><LayoutGrid size={15}/> دليل التنقل المؤسسي</div>
+            <div className="sc-kicker"><LayoutGrid size={15} /> دليل التنقل المؤسسي</div>
             <h1>خريطة واجهات بيان</h1>
             <p>استعرض شاشات النظام، وابحث حسب الاسم أو المسار أو القسم، ثم انتقل مباشرة إلى الواجهة المطلوبة.</p>
           </div>
-          <div className="sc-intro-mark" aria-hidden="true"><LayoutGrid size={38}/><span>42</span></div>
+          <div className="sc-intro-mark" aria-hidden="true"><LayoutGrid size={38} /><span>42</span></div>
         </div>
 
         <div className="sc-stats">
@@ -89,16 +90,16 @@ export function ScreensCatalog() {
         <section className="sc-panel" aria-label="البحث والتصفية">
           <div className="sc-toolbar">
             <label className="sc-search">
-              <Search size={18}/>
-              <input value={query} onChange={e => setQuery(e.target.value)} placeholder="ابحث عن شاشة أو مسار أو وظيفة..." aria-label="البحث في الشاشات"/>
-              {query && <button type="button" onClick={() => setQuery('')} aria-label="مسح البحث"><X size={15}/></button>}
+              <Search size={18} />
+              <input value={query} onChange={e => setQuery(e.target.value)} placeholder="ابحث عن شاشة أو مسار أو وظيفة..." aria-label="البحث في الشاشات" />
+              {query && <button type="button" onClick={() => setQuery('')} aria-label="مسح البحث"><X size={15} /></button>}
             </label>
             <button type="button" className={`sc-filter-toggle ${filtersOpen ? 'active' : ''}`} onClick={() => setFiltersOpen(v => !v)}>
-              <Filter size={16}/> التصفية <ChevronDown size={15}/>
+              <Filter size={16} /> التصفية <ChevronDown size={15} />
             </button>
             <div className="sc-view-toggle" aria-label="طريقة عرض النتائج">
-              <button type="button" className={view === 'grid' ? 'selected' : ''} onClick={() => setView('grid')} aria-label="عرض شبكي"><LayoutGrid size={17}/></button>
-              <button type="button" className={view === 'list' ? 'selected' : ''} onClick={() => setView('list')} aria-label="عرض قائمة"><List size={18}/></button>
+              <button type="button" className={view === 'grid' ? 'selected' : ''} onClick={() => setView('grid')} aria-label="عرض شبكي"><LayoutGrid size={17} /></button>
+              <button type="button" className={view === 'list' ? 'selected' : ''} onClick={() => setView('list')} aria-label="عرض قائمة"><List size={18} /></button>
             </div>
           </div>
 
@@ -119,7 +120,7 @@ export function ScreensCatalog() {
 
           <div className="sc-results-head">
             <div><strong>{filtered.length}</strong> شاشة <span>مطابقة لمعايير البحث</span></div>
-            <span className="sc-results-hint"><CircleDot size={13}/> اختر أي بطاقة لفتح الشاشة</span>
+            <span className="sc-results-hint"><CircleDot size={13} /> اختر أي بطاقة لفتح الشاشة</span>
           </div>
 
           {filtered.length ? (
@@ -137,22 +138,22 @@ export function ScreensCatalog() {
                     <code dir="ltr">{item.path}</code>
                   </div>
                   <div className="sc-item-bottom">
-                    <span className="sc-roles"><ShieldCheck size={13}/>{item.roles?.length || 0} أدوار</span>
-                    <Link href={item.path} className="sc-open">فتح الشاشة <ExternalLink size={14}/></Link>
+                    <span className="sc-roles"><ShieldCheck size={13} />{item.roles?.length || 0} أدوار</span>
+                    <Link href={item.path} className="sc-open">فتح الشاشة <ExternalLink size={14} /></Link>
                   </div>
                 </article>
               ))}
             </div>
           ) : (
             <div className="sc-empty">
-              <Search size={30}/>
+              <Search size={30} />
               <strong>لا توجد شاشات مطابقة</strong>
               <p>جرّب تغيير عبارة البحث أو عوامل التصفية.</p>
               <button type="button" onClick={clearFilters}>عرض جميع الشاشات</button>
             </div>
           )}
         </section>
-        <footer className="sc-footer"><span>بيان · خريطة الواجهات</span><span><CheckCircle2 size={14}/> البيانات مستمدة من كتالوج النظام</span></footer>
+        <footer className="sc-footer"><span>بيان · خريطة الواجهات</span><span><CheckCircle2 size={14} /> البيانات مستمدة من كتالوج النظام</span></footer>
       </section>
     </main>
   );

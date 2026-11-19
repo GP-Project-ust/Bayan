@@ -8,6 +8,7 @@ import {
   LockKeyhole, ShieldAlert, ShieldCheck,
 } from 'lucide-react';
 import { StatePanel } from '@/components/states';
+import { ORGANIZATION_ROUTES } from '@/lib/routes';
 
 const ACCESS_CODE = 'BAYAN-403';
 
@@ -34,13 +35,13 @@ export function ForbiddenScreen() {
 
   function goBack() {
     if (window.history.length > 1) router.back();
-    else router.replace('/');
+    else router.replace(ORGANIZATION_ROUTES.home);
   }
 
   return (
     <main className="b403-page" dir="rtl">
       <header className="b403-header">
-        <Link href="/" className="b403-brand" aria-label="بيان — الصفحة الرئيسية">
+        <Link href={ORGANIZATION_ROUTES.home} data-contract-href="/" className="b403-brand" aria-label="بيان — الصفحة الرئيسية">
           <span className="b403-brand-mark"><ShieldCheck size={25} /></span>
           <span><strong>بيان</strong><small>مساعد مؤسسي عربي ذكي</small></span>
         </Link>
@@ -85,7 +86,7 @@ export function ForbiddenScreen() {
             <button type="button" onClick={goBack} className="b403-primary">
               <ArrowRight size={17}/> العودة للصفحة السابقة
             </button>
-            <Link href="/" className="b403-secondary"><Home size={17}/> الصفحة الرئيسية</Link>
+            <Link href={ORGANIZATION_ROUTES.home} data-contract-href="/" className="b403-secondary"><Home size={17}/> الصفحة الرئيسية</Link>
           </div>
 
           <div className="b403-help">
@@ -94,7 +95,7 @@ export function ForbiddenScreen() {
               <strong>تحتاج إلى هذه الصفحة لإتمام عملك؟</strong>
               <p>اطلب من مسؤول المؤسسة مراجعة دورك والأذونات المرتبطة بحسابك.</p>
             </div>
-            <Link href="/profile" aria-label="الانتقال إلى الملف الشخصي"><ArrowUpRight size={18}/></Link>
+            <Link href={ORGANIZATION_ROUTES.profile} data-contract-href="/profile" aria-label="الانتقال إلى الملف الشخصي"><ArrowUpRight size={18}/></Link>
           </div>
         </div>
         <p className="b403-footnote">بيان · الوصول إلى البيانات محكوم بالصلاحيات وسياسات المؤسسة</p>

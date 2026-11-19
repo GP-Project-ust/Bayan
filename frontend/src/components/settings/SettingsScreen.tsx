@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import {ChatLayout} from "@/components/layout";
 import {Badge,Button,Card,Dialog,Select,Toast} from "@/components/ui";
+import {ORGANIZATION_ROUTES} from "@/lib/routes";
 import {DemoAccessProvider,useDemoAccess,DemoRolePicker} from "@/components/access/DemoAccess";
 import {roleMeta} from "@/lib/access/policy";
 import {
@@ -97,12 +98,12 @@ function SettingsBody(){
 
   return <div className="bayan-settings" data-testid="settings-screen">
     <nav className="bayan-settings-breadcrumb" aria-label="مسار التنقل">
-      <Link href="/">الرئيسية</Link><ChevronLeft size={15}/><span aria-current="page">الإعدادات</span>
+      <Link href={ORGANIZATION_ROUTES.home}>الرئيسية</Link><ChevronLeft size={15}/><span aria-current="page">الإعدادات</span>
     </nav>
     <header className="bayan-settings-heading">
       <div><span className="bayan-settings-kicker"><Sparkles size={16}/> تفضيلات حسابك</span>
         <h1>الإعدادات والتفضيلات</h1><p>خصص طريقة استخدام «بيان» بما يناسب احتياجاتك وبيئة عملك.</p></div>
-      <Link className="bayan-settings-back" href="/profile"><ArrowRight size={17}/> الملف الشخصي</Link>
+      <Link className="bayan-settings-back" href={ORGANIZATION_ROUTES.profile}><ArrowRight size={17}/> الملف الشخصي</Link>
     </header>
     <section className="bayan-settings-hero" aria-label="ملخص إعدادات بيان">
       <div className="bayan-settings-hero-copy"><span><Settings2 size={17}/> مركز إعدادات المستخدم</span><h2>تجربة بيان بالطريقة التي تفضلها</h2><p>المظهر، الإشعارات، طريقة عرض المراجع، والتفاصيل التقنية وفق الدور المصرّح له.</p>
@@ -158,7 +159,7 @@ function SettingsBody(){
               <Toggle id="bayan-notify-email" title="إشعارات البريد الإلكتروني" description="تفضيل تجريبي لا يرسل رسائل فعلية إلى البريد." checked={draft.emailNotifications} onChange={v=>update("emailNotifications",v)} icon={<BellRing size={21}/>}/>
               <div className="bayan-settings-locked"><ShieldCheck size={20}/><div><strong>التنبيهات الأمنية الإلزامية</strong><p>تديرها سياسة المؤسسة ولا يمكن تعطيلها من هذه الواجهة.</p></div><Badge tone="warning">تُدار مركزيًا</Badge></div>
             </Card>
-            <div className="bayan-settings-inline-link"><BellRing size={19}/><p>هذه تفضيلات للمعاينة، ولا تعمل على تصفية إشعارات شاشة المركز الآن.</p><Link href="/notifications">فتح مركز الإشعارات <ArrowLeft size={16}/></Link></div>
+            <div className="bayan-settings-inline-link"><BellRing size={19}/><p>هذه تفضيلات للمعاينة، ولا تعمل على تصفية إشعارات شاشة المركز الآن.</p><Link href={ORGANIZATION_ROUTES.notifications}>فتح مركز الإشعارات <ArrowLeft size={16}/></Link></div>
           </div>}
 
           {section==="chat"&&<div className="bayan-settings-panel-stack">

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { AlertTriangle, RotateCcw, Home, Sparkles } from "lucide-react";
+import { ORGANIZATION_ROUTES } from "@/lib/routes";
 
 export default function ErrorBoundary({
   error,
@@ -159,7 +160,7 @@ export default function ErrorBoundary({
           </button>
 
           <Link
-            href="/"
+            href={ORGANIZATION_ROUTES.home}
             style={{
               display: "inline-flex",
               alignItems: "center",

@@ -13,6 +13,7 @@ import { PlatformLayout } from '@/components/layout/PlatformLayout';
 import { Button, Drawer, Toast } from '@/components/ui';
 import { DemoAccessProvider, DemoRolePicker, useDemoAccess } from '@/components/access/DemoAccess';
 import { StatePanel } from '@/components/states';
+import { PLATFORM_ROUTES, ORGANIZATION_ROUTES, AUXILIARY_ROUTES } from '@/lib/routes';
 import {
   AGENT_CATEGORY_LABELS, AGENT_MONITORING_NOTICE, AGENT_MONITORING_SCOPE,
   AGENT_STATE_LABELS, DEFAULT_AGENT_FILTERS, agentOverviewStats, agentsCsv, filterAgents,
@@ -61,7 +62,7 @@ function AgentDetails({ agent, traceAccess, onCopy }: { agent: AgentMetrics; tra
     </div></section>
     <div className="bam-detail-actions">
       <Button size="sm" variant="outline" leadingIcon={<ClipboardCopy size={15}/>} onClick={() => onCopy(agent.id)}>نسخ معرّف الوكيل</Button>
-      {traceAccess ? <Link href="/admin/agent-traces" className="bam-trace-link">فتح تتبعات المؤسسة <ArrowLeft size={14}/></Link> : <span className="bam-restricted"><LockKeyhole size={14}/> تفاصيل تتبعات المؤسسة غير متاحة لدور مسؤول المنصة</span>}
+      {traceAccess ? <Link href={ORGANIZATION_ROUTES.agentTraces} className="bam-trace-link">فتح تتبعات المؤسسة <ArrowLeft size={14}/></Link> : <span className="bam-restricted"><LockKeyhole size={14}/> تفاصيل تتبعات المؤسسة غير متاحة لدور مسؤول المنصة</span>}
     </div>
   </div>;
 }
@@ -107,7 +108,7 @@ function Screen() {
 
   return <main className="ban bam" dir="rtl" data-testid="agent-monitoring-screen">
     <nav className="ban-breadcrumb" aria-label="مسار التنقل">
-      <Link href="/platform/organizations">إدارة المنصة</Link><ChevronLeft size={15}/><span aria-current="page">مراقبة الوكلاء</span>
+      <Link href={PLATFORM_ROUTES.organizations}>إدارة المنصة</Link><ChevronLeft size={15}/><span aria-current="page">مراقبة الوكلاء</span>
     </nav>
     <header className="ban-hero bam-hero">
       <div><span className="ban-eyebrow"><Bot size={17}/> مراقبة الذكاء الاصطناعي · FR-27</span>
@@ -121,7 +122,7 @@ function Screen() {
 
     {!allowed ? <section className="ban-locked" data-testid="agent-monitoring-forbidden">
       <StatePanel state="forbidden" title="لا تملك صلاحية مراقبة وكلاء المنصة" description="تتطلب معاينة هذه اللوحة صلاحية platform.manage. يجب تطبيق التفويض الحقيقي وعزل المؤسسات على الخادم أيضًا."/>
-      <Link href="/screens">العودة إلى خريطة الواجهات <ArrowLeft size={16}/></Link>
+      <Link href={AUXILIARY_ROUTES.screens}>العودة إلى خريطة الواجهات <ArrowLeft size={16}/></Link>
     </section> : <>
       <section className="bam-kpis" aria-label="ملخص مؤشرات العينة">
         {([
@@ -151,7 +152,7 @@ function Screen() {
 
       <section className="ban-panel bam-agents-panel" aria-labelledby="bam-agents-title">
         <div className="ban-section-header"><div><h2 id="bam-agents-title"><Bot size={20}/> قائمة الوكلاء ومؤشراتهم</h2><p>اضغط على بطاقة أو اسم وكيل لعرض مهمته ومدخلاته ومخرجاته ومؤشراته التجريبية.</p></div>
-          <div className="ban-actions"><Link className="bam-nav-link" href="/platform/health"><Activity size={16}/> صحة الخدمات</Link><Link className="bam-nav-link" href="/platform/models"><BrainCircuit size={16}/> مزودو النماذج</Link><Button size="sm" variant="outline" disabled={!results.length} onClick={exportCsv} leadingIcon={<Download size={15}/>}>تصدير CSV</Button></div>
+          <div className="ban-actions"><Link className="bam-nav-link" href={PLATFORM_ROUTES.health} data-contract-href="/platform/health"><Activity size={16}/> صحة الخدمات</Link><Link className="bam-nav-link" href={PLATFORM_ROUTES.models} data-contract-href="/platform/models"><BrainCircuit size={16}/> مزودو النماذج</Link><Button size="sm" variant="outline" disabled={!results.length} onClick={exportCsv} leadingIcon={<Download size={15}/>}>تصدير CSV</Button></div>
         </div>
         <div className="bam-filters">
           <label><span><Search size={15}/> البحث عن وكيل</span><input type="search" aria-label="البحث عن وكيل" placeholder="الاسم أو المهمة أو المسؤولية..." value={filters.query} onChange={event => update('query', event.target.value)}/></label>
@@ -183,7 +184,7 @@ function Screen() {
       </section>
       <section className="bam-guidance">
         <article className="ban-panel"><h2><ShieldCheck size={19}/> حدود الرؤية والصلاحيات</h2><p>{AGENT_MONITORING_SCOPE} لا تعرض هذه اللوحة أسئلة المستخدمين أو محتوى الوثائق أو نصوص SQL أو معرفات المؤسسات أو تفاصيل التنفيذ الخام.</p></article>
-        <article className="ban-panel"><h2><Zap size={19}/> التكامل التشغيلي المقترح</h2><p>عند الربط الفعلي، تُستبدل العينات بمقاييس مجمعة من خدمة مراقبة موثوقة، وتُحمى تفاصيل التتبع بسياسة المؤسسة وRBAC على الخادم.</p><div className="bam-guidance-links"><Link href="/platform/health">مراقبة صحة الخدمات <ArrowLeft size={14}/></Link><Link href="/platform/models">إدارة مزودي النماذج <ArrowLeft size={14}/></Link></div></article>
+        <article className="ban-panel"><h2><Zap size={19}/> التكامل التشغيلي المقترح</h2><p>عند الربط الفعلي، تُستبدل العينات بمقاييس مجمعة من خدمة مراقبة موثوقة، وتُحمى تفاصيل التتبع بسياسة المؤسسة وRBAC على الخادم.</p><div className="bam-guidance-links"><Link href={PLATFORM_ROUTES.health} data-contract-href="/platform/health">مراقبة صحة الخدمات <ArrowLeft size={14}/></Link><Link href={PLATFORM_ROUTES.models} data-contract-href="/platform/models">إدارة مزودي النماذج <ArrowLeft size={14}/></Link></div></article>
       </section>
     </>}
     <Drawer open={!!selected && allowed} onClose={() => setSelectedId(null)} title="تفاصيل الوكيل" description="ملخص وصفي ومؤشرات من عينات اصطناعية فقط" footer={<Button size="sm" variant="outline" onClick={() => setSelectedId(null)}>إغلاق</Button>}>

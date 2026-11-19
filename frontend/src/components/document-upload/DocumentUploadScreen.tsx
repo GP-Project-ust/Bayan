@@ -12,6 +12,7 @@ import {ChatLayout} from "@/components/layout";
 import {Badge,Button,Dialog,Drawer,Toast} from "@/components/ui";
 import {StatePanel} from "@/components/states";
 import {DemoAccessProvider,DemoRolePicker,useDemoAccess} from "@/components/access/DemoAccess";
+import {ORGANIZATION_ROUTES} from "@/lib/routes";
 import {
   ACCEPT_ATTRIBUTE,accessLabels,categoryLabels,exampleFiles,initialUploadMetadata,
   isSimulating,makeDemoUploadItems,MAX_BATCH_FILES,MAX_FILE_BYTES,nextSimulationStage,
@@ -122,7 +123,7 @@ function UploadBody(){
   }
   const formDisabled=!canManage||anyRunning;
   return <div className="bdu" data-testid="document-upload-screen">
-    <nav className="bdu-breadcrumb" aria-label="مسار التنقل"><Link href="/">الرئيسية</Link><ChevronLeft size={15}/><Link href="/sources">مكتبة المستندات</Link><ChevronLeft size={15}/><span aria-current="page">رفع وفهرسة مستند</span></nav>
+    <nav className="bdu-breadcrumb" aria-label="مسار التنقل"><Link href={ORGANIZATION_ROUTES.home}>الرئيسية</Link><ChevronLeft size={15}/><Link href={ORGANIZATION_ROUTES.sources}>مكتبة المستندات</Link><ChevronLeft size={15}/><span aria-current="page">رفع وفهرسة مستند</span></nav>
     <header className="bdu-hero"><div><div className="bdu-eyebrow"><Sparkles size={15}/> إدارة مصادر المعرفة</div><h1>رفع المستندات وفهرستها</h1><p>جهّز ملفات المؤسسة، وصنّفها وحدّد صلاحياتها، ثم عاين مراحل المعالجة قبل ربط خدمات الرفع والفهرسة الفعلية.</p><div className="bdu-hero-tags"><span><ShieldCheck size={16}/> تحكم بالوصول</span><span><Layers3 size={16}/> فهرسة دلالية</span><span><FileCheck2 size={16}/> فحص قبل الإرسال</span></div></div><span className="bdu-hero-art" aria-hidden="true"><UploadCloud size={75}/></span></header>
     <div className="bdu-demo-banner" role="note"><Info size={20}/><div><strong>واجهة تفاعلية تجريبية — دون رفع فعلي</strong><p>{DEMO_NOTICE}</p></div></div>
     <section className="bdu-role" aria-label="اختيار الصلاحيات التجريبية"><div><LockKeyhole size={19}/><span>رفع المستندات مخصص لمسؤول تقنية المعلومات في المؤسسة؛ تغيير الدور هنا لا يمثّل تسجيل دخول حقيقيًا.</span></div><DemoRolePicker id="bdu-role-picker"/></section>
@@ -175,7 +176,7 @@ function UploadBody(){
             <div className="bdu-run-note"><Info size={15}/> التنفيذ تجريبي ولا يرسل طلبات API.</div>
             {stats.complete>0&&<div className="bdu-complete-note" role="status"><CheckCircle2 size={19}/><span>اكتملت محاكاة {stats.complete} من الملفات. <strong>لم تُضف إلى المكتبة أو Qdrant.</strong></span></div>}
           </section>
-          <Link href="/sources" className="bdu-back"><BookOpen size={17}/> العودة إلى مكتبة المستندات <ArrowLeft size={17}/></Link>
+          <Link href={ORGANIZATION_ROUTES.sources} className="bdu-back"><BookOpen size={17}/> العودة إلى مكتبة المستندات <ArrowLeft size={17}/></Link>
         </div>
       </div>
       <div className="bdu-footer-note"><FileWarning size={18}/><span>أنواع الملفات وامتداداتها يمكن تزويرها. يتعين على الخادم فحص المحتوى والأذونات والفيروسات والحجم وحدود المعدّل قبل التخزين والفهرسة.</span></div>

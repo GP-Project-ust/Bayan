@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowUpLeft, BookOpen, Check, CircleAlert, CircleCheck,
   CodeXml, LayoutDashboard, MessageSquareText, Palette, ShieldCheck, ClipboardCheck, Sparkles,
   Type, Layers3, Database, Download, AlertTriangle, CircleHelp } from "lucide-react";
 import { bayanTokens } from "@/lib/bayan-tokens";
+import { ORGANIZATION_ROUTES, AUXILIARY_ROUTES } from "@/lib/routes";
 import "./style.css";
 
 const colors = [
@@ -26,14 +27,14 @@ export default function DesignSystemFoundationPage() {
     <div className="ds-container">
       <nav className="ds-top-nav" aria-label="التنقل بين صفحات البيان">
         <div className="ds-lockup"><div className="ds-logo-mark"><Sparkles size={21}/></div><strong>بيان</strong><span>Design System · الإصدار 1.0</span></div>
-        <div className="ds-top-links"><Link href="/"><MessageSquareText size={17}/> المحادثة</Link><Link href="/admin"><LayoutDashboard size={17}/> لوحة الإدارة</Link><Link href="/screens"><Layers3 size={17}/> خريطة الشاشات</Link></div>
+        <div className="ds-top-links"><Link href={ORGANIZATION_ROUTES.home}><MessageSquareText size={17}/> المحادثة</Link><Link href={ORGANIZATION_ROUTES.dashboard}><LayoutDashboard size={17}/> لوحة الإدارة</Link><Link href={AUXILIARY_ROUTES.screens}><Layers3 size={17}/> خريطة الشاشات</Link></div>
       </nav>
 
       <header className="ds-hero">
         <div><div className="ds-eyebrow"><Palette size={16}/> المرحلة الأولى من سبع مراحل</div>
           <h1>أسس النظام البصري لـ <span>بيان</span></h1>
           <p>مرجع حي للألوان والخطوط والمسافات والحدود والظلال. اعتمدنا التصميم السابق كما هو، وفصلنا قواعد الهوية حتى تُستخدم عند بناء الواجهات الجديدة دون تغيير الشاشات القديمة.</p>
-          <div className="ds-actions"><Link className="ds-btn ds-primary" href="/design-system/components"><Layers3 size={18}/> مكتبة المكونات الجديدة</Link><Link className="ds-btn ds-secondary" href="/design-system/layouts"><LayoutDashboard size={18}/> المرحلة الثالثة: هياكل الصفحات</Link><Link className="ds-btn ds-secondary" href="/design-system/bayan-components"><Layers3 size={18}/> المرحلة الرابعة: مكونات بيان</Link><Link className="ds-btn ds-secondary" href="/design-system/states-permissions"><ShieldCheck size={18}/> المرحلة الخامسة: الحالات والصلاحيات</Link><Link className="ds-btn ds-secondary" href="/design-system/responsive"><LayoutDashboard size={18}/> المرحلة السادسة: التجاوب</Link><Link className="ds-btn ds-secondary" href="/design-system/quality"><ClipboardCheck size={18}/> المرحلة السابعة: الجودة والاختبارات</Link><Link className="ds-btn ds-secondary" href="/"><MessageSquareText size={18}/> معاينة الواجهة الأصلية <ArrowUpLeft size={16}/></Link><Link className="ds-btn ds-secondary" href="/admin"><LayoutDashboard size={18}/> معاينة لوحة الإدارة</Link></div>
+          <div className="ds-actions"><Link className="ds-btn ds-primary" href={AUXILIARY_ROUTES.designSystemComponents}><Layers3 size={18}/> مكتبة المكونات الجديدة</Link><Link className="ds-btn ds-secondary" href={AUXILIARY_ROUTES.designSystemLayouts}><LayoutDashboard size={18}/> المرحلة الثالثة: هياكل الصفحات</Link><Link className="ds-btn ds-secondary" href={AUXILIARY_ROUTES.designSystemBayanComponents}><Layers3 size={18}/> المرحلة الرابعة: مكونات بيان</Link><Link className="ds-btn ds-secondary" href={AUXILIARY_ROUTES.designSystemStatesPermissions}><ShieldCheck size={18}/> المرحلة الخامسة: الحالات والصلاحيات</Link><Link className="ds-btn ds-secondary" href={AUXILIARY_ROUTES.designSystemResponsive}><LayoutDashboard size={18}/> المرحلة السادسة: التجاوب</Link><Link className="ds-btn ds-secondary" href={AUXILIARY_ROUTES.designSystemQuality}><ClipboardCheck size={18}/> المرحلة السابعة: الجودة والاختبارات</Link><Link className="ds-btn ds-secondary" href={ORGANIZATION_ROUTES.home}><MessageSquareText size={18}/> معاينة الواجهة الأصلية <ArrowUpLeft size={16}/></Link><Link className="ds-btn ds-secondary" href={ORGANIZATION_ROUTES.dashboard}><LayoutDashboard size={18}/> معاينة لوحة الإدارة</Link></div>
         </div>
         <div className="ds-preview-brand"><div className="ds-preview-logo"><Sparkles size={28}/><span>بيان</span></div><strong>المساعد المؤسسي العربي الذكي</strong><p>عربية أولًا · RTL · تصميم مؤسسي</p><div className="ds-mini-surface"><span/><span/><span/></div></div>
       </header>
@@ -53,14 +54,14 @@ export default function DesignSystemFoundationPage() {
       </div>
 
       <section className="ds-section" aria-labelledby="ds-preview"><div className="ds-section-head"><div><h2 id="ds-preview"><CodeXml/> 05 — معاينة أسلوب المكونات</h2><p>معاينات بصرية لتوضيح قواعد المرحلة الأولى. أصبحت المكونات المعاد استخدامها متاحة الآن في صفحة المرحلة الثانية.</p></div><span className="ds-label">Preview only</span></div>
-        <div className="ds-samples"><div className="ds-sample"><h3>الأزرار</h3><div className="ds-sample-actions"><Link className="ds-btn ds-primary" href="/"><Check size={17}/> إجراء رئيسي</Link><Link className="ds-btn ds-secondary" href="/admin">إجراء ثانوي</Link><button type="button" className="ds-btn ds-disabled" disabled>معطّل</button></div></div>
+        <div className="ds-samples"><div className="ds-sample"><h3>الأزرار</h3><div className="ds-sample-actions"><Link className="ds-btn ds-primary" href={ORGANIZATION_ROUTES.home}><Check size={17}/> إجراء رئيسي</Link><Link className="ds-btn ds-secondary" href={ORGANIZATION_ROUTES.dashboard}>إجراء ثانوي</Link><button type="button" className="ds-btn ds-disabled" disabled>معطّل</button></div></div>
         <div className="ds-sample"><h3>حقول الإدخال</h3><label className="ds-field">السؤال أو البحث<input type="text" readOnly aria-label="حقل تجريبي" placeholder="اكتب سؤالك هنا..."/></label></div>
         <div className="ds-sample"><h3>بطاقات الحالات</h3><div className="ds-state-row"><span className="ds-state ds-state-success"><CircleCheck size={16}/> ناجح</span><span className="ds-state ds-state-warning"><AlertTriangle size={16}/> قيد الانتظار</span><span className="ds-state ds-state-error"><CircleAlert size={16}/> خطأ</span></div></div>
         <div className="ds-sample"><h3>المراجع وSQL</h3><div className="ds-citation"><BookOpen size={17}/> دليل شؤون الطلاب — ص 8 <small>مثال افتراضي</small></div><pre dir="ltr" className="ds-code">SELECT COUNT(*) FROM students;</pre></div></div>
       </section>
 
       <section className="ds-section ds-existing" aria-labelledby="ds-existing"><div className="ds-section-head"><div><h2 id="ds-existing"><ShieldCheck/> اعتماد التصميم السابق</h2><p>هذه الصور هي مرجع المطابقة البصرية. لم نغيّر أيًّا من ملفات CSS الأصلية الخاصة بالواجهتين.</p></div></div>
-        <div className="ds-reference-grid"><Link href="/"><img src="/design-references/chat-reference.png" alt="المرجع السابق لواجهة محادثة بيان"/><strong>واجهة المحادثة الأصلية <ArrowLeft size={16}/></strong></Link><Link href="/admin"><img src="/design-references/admin-reference.png" alt="المرجع السابق للوحة إدارة بيان"/><strong>لوحة الإدارة الأصلية <ArrowLeft size={16}/></strong></Link></div>
+        <div className="ds-reference-grid"><Link href={ORGANIZATION_ROUTES.home}><img src="/design-references/chat-reference.png" alt="المرجع السابق لواجهة محادثة بيان"/><strong>واجهة المحادثة الأصلية <ArrowLeft size={16}/></strong></Link><Link href={ORGANIZATION_ROUTES.dashboard}><img src="/design-references/admin-reference.png" alt="المرجع السابق للوحة إدارة بيان"/><strong>لوحة الإدارة الأصلية <ArrowLeft size={16}/></strong></Link></div>
       </section>
       <footer className="ds-footer"><span>بيان · نظام التصميم · المرحلة 1/7</span><span><Database size={15}/> بيانات وأمثلة تجريبية، ولا توجد اتصالات خلفية في هذه الصفحة.</span></footer>
     </div>

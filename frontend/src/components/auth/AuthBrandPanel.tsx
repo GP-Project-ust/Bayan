@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BookOpenText, Check, GraduationCap, MessageCircle, ShieldCheck, Sparkles } from "lucide-react";
+import { ORGANIZATION_ROUTES } from "@/lib/routes";
 
 /** Reuses the exact branded structure/classes of the approved login screen. */
 const PRODUCT_FEATURES = [
@@ -12,7 +13,7 @@ export function AuthBrandPanel() {
   return (
     <aside className="bayan-login-brand-panel" aria-label="التعريف بنظام بيان">
       <div className="bayan-login-brand-top">
-        <Link href="/" className="bayan-login-logo" aria-label="بيان — الصفحة الرئيسية">
+        <Link href={ORGANIZATION_ROUTES.home} className="bayan-login-logo" aria-label="بيان — الصفحة الرئيسية">
           <span className="bayan-login-logo-mark" aria-hidden="true"><GraduationCap size={32} strokeWidth={1.9}/><BookOpenText size={24}/></span>
           <span className="bayan-login-logo-title">بيان</span>
         </Link>

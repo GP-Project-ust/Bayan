@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getHealth } from "@/lib/api";
+import { ORGANIZATION_ROUTES, AUXILIARY_ROUTES } from "@/lib/routes";
 import type { ComponentStatus } from "@/types";
 
 const AGENTS = [
@@ -90,25 +91,25 @@ export default function HomePage() {
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Link
-            href="/screens"
+            href={AUXILIARY_ROUTES.screens}
             className="rounded-xl bg-gold-500/20 px-4 py-2 text-sm font-semibold text-gold-400 border border-gold-500/40 hover:bg-gold-500/30 transition-colors"
           >
             استعراض خريطة الشاشات (42 شاشة)
           </Link>
           <Link
-            href="/prototype-chat"
+            href={ORGANIZATION_ROUTES.prototypeChat}
             className="rounded-xl bg-bayan-800/60 px-4 py-2 text-sm text-bayan-200 border border-bayan-700 hover:bg-bayan-700/60 transition-colors"
           >
             معاينة النموذج الأولي للمحادثة
           </Link>
           <Link
-            href="/conversations"
+            href={ORGANIZATION_ROUTES.conversations}
             className="rounded-xl bg-bayan-800/60 px-4 py-2 text-sm text-bayan-200 border border-bayan-700 hover:bg-bayan-700/60 transition-colors"
           >
             سجل المحادثات
           </Link>
           <Link
-            href="/admin"
+            href={ORGANIZATION_ROUTES.dashboard}
             className="rounded-xl bg-bayan-800/60 px-4 py-2 text-sm text-bayan-200 border border-bayan-700 hover:bg-bayan-700/60 transition-colors"
           >
             لوحة الإدارة

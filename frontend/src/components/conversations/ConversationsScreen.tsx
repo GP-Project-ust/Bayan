@@ -13,6 +13,7 @@ import {
 import {ChatLayout} from "@/components/layout";
 import {Badge,Button,Dialog,Drawer,Toast} from "@/components/ui";
 import {DemoAccessProvider,DemoRolePicker,useDemoAccess} from "@/components/access/DemoAccess";
+import {ORGANIZATION_ROUTES, buildConversationUrl} from "@/lib/routes";
 import {
   demoConversations,conversationStorageKey,kindLabels,emptyConversationChanges,
   readConversationChanges,writeConversationChanges,applyConversationChanges,
@@ -59,7 +60,7 @@ function ConversationCard({item,onSelect,onStar,onRename,onDelete}:{
       <button className="bayan-conv-icon-button" type="button" onClick={()=>onRename(item.id)} aria-label={`إعادة تسمية ${item.title}`} title="إعادة التسمية"><Pencil size={19}/></button>
       <button className="bayan-conv-icon-button danger" type="button" onClick={()=>onDelete(item.id)} aria-label={`حذف ${item.title}`} title="حذف المحادثة"><Trash2 size={19}/></button>
       <button className="bayan-conv-open" type="button" onClick={()=>onSelect(item.id)} aria-label={`عرض المحادثة ${item.title}`}>عرض التفاصيل <ChevronLeft size={17}/></button>
-      <Link className="bayan-conv-page-link" href={`/conversations/${encodeURIComponent(item.id)}`} aria-label={`فتح الصفحة الكاملة للمحادثة ${item.title}`}>فتح الصفحة</Link>
+      <Link className="bayan-conv-page-link" href={buildConversationUrl(item.id)} aria-label={`فتح الصفحة الكاملة للمحادثة ${item.title}`}>فتح الصفحة</Link>
     </div>
   </li>;
 }
@@ -152,7 +153,7 @@ function ConversationBody(){
   const hasFilters=filter!=="all"||query.trim()!==""||sort!=="newest";
 
   return <div className="bayan-conv" data-testid="conversations-screen" aria-busy={!ready}>
-    <nav className="bayan-conv-crumb" aria-label="مسار التنقل"><Link href="/">الرئيسية</Link><ChevronLeft size={15}/><span aria-current="page">المحادثات السابقة</span></nav>
+    <nav className="bayan-conv-crumb" aria-label="مسار التنقل"><Link href={ORGANIZATION_ROUTES.home}>الرئيسية</Link><ChevronLeft size={15}/><span aria-current="page">المحادثات السابقة</span></nav>
     <header className="bayan-conv-hero">
       <div className="bayan-conv-hero-copy"><span className="bayan-conv-kicker"><Sparkles size={17}/> مساحة عملك الذكية</span>
         <h1>سجل المحادثات السابقة</h1>
@@ -173,7 +174,7 @@ function ConversationBody(){
     <section className="bayan-conv-panel" aria-label="محادثاتي">
       <div className="bayan-conv-panel-head"><div><h2>محادثاتي</h2><p>ابحث في محادثاتك، وأضف المهم إلى المفضلة، أو اعرض التفاصيل.</p></div>
         <div className="bayan-conv-panel-actions"><Button variant="outline" size="sm" leadingIcon={<RotateCcw size={17}/>} onClick={()=>setConfirmRestore(true)}>استعادة التجربة</Button>
-          <Button variant="primary" size="sm" leadingIcon={<Plus size={17}/>} onClick={()=>router.push("/")}>محادثة جديدة</Button></div>
+          <Button variant="primary" size="sm" leadingIcon={<Plus size={17}/>} onClick={()=>router.push(ORGANIZATION_ROUTES.home)}>محادثة جديدة</Button></div>
       </div>
       <div className="bayan-conv-toolbar">
         <div className="bayan-conv-search"><Search size={20} aria-hidden="true"/><input type="search" aria-label="البحث في المحادثات" placeholder="ابحث بعنوان المحادثة أو محتواها..." value={query} onChange={e=>setQuery(e.target.value)}/>
@@ -198,7 +199,7 @@ function ConversationBody(){
       description="سجل تجريبي للمحادثة مع توضيح المصادر والمراحل" className="bayan-conv-drawer">
       {selected&&<div className="bayan-conv-detail" dir="rtl">
         <div className="bayan-conv-detail-tags"><Badge tone="info">{kindLabels[selected.kind]}</Badge><Badge tone="neutral">{formatDemoDate(selected.updatedAt)}</Badge><Badge tone="warning">بيانات تجريبية</Badge></div>
-        <Link className="bayan-conv-detail-full" href={`/conversations/${encodeURIComponent(selected.id)}`}>فتح صفحة المحادثة الكاملة <ChevronLeft size={16}/></Link>
+        <Link className="bayan-conv-detail-full" href={buildConversationUrl(selected.id)}>فتح صفحة المحادثة الكاملة <ChevronLeft size={16}/></Link>
         <div className="bayan-conv-detail-intro"><h3>ملخص المحادثة</h3><p>{selected.summary}</p></div>
         <div className="bayan-conv-thread"><h3><MessagesSquare size={17}/> سجل الرسائل</h3><div className="bayan-conv-message-list">{messages.map((message,i)=><div key={`${selected.id}-${i}`} className={`bayan-conv-message ${message.sender}`}>
           <div className="bayan-conv-message-top"><strong>{message.sender==="user"?"أنت":"مساعد بيان"}</strong><span>{message.time}</span></div><p>{message.body}</p></div>)}</div></div>

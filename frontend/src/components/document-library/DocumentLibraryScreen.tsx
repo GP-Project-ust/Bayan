@@ -14,6 +14,7 @@ import {viewerHref} from "@/lib/document-viewer/viewer";
 import {Badge,Button,Drawer,Toast} from "@/components/ui";
 import {StatePanel} from "@/components/states";
 import {DemoAccessProvider,DemoRolePicker,useDemoAccess} from "@/components/access/DemoAccess";
+import {ORGANIZATION_ROUTES} from "@/lib/routes";
 import {
   changeDocumentStatus,defaultLibraryFilters,documentCategoryLabels,filterLibraryDocuments,
   indexStatusLabels,initialLibraryDocuments,libraryStats,makeDemoDocumentCitation,validDocumentPage,
@@ -95,7 +96,7 @@ function LibraryBody(){
     catch{setNotice({title:"تعذر النسخ",message:"تحقق من أذونات الحافظة في المتصفح.",tone:"warning"});}
   }
   return <div className="bdl" data-testid="document-library-screen">
-    <nav className="bdl-breadcrumb" aria-label="مسار التنقل"><Link href="/">الرئيسية</Link><ChevronLeft size={15}/><span aria-current="page">مكتبة المستندات</span></nav>
+    <nav className="bdl-breadcrumb" aria-label="مسار التنقل"><Link href={ORGANIZATION_ROUTES.home}>الرئيسية</Link><ChevronLeft size={15}/><span aria-current="page">مكتبة المستندات</span></nav>
     <header className="bdl-hero"><div><span className="bdl-overline"><Sparkles size={15}/> قاعدة المعرفة المؤسسية</span><h1>مكتبة المستندات واللوائح</h1><p>استعرض المستندات المصنّفة وحالة فهرستها ومعلومات مصادرها، ثم انتقل إلى البحث الدلالي.</p><div className="bdl-hero-badges"><span><ShieldCheck size={15}/> نطاق عرض وفق الدور</span><span><Layers3 size={15}/> تصنيف وفهرسة المستندات</span></div></div><div className="bdl-hero-icon" aria-hidden="true"><LibraryBig size={72}/></div></header>
     <div className="bdl-demo-note" role="note"><Info size={20}/><p><strong>تصميم أولي ببيانات تجريبية:</strong> {mockDisclaimer} ترتبط أسماء بعض العينات بواجهة البحث الدلالي السابقة، ولا تمثل مستندات فعلية في الجامعة.</p></div>
     <section className="bdl-role-panel" aria-label="خيارات الصلاحيات التجريبية"><div><LockKeyhole size={19}/><span>الصلاحيات المعروضة محاكاة للواجهة فقط؛ التحقق الحقيقي من وصول المستندات يقع على الخادم.</span></div><DemoRolePicker id="bdl-demo-role"/></section>
@@ -109,7 +110,7 @@ function LibraryBody(){
         ].map(stat=><div className="bdl-stat" key={stat.label}><span className={`bdl-stat-icon bdl-stat-icon--${stat.color}`}><stat.icon size={22}/></span><div><small>{stat.label}</small><strong>{stat.value}</strong></div></div>)}
       </div>
       <section className="bdl-filter-card" aria-label="البحث وتصفية المستندات">
-        <div className="bdl-filter-top"><div><h2><SlidersHorizontal size={20}/> تصفح المكتبة</h2><p>يمكن البحث باسم المستند أو الوصف أو الجهة المالكة.</p></div><div className="bdl-filter-top-actions"><Link href="/semantic-search" className="bdl-semantic-link"><FileSearch size={18}/> البحث الدلالي</Link>{canManage&&<Link href="/sources/upload" className="bdl-upload-link"><Plus size={18}/> رفع مستند</Link>}</div></div>
+        <div className="bdl-filter-top"><div><h2><SlidersHorizontal size={20}/> تصفح المكتبة</h2><p>يمكن البحث باسم المستند أو الوصف أو الجهة المالكة.</p></div><div className="bdl-filter-top-actions"><Link href={ORGANIZATION_ROUTES.semanticSearch} className="bdl-semantic-link"><FileSearch size={18}/> البحث الدلالي</Link>{canManage&&<Link href={ORGANIZATION_ROUTES.sourceUpload} data-contract-href="/sources/upload" className="bdl-upload-link"><Plus size={18}/> رفع مستند</Link>}</div></div>
         <div className="bdl-filters"><label className="bdl-search" htmlFor="bdl-query"><Search size={19}/><input id="bdl-query" type="search" value={filters.query} onChange={event=>setFilter("query",event.target.value)} placeholder="ابحث في اسم المستند أو الجهة..."/><span className="bdl-sr-only">بحث في المكتبة</span></label>
           <label className="bdl-select"><span>التصنيف</span><select aria-label="تصنيف المستند" value={filters.category} onChange={event=>setFilter("category",event.target.value as LibraryCategory)}>{filterCategories.map(choice=><option key={choice.value} value={choice.value}>{choice.label}</option>)}</select></label>
           <label className="bdl-select"><span>حالة الفهرسة</span><select aria-label="حالة الفهرسة" value={filters.status} onChange={event=>setFilter("status",event.target.value as StatusFilter)}>{filterStatuses.map(choice=><option key={choice.value} value={choice.value}>{choice.label}</option>)}</select></label>
@@ -133,7 +134,7 @@ function LibraryBody(){
         <h4>مقتطفات تدريبية متاحة</h4>
         {selected.snippets.length>0?<><label className="bdl-page-picker" htmlFor="bdl-page-number"><span>رقم الصفحة في المثال</span><select id="bdl-page-number" value={shownPage} onChange={event=>setPreviewPage(Number(event.target.value))}>{selected.snippets.map(item=><option key={item.id} value={item.page}>الصفحة {item.page} — {item.section}</option>)}</select></label>
           {selectedSnippet&&<blockquote><strong>{selectedSnippet.section}</strong><p>{selectedSnippet.excerpt}</p></blockquote>}
-          <div className="bdl-preview-actions"><Link className="bdl-viewer-link" href={viewerHref(selected.id,shownPage,selectedSnippet?.id)} onClick={()=>setSelectedId(null)}><FileText size={16}/> فتح صفحة المستند</Link><Button size="sm" variant="outline" disabled={!canCite} leadingIcon={<ClipboardCopy size={15}/>} onClick={copyCitation}>نسخ استشهاد تجريبي</Button><Button size="sm" onClick={()=>{setSelectedId(null);router.push("/semantic-search");}} leadingIcon={<FileSearch size={16}/>}>فتح البحث الدلالي</Button></div></>:
+          <div className="bdl-preview-actions"><Link className="bdl-viewer-link" href={viewerHref(selected.id,shownPage,selectedSnippet?.id)} onClick={()=>setSelectedId(null)}><FileText size={16}/> فتح صفحة المستند</Link><Button size="sm" variant="outline" disabled={!canCite} leadingIcon={<ClipboardCopy size={15}/>} onClick={copyCitation}>نسخ استشهاد تجريبي</Button><Button size="sm" onClick={()=>{setSelectedId(null);router.push(ORGANIZATION_ROUTES.semanticSearch);}} leadingIcon={<FileSearch size={16}/>}>فتح البحث الدلالي</Button></div></>:
           <div className="bdl-no-preview"><FileWarning size={21}/><p>لم تتوفر مقاطع تدريبية لهذا المستند. حالة الفهرسة هنا وصف تجريبي فقط، ولا يوجد ملف أصلي للمعاينة.</p><Link className="bdl-viewer-link" href={viewerHref(selected.id,1)} onClick={()=>setSelectedId(null)}>فتح العارض</Link></div>}
         <div className="bdl-preview-warning"><Info size={19}/> جميع المقاطع وأرقام الصفحات والمعلومات هنا افتراضية وغير صالحة للاقتباس من وثائق حقيقية.</div>
       </div>}

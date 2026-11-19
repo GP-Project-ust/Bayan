@@ -13,6 +13,7 @@ import {AdminLayout} from '@/components/layout';
 import {Badge,Button,Dialog,Toast} from '@/components/ui';
 import {StatePanel} from '@/components/states';
 import {DemoAccessProvider,DemoRolePicker,useDemoAccess} from '@/components/access/DemoAccess';
+import {ORGANIZATION_ROUTES} from '@/lib/routes';
 import {capabilityLabels,rolePermissions} from '@/lib/access/policy';
 import {
   DEMO_USERS,USERS_DEMO_NOTE,demoActorId,demoInstitution,departments,
@@ -109,7 +110,7 @@ function Body({requestedId}:{requestedId:string|null}){
     try{await navigator.clipboard.writeText(user.id);setNotice({title:'نُسخ المعرّف',message:'نسخ المعرّف التجريبي فقط.',tone:'success'});}
     catch{setNotice({title:'تعذّر النسخ',message:'يمكنك تحديد المعرّف من بطاقة الحساب ونسخه يدويًا.',tone:'warning'});}
   }
-  const identity=<nav className="ban-breadcrumb" aria-label="مسار التنقل"><Link href="/admin">لوحة الإدارة</Link><ChevronLeft size={15}/><Link href="/admin/users">إدارة المستخدمين</Link><ChevronLeft size={15}/><span aria-current="page">تفاصيل المستخدم</span></nav>;
+  const identity=<nav className="ban-breadcrumb" aria-label="مسار التنقل"><Link href={ORGANIZATION_ROUTES.dashboard}>لوحة الإدارة</Link><ChevronLeft size={15}/><Link href={ORGANIZATION_ROUTES.users}>إدارة المستخدمين</Link><ChevronLeft size={15}/><span aria-current="page">تفاصيل المستخدم</span></nav>;
 
   return <div className="ban bud" dir="rtl" data-testid="user-details-screen">
     {identity}
@@ -120,9 +121,9 @@ function Body({requestedId}:{requestedId:string|null}){
     </header>
     <div className="ban-disclaimer" role="note"><Info size={19}/><p><strong>بيانات العرض:</strong> {USERS_DEMO_NOTE} معلومات النشاط أدناه توضيحية وليست سجل تدقيق. يُرجى عدم إدخال بيانات حقيقية.</p></div>
     <section className="ban-role"><span><LockKeyhole size={17}/> تفاصيل المستخدمين وإجراءاتهم تظهر لمسؤول تقنية المعلومات فقط في هذه المحاكاة.</span><DemoRolePicker id="bud-demo-role"/></section>
-    {!canManage?<div className="ban-locked" data-testid="user-details-forbidden"><StatePanel state="forbidden" title="ليس لديك صلاحية عرض تفاصيل المستخدم" description="اختر مسؤول تقنية المعلومات من الدور التجريبي. يجب التحقق من الوصول الحقيقي على خادم FastAPI وبحسب المؤسسة."/><Link href="/admin/users">العودة إلى المستخدمين <ArrowLeft size={17}/></Link></div>:
+    {!canManage?<div className="ban-locked" data-testid="user-details-forbidden"><StatePanel state="forbidden" title="ليس لديك صلاحية عرض تفاصيل المستخدم" description="اختر مسؤول تقنية المعلومات من الدور التجريبي. يجب التحقق من الوصول الحقيقي على خادم FastAPI وبحسب المؤسسة."/><Link href={ORGANIZATION_ROUTES.users}>العودة إلى المستخدمين <ArrowLeft size={17}/></Link></div>:
     !loaded?<section className="ban-panel bud-state" role="status">جارٍ تحميل سجل العرض التجريبي…</section>:
-    !user?<section className="ban-panel bud-state" data-testid="user-details-not-found"><AlertTriangle size={36}/><h2>{validId?'المستخدم غير موجود في قائمة العرض':'معرّف المستخدم غير صالح أو مفقود'}</h2><p>ربما تغيّر السجل أو حُذف محليًا. افتح حسابًا من صفحة إدارة المستخدمين.</p><Link href="/admin/users" className="bud-back"><UsersRound size={17}/> عرض المستخدمين</Link></section>:
+    !user?<section className="ban-panel bud-state" data-testid="user-details-not-found"><AlertTriangle size={36}/><h2>{validId?'المستخدم غير موجود في قائمة العرض':'معرّف المستخدم غير صالح أو مفقود'}</h2><p>ربما تغيّر السجل أو حُذف محليًا. افتح حسابًا من صفحة إدارة المستخدمين.</p><Link href={ORGANIZATION_ROUTES.users} className="bud-back"><UsersRound size={17}/> عرض المستخدمين</Link></section>:
     <>
       <section className="ban-panel bud-identity" data-testid="user-identity">
         <div className="bud-profile"><span className="bud-avatar"><UserRound size={34}/></span><div><div className="bud-profile-heading"><h2>{user.name}</h2><Badge tone={user.status==='active'?'success':'warning'}>{userStatusLabels[user.status]}</Badge></div><p dir="ltr" className="bud-email">{user.email}</p><div className="bud-mini-meta"><span><Shield size={15}/>{userRoleLabels[user.role]}</span><span><Building2 size={15}/>{user.department}</span><span><Clipboard size={14}/><b dir="ltr">{user.id}</b></span></div></div></div>
@@ -161,7 +162,7 @@ function Body({requestedId}:{requestedId:string|null}){
         <aside className="bud-aside" aria-label="معلومات وإجراءات مرتبطة">
           <section className="ban-panel bud-side-card"><h3><ShieldCheck size={19}/> معلومات إدارة الدور</h3><p>{userRoleLabels[user.role]} هو الدور المحفوظ في نموذج هذه المؤسسة.</p><p>تغيير الدور يتم من نافذة «تعديل المستخدم» بعد التحقق من قواعد حماية الحساب الإداري وآخر مسؤول نشط.</p><Button variant="outline" size="sm" fullWidth onClick={()=>{setTab('permissions');}} leadingIcon={<Shield size={16}/>}>عرض صلاحيات الدور</Button></section>
           <section className="ban-panel bud-side-card"><h3><AlertTriangle size={19}/> قواعد الحماية</h3><ul><li>يُمنع تعطيل حساب الإدارة الحالي.</li><li>يُمنع تعطيل آخر مسؤول تقنية معلومات نشط.</li><li>يُمنع تخفيض دور الحساب الإداري الحالي.</li><li>لا تتصل هذه الشاشة بنظام المصادقة الحقيقي.</li></ul>{protectedActor&&<p className="bud-protected">هذا هو حساب الإدارة الحالي في بيانات المثال.</p>}{isLastAdmin&&<p className="bud-protected">هذا آخر مسؤول تقنية معلومات نشط.</p>}</section>
-          <Link href="/admin/users" className="bud-back"><UsersRound size={18}/> العودة إلى إدارة المستخدمين <ArrowLeft size={16}/></Link>
+          <Link href={ORGANIZATION_ROUTES.users} className="bud-back"><UsersRound size={18}/> العودة إلى إدارة المستخدمين <ArrowLeft size={16}/></Link>
         </aside>
       </div>
     </>}
