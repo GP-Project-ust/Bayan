@@ -82,35 +82,39 @@ export default function HomePage() {
       </section>
 
       {/* واجهة المحادثة وخريطة الشاشات */}
-      <section className="mt-8 rounded-2xl border border-dashed border-bayan-700 bg-bayan-900/30 p-8 text-center">
-        <p className="text-bayan-200">
-          واجهة المحادثة الرسمية تُبنى في <span className="font-bold text-gold-400">Sprint 1</span>
-        </p>
-        <p className="mt-2 text-sm text-bayan-400">
-          الهيكل الأساسي للواجهة (RTL + اتصال API) جاهز ومكتمل
+      <section className="mt-8 rounded-2xl border border-teal-500/30 bg-bayan-900/40 p-8 text-center shadow-lg">
+        <div className="inline-flex items-center gap-2 rounded-full bg-teal-500/10 px-3.5 py-1 text-xs font-semibold text-teal-400 border border-teal-500/30">
+          جاهز للتشغيل • Sprint 1
+        </div>
+        <h3 className="mt-3 text-xl font-bold text-bayan-100">
+          واجهة المحادثة الذكية المباشرة
+        </h3>
+        <p className="mt-2 text-sm text-bayan-300">
+          تفاعل مباشرة مع وكلاء بيان واستعلم عن بيانات الجامعة مع تدفق SSE الحي ونتائج SQL
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Link
-            href={AUXILIARY_ROUTES.screens}
-            className="rounded-xl bg-gold-500/20 px-4 py-2 text-sm font-semibold text-gold-400 border border-gold-500/40 hover:bg-gold-500/30 transition-colors"
+            href={ORGANIZATION_ROUTES.chat}
+            className="rounded-xl bg-teal-600 px-6 py-2.5 text-sm font-bold text-white shadow-md hover:bg-teal-500 transition-all flex items-center gap-2"
           >
-            استعراض خريطة الشاشات (42 شاشة)
+            <span>بدء المحادثة الذكية الآن</span>
+            <span dir="ltr">←</span>
           </Link>
           <Link
-            href={ORGANIZATION_ROUTES.prototypeChat}
-            className="rounded-xl bg-bayan-800/60 px-4 py-2 text-sm text-bayan-200 border border-bayan-700 hover:bg-bayan-700/60 transition-colors"
+            href={AUXILIARY_ROUTES.screens}
+            className="rounded-xl bg-gold-500/20 px-4 py-2.5 text-sm font-semibold text-gold-400 border border-gold-500/40 hover:bg-gold-500/30 transition-colors"
           >
-            معاينة النموذج الأولي للمحادثة
+            خريطة الشاشات (42 شاشة)
           </Link>
           <Link
             href={ORGANIZATION_ROUTES.conversations}
-            className="rounded-xl bg-bayan-800/60 px-4 py-2 text-sm text-bayan-200 border border-bayan-700 hover:bg-bayan-700/60 transition-colors"
+            className="rounded-xl bg-bayan-800/60 px-4 py-2.5 text-sm text-bayan-200 border border-bayan-700 hover:bg-bayan-700/60 transition-colors"
           >
             سجل المحادثات
           </Link>
           <Link
             href={ORGANIZATION_ROUTES.dashboard}
-            className="rounded-xl bg-bayan-800/60 px-4 py-2 text-sm text-bayan-200 border border-bayan-700 hover:bg-bayan-700/60 transition-colors"
+            className="rounded-xl bg-bayan-800/60 px-4 py-2.5 text-sm text-bayan-200 border border-bayan-700 hover:bg-bayan-700/60 transition-colors"
           >
             لوحة الإدارة
           </Link>

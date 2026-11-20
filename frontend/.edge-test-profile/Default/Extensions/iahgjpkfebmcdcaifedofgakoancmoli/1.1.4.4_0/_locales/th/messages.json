@@ -1,0 +1,11 @@
+{
+   "appDesc": {
+      "message": "HP Dynamic Audio ได้รับการออกแบบมาเพื่อมอบประสบการณ์ด้านการฟังให้ตรงตามเจตนารมณ์ของศิลปิน โดยรองรับการกำหนดและปรับการเล่นเสียงในเบราว์เซอร์ตามชุดการตั้งค่าเสียงสำหรับเพลง ภาพยนต์ หรือเสียงคน"
+   },
+   "appName": {
+      "message": "HP Dynamic Audio"
+   },
+   "appShortDesc": {
+      "message": "Provide best listening experience for music, movies, voice, and more"
+   }
+}

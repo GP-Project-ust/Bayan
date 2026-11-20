@@ -7,6 +7,7 @@
 export const ORGANIZATION_ROUTES = {
   home: "/",
   dashboard: "/admin",
+  chat: "/chat",
   prototypeChat: "/prototype-chat",
   
   // Conversations

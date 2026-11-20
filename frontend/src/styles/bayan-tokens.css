@@ -114,7 +114,7 @@
   /* =====================================================================
      TYPOGRAPHY & ARABIC RTL SYSTEM
      ===================================================================== */
-  --bayan-font-sans: "IBM Plex Sans Arabic", "Noto Sans Arabic", "Cairo", "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  --bayan-font-sans: var(--font-bayan-arabic), "IBM Plex Sans Arabic", "Noto Sans Arabic", "Cairo", "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
   --bayan-font-family: var(--bayan-font-sans);
   --bayan-font-mono: "JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace;
 

@@ -1,0 +1,11 @@
+{
+   "appDesc": {
+      "message": "Rozszerzenie HP Dynamic Audio, opracowane w celu zapewnienia słuchaczom doznań dźwiękowych, jakie były zamierzeniem twórców, identyfikuje i adaptuje dźwięk odtwarzany przez przeglądarkę, przyporządkowując jego ustawienia do jednej z następujących kategorii: muzyka, filmy lub odtwarzanie głosu."
+   },
+   "appName": {
+      "message": "HP Dynamic Audio"
+   },
+   "appShortDesc": {
+      "message": "Provide best listening experience for music, movies, voice, and more"
+   }
+}

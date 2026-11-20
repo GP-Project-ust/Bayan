@@ -1,0 +1,969 @@
+/* ==========================================================================
+   Bayan AI Platform — Real Next.js AI Chat Interface Styles
+   Institutional Navy & Teal Identity | True Arabic RTL | Fully Responsive
+   ========================================================================== */
+
+.bayan-chat-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  height: 100vh;
+  background-color: var(--bayan-navy-950, #061527);
+  color: var(--bayan-slate-100, #f1f5f9);
+  font-family: var(--font-bayan-arabic), "IBM Plex Sans Arabic", "Alexandria", sans-serif;
+  direction: rtl;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   1. الهيدر والشعار وشارات المزوّد والحالة
+   -------------------------------------------------------------------------- */
+.bayan-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 24px;
+  background-color: rgba(10, 35, 66, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.1);
+  z-index: 20;
+  flex-shrink: 0;
+}
+
+.bayan-brand-cluster {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bayan-logo-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #00A6B2 0%, #007681 100%);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 20px;
+  box-shadow: 0 4px 12px rgba(0, 166, 178, 0.3);
+  text-decoration: none;
+}
+
+.bayan-brand-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.bayan-header-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bayan-h-badge {
+  font-size: 11.5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background-color: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+}
+
+.bayan-h-badge.mode.mode-mock {
+  background-color: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #f59e0b;
+}
+
+.bayan-h-badge.mode.mode-real {
+  background-color: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #10b981;
+}
+
+.bayan-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bayan-health-cluster {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(15, 23, 42, 0.6);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(226, 232, 240, 0.08);
+}
+
+.bayan-health-dot-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.bayan-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #64748b;
+}
+
+.bayan-health-dot-item.up .bayan-dot {
+  background-color: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.bayan-health-dot-item.down .bayan-dot {
+  background-color: #ef4444;
+}
+
+.bayan-health-dot-item.checking .bayan-dot {
+  background-color: #f59e0b;
+  animation: pulse 1s infinite;
+}
+
+.bayan-health-refresh {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+}
+
+.bayan-health-refresh:hover:not(:disabled) {
+  color: #00A6B2;
+}
+
+.bayan-quick-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bayan-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background-color: rgba(30, 41, 59, 0.6);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.bayan-nav-link:hover {
+  background-color: rgba(45, 212, 191, 0.15);
+  border-color: rgba(45, 212, 191, 0.3);
+  color: #2dd4bf;
+}
+
+/* --------------------------------------------------------------------------
+   2. مساحة المحادثة والرسائل
+   -------------------------------------------------------------------------- */
+.bayan-chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.bayan-messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* شاشة الترحيب الابتدائية */
+.bayan-welcome-hero {
+  margin: auto;
+  text-align: center;
+  max-width: 580px;
+  padding: 40px 24px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px dashed rgba(226, 232, 240, 0.15);
+  border-radius: 20px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.bayan-welcome-icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: rgba(0, 166, 178, 0.12);
+  border: 1px solid rgba(0, 166, 178, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.bayan-welcome-desc {
+  font-size: 14px;
+  color: #94a3b8;
+  line-height: 1.8;
+  margin-top: 10px;
+}
+
+.bayan-welcome-features {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 24px;
+  text-align: right;
+}
+
+.bayan-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #cbd5e1;
+  background: rgba(30, 41, 59, 0.4);
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(226, 232, 240, 0.06);
+}
+
+/* صفوف الرسائل */
+.bayan-messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bayan-msg-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+
+.bayan-msg-row.user {
+  flex-direction: row-reverse;
+}
+
+.bayan-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bayan-avatar.user {
+  background: rgba(0, 166, 178, 0.2);
+  border: 1px solid rgba(0, 166, 178, 0.4);
+}
+
+.bayan-avatar.assistant {
+  background: rgba(10, 35, 66, 0.9);
+  border: 1px solid rgba(210, 158, 44, 0.4);
+}
+
+.bayan-msg-bubble {
+  max-width: min(88%, 760px);
+  padding: 14px 18px;
+  border-radius: 16px;
+  font-size: 14.5px;
+  line-height: 1.8;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: messageSlideIn 0.25s ease-out;
+}
+
+.bayan-msg-bubble.user {
+  background: linear-gradient(135deg, #007681 0%, #004D54 100%);
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 118, 129, 0.2);
+}
+
+.bayan-msg-bubble.assistant {
+  background: rgba(30, 41, 59, 0.7);
+  color: #f1f5f9;
+  border: 1px solid rgba(226, 232, 240, 0.1);
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  width: 100%;
+}
+
+.bayan-msg-content {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.bayan-msg-time {
+  font-size: 11px;
+  color: rgba(203, 213, 225, 0.65);
+  align-self: flex-end;
+}
+
+.bayan-msg-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 1px solid rgba(226, 232, 240, 0.08);
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.bayan-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(226, 232, 240, 0.08);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   3. جدول نتائج الاستعلام (ResultsTable)
+   -------------------------------------------------------------------------- */
+.bayan-results-panel {
+  margin-top: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(226, 232, 240, 0.12);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.bayan-results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bayan-results-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.bayan-results-count {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(30, 41, 59, 0.8);
+  color: #2dd4bf;
+  border: 1px solid rgba(45, 212, 191, 0.25);
+  font-variant-numeric: tabular-nums;
+}
+
+.bayan-results-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(226, 232, 240, 0.08);
+  border-radius: 8px;
+  background: #0b1122;
+}
+
+.bayan-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.bayan-results-table th {
+  background-color: #16233a;
+  color: #cbd5e1;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-bottom: 2px solid rgba(226, 232, 240, 0.12);
+  white-space: nowrap;
+}
+
+.bayan-results-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #1e293b;
+  color: #e2e8f0;
+  white-space: nowrap;
+}
+
+.bayan-results-table tr:last-child td {
+  border-bottom: none;
+}
+
+.bayan-results-table tbody tr:hover td {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.bayan-results-table td.num-cell {
+  font-family: var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+  text-align: left;
+}
+
+.bayan-results-table td.tbl-null {
+  color: #64748b;
+  font-style: italic;
+}
+
+.bayan-results-empty-cell {
+  text-align: center !important;
+  color: #94a3b8;
+  padding: 24px !important;
+  font-style: italic;
+}
+
+.bayan-results-trunc-badge {
+  font-size: 12px;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  padding: 8px 14px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   4. كتلة استعلام SQL (SQLCodeBlock)
+   -------------------------------------------------------------------------- */
+.bayan-sql-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.bayan-sql-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bayan-sql-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bayan-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bayan-copy-btn:hover {
+  color: #ffffff;
+  border-color: #00A6B2;
+}
+
+.bayan-copy-btn.copied {
+  color: #10b981;
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  font-weight: 600;
+}
+
+.bayan-copy-btn.failed {
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.bayan-sql-wrap {
+  border-radius: 8px;
+  background-color: #0b1122;
+  border: 1px solid #1e293b;
+  overflow-x: auto;
+}
+
+.bayan-sql-block {
+  margin: 0;
+  padding: 12px 14px;
+  font-family: var(--font-mono, monospace);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #cbd5e1;
+  white-space: pre;
+}
+
+/* --------------------------------------------------------------------------
+   5. أثر الوكلاء (AgentExecutionTrace)
+   -------------------------------------------------------------------------- */
+.bayan-trace-container {
+  margin-top: 8px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(226, 232, 240, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.bayan-trace-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: right;
+  transition: background-color 0.15s;
+}
+
+.bayan-trace-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.bayan-trace-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(30, 41, 59, 0.9);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.bayan-trace-live-pulse {
+  font-size: 11px;
+  color: #2dd4bf;
+  animation: pulse 1.5s infinite;
+}
+
+.bayan-trace-cards {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid rgba(226, 232, 240, 0.08);
+}
+
+.bayan-agent-card {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(226, 232, 240, 0.08);
+  border-inline-start-width: 4px;
+  border-inline-start-style: solid;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bayan-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bayan-agent-badge {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.bayan-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.bayan-status-pill.bayan-status-done {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.bayan-status-pill.bayan-status-failed {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.bayan-status-pill.bayan-status-skipped {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+}
+
+.bayan-card-note {
+  margin: 0;
+  font-size: 13px;
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.bayan-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.bayan-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.bayan-meta-pill.duration {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.bayan-meta-pill.rows {
+  background: rgba(45, 212, 191, 0.12);
+  color: #2dd4bf;
+  border: 1px solid rgba(45, 212, 191, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   6. شريط مؤشر البث المباشر (StreamingIndicator)
+   -------------------------------------------------------------------------- */
+.bayan-streaming-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(0, 166, 178, 0.08);
+  border: 1px solid rgba(0, 166, 178, 0.25);
+}
+
+.bayan-timer-pill {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  color: #2dd4bf;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(45, 212, 191, 0.2);
+}
+
+/* --------------------------------------------------------------------------
+   7. فقاعة الخطأ وإعادة المحاولة (ErrorMessage)
+   -------------------------------------------------------------------------- */
+.bayan-error-bubble {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.bayan-error-code {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: #fca5a5;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.bayan-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #fecaca;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.bayan-retry-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   8. صندوق إدخال السؤال والأزرار (ChatInput)
+   -------------------------------------------------------------------------- */
+.bayan-composer-container {
+  padding: 16px 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(226, 232, 240, 0.08);
+}
+
+.bayan-examples-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.bayan-examples-row::-webkit-scrollbar {
+  display: none;
+}
+
+.bayan-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(30, 41, 59, 0.7);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.bayan-chip:hover:not(:disabled) {
+  background: rgba(0, 166, 178, 0.15);
+  border-color: rgba(0, 166, 178, 0.4);
+  color: #ffffff;
+}
+
+.bayan-chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.bayan-composer-box {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 14px;
+  padding: 8px 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: border-color 0.15s;
+}
+
+.bayan-composer-box:focus-within {
+  border-color: #00A6B2;
+  box-shadow: 0 0 0 2px rgba(0, 166, 178, 0.2);
+}
+
+.bayan-textarea {
+  flex: 1;
+  min-height: 52px;
+  max-height: 180px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f1f5f9;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: none;
+  padding: 6px 4px;
+}
+
+.bayan-textarea::placeholder {
+  color: #64748b;
+}
+
+.bayan-composer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bayan-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+
+.bayan-btn-primary {
+  background: #00A6B2;
+  color: #04211d;
+}
+
+.bayan-btn-primary:hover:not(:disabled) {
+  background: #1ac3d0;
+}
+
+.bayan-btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.bayan-btn-stop {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.bayan-btn-stop:hover {
+  background: #dc2626;
+}
+
+.bayan-btn-ghost {
+  background: rgba(30, 41, 59, 0.6);
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.bayan-btn-ghost:hover:not(:disabled) {
+  color: #ffffff;
+  border-color: #00A6B2;
+}
+
+.bayan-composer-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.bayan-conv-id-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 70%;
+}
+
+.bayan-conv-id {
+  font-family: var(--font-mono, monospace);
+  color: #2dd4bf;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   9. التجاوب مع مختلف الشاشات (375px - 1440px)
+   -------------------------------------------------------------------------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes messageSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@media (max-width: 768px) {
+  .bayan-chat-header {
+    padding: 10px 14px;
+    flex-wrap: wrap;
+  }
+  .bayan-header-badges {
+    order: 3;
+    width: 100%;
+    margin-top: 4px;
+  }
+  .bayan-msg-bubble {
+    max-width: 92%;
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+  .bayan-results-table th, .bayan-results-table td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 500px) {
+  .bayan-chat-main {
+    padding: 0 10px;
+  }
+  .bayan-composer-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .bayan-composer-actions {
+    justify-content: space-between;
+  }
+  .bayan-btn {
+    flex: 1;
+  }
+  .bayan-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  .bayan-msg-bubble {
+    max-width: 100%;
+  }
+}

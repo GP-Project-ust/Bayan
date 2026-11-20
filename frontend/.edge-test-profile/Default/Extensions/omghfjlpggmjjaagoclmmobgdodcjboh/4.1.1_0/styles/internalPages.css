@@ -1,0 +1,35 @@
+@import '/styles/global.css';
+@import '/styles/popupTheme.css';
+
+:root {
+  --page-width: 1040px;
+  --page-gutter: 32px;
+  --brand-green: var(--brand);
+  --brand-burgundy: var(--warn);
+  --link-color: var(--accent);
+  --common-gray: var(--text-dim);
+  --lite-gray: var(--surface-2);
+}
+
+html {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 15px/1.6 var(--font-ui);
+}
+
+body { margin: 0; min-width: 0; font: inherit; }
+*, *::before, *::after { -webkit-box-sizing: border-box; box-sizing: border-box; }
+button, input, select, textarea { font: inherit; }
+a { color: var(--accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+::-moz-selection { background: var(--accent-soft); color: var(--text); }
+::selection { background: var(--accent-soft); color: var(--text); }
+
+@media (max-width: 600px) {
+  :root { --page-gutter: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; }
+}

@@ -1,0 +1,6 @@
+@import '/styles/internalPages.css';
+:root { --page-width: 800px; }
+.Body { max-width: var(--page-width); margin: 0 auto; padding: 56px var(--page-gutter) 72px; }
+.Title { font-size: clamp(26px, 3vw, 34px); font-weight: 600; line-height: 1.25; letter-spacing: -.025em; }
+.PageDescription { max-width: 660px; color: var(--text-dim); margin-top: 16px; }
+@media (max-width: 600px) { .Body { padding: 32px var(--page-gutter) 48px; } }

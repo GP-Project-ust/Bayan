@@ -175,3 +175,159 @@
   .bayan-mobile-scrim,.bayan-mobile-menu-button,.bayan-mobile-close{display:none!important;}
   .app-layout>.app-sidebar{display:none!important;}
 }
+
+/* =========================================================================
+   BAYAN ENTERPRISE DESIGN SYSTEM — GLOBAL VISUAL ELEVATION
+   Refines typography, code presentation, desktop sidebar, topbar, and cards.
+   ========================================================================= */
+
+/* Typography & Arabic text baseline */
+body {
+  font-family: var(--bayan-font-family) !important;
+  color: var(--bayan-text-primary) !important;
+  line-height: var(--bayan-line-height-body) !important;
+  letter-spacing: normal !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body :is(h1, h2, h3, h4, h5, h6, p, span, label, button, a, input, select, textarea) {
+  letter-spacing: normal !important;
+}
+
+/* Strict LTR & Monospace for SQL / Code blocks */
+.sql-code, .bayan-code-panel pre, pre, code, .code-editor, [data-code-block] {
+  font-family: var(--bayan-font-mono) !important;
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: isolate !important;
+  tab-size: 2;
+}
+
+/* Tabular figures for numbers within Arabic context */
+.num, [data-numeric] {
+  direction: ltr;
+  unicode-bidi: embed;
+  font-variant-numeric: tabular-nums;
+  display: inline-block;
+}
+
+/* Desktop App Sidebar Enhancement */
+body .app-sidebar {
+  background: linear-gradient(160deg, #061527 0%, #0A2342 60%, #0E2A4D 100%) !important;
+  box-shadow: -4px 0 24px rgba(6, 21, 39, 0.22) !important;
+  border-left: 1px solid rgba(226, 232, 240, 0.08) !important;
+}
+
+body .app-sidebar .brand-word {
+  letter-spacing: -1px !important;
+}
+
+body .app-sidebar .brand-description {
+  color: #CBD5E1 !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+body .app-sidebar .sidebar-rule {
+  background: rgba(226, 232, 240, 0.12) !important;
+}
+
+body .app-sidebar .new-chat-button {
+  background: linear-gradient(135deg, #007681 0%, #00A6B2 100%) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 166, 178, 0.25) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+body .app-sidebar .new-chat-button:hover {
+  filter: brightness(1.08) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 166, 178, 0.35) !important;
+}
+
+body .app-sidebar .side-nav-item {
+  border-radius: 10px !important;
+  padding: 0 12px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  border: 1px solid transparent;
+  color: #E2E8F0 !important;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+body .app-sidebar .side-nav-item:hover {
+  background: rgba(0, 166, 178, 0.14) !important;
+  color: #FFFFFF !important;
+  border-color: rgba(0, 166, 178, 0.24);
+}
+
+body .app-sidebar .side-nav-item.active {
+  background: linear-gradient(90deg, rgba(0, 166, 178, 0.25) 0%, rgba(0, 118, 129, 0.35) 100%) !important;
+  border-inline-start: 3px solid #00A6B2 !important;
+  border-color: rgba(0, 166, 178, 0.35) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(0, 166, 178, 0.18);
+  font-weight: 700 !important;
+}
+
+body .app-sidebar .proposed-mark {
+  border: 1px solid rgba(210, 158, 44, 0.35) !important;
+  background: rgba(210, 158, 44, 0.08) !important;
+  color: #F1CD7A !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  border-radius: 20px !important;
+}
+
+/* Header & TopBar */
+body .topbar {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid var(--bayan-border-subtle) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+}
+
+body .topbar .user-menu {
+  padding: 6px 12px !important;
+  border-radius: 10px !important;
+  transition: background 0.18s ease;
+  color: var(--bayan-slate-800) !important;
+}
+body .topbar .user-menu:hover {
+  background: var(--bayan-slate-100) !important;
+}
+
+body .topbar .notification-icon {
+  width: 40px !important;
+  height: 40px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 10px !important;
+  transition: background 0.18s ease;
+  color: var(--bayan-slate-700) !important;
+}
+body .topbar .notification-icon:hover {
+  background: var(--bayan-slate-100) !important;
+  color: var(--bayan-teal-700) !important;
+}
+
+/* Global Workspace Surfaces */
+body .workspace {
+  background: #F8FAFC !important;
+}
+
+/* Modern Card Polish */
+body .welcome-card,
+body .answer-card,
+body .admin-panel,
+body .feature-panel {
+  box-shadow: var(--bayan-shadow-card) !important;
+  border: 1px solid var(--bayan-border-subtle) !important;
+  border-radius: 16px !important;
+  background: #FFFFFF !important;
+}
+

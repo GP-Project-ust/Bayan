@@ -1,0 +1,11 @@
+{
+   "appDesc": {
+      "message": "HP Dynamic Audioは、アーティストが意図したリスニング品質を提供できるように設計されています。ブラウザで再生されているオーディオを識別し、音楽、映画、音声のオーディオ プリセットに適合させます。"
+   },
+   "appName": {
+      "message": "HP Dynamic Audio"
+   },
+   "appShortDesc": {
+      "message": "Provide best listening experience for music, movies, voice, and more"
+   }
+}

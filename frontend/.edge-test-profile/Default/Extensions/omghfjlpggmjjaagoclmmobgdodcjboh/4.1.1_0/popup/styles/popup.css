@@ -1,0 +1,54 @@
+@import '/styles/popupTheme.css';
+@import '/styles/global.css';
+body{
+	overflow: hidden;
+	font: 13px var( --font-ui );
+  color: var( --text );
+	line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  width: 402px;
+  height: 439px;
+  background: var( --bg );
+}
+body.fullScreen{
+  min-height: 100%;
+  height: 100%;
+}
+html{
+	overflow: hidden;
+  height: 100%;
+  background: var( --bg );
+}
+
+a{
+  outline: 0;
+}
+a,
+a:visited{
+  color: var( --text );
+}
+input,
+button{
+  outline: 0;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible{
+  outline: 2px solid var( --accent );
+  outline-offset: 2px;
+}
+.MainContainer{
+  width: 100%;
+  height: 100%;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  position: relative;
+  background: var( --bg );
+  overflow: hidden;
+}
+.MainContainer.fullScreen{
+  width: 100%;
+  height: 100%;
+}
