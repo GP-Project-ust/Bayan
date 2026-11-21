@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import type { ChatMessage, MetaPayload, AgentTraceEntry } from "@/types";
 import { streamChat } from "@/lib/chat/sse-client";
+import { ChatLayout } from "@/components/layout";
 import { ChatHeader } from "./ChatHeader";
 import { UserMessage } from "./UserMessage";
 import { AssistantMessage } from "./AssistantMessage";
@@ -216,41 +217,43 @@ export function ChatInterface() {
   };
 
   return (
-    <div className="bayan-chat-layout" dir="rtl">
-      {/* الترويسة الرئيسية */}
-      <ChatHeader
-        provider={meta?.provider}
-        model={meta?.model}
-        mode={meta?.mode}
-      />
+    <ChatLayout
+      variant="main"
+      onNewChat={handleNewChat}
+      activeChat={messages.length > 0 ? messages[0].content : undefined}
+    >
+      <div className="bayan-chat-page" role="main" aria-label="مساحة المحادثة">
+        {/* الترويسة التنفيذية للمحادثة المطابقة لهوية لوحة الإدارة */}
+        <ChatHeader
+          provider={meta?.provider}
+          model={meta?.model}
+          mode={meta?.mode}
+        />
 
-      {/* منطقة الرسائل والمحادثة */}
-      <main className="bayan-chat-main" role="main" aria-label="مساحة المحادثة">
-        <div className="bayan-messages-container">
+        {/* بطاقة مساحة المحادثة المؤسسية الموحدة */}
+        <div className="bayan-chat-workspace-card">
           {messages.length === 0 ? (
             /* بطاقة الترحيب عند بدء جلسة جديدة */
             <div className="bayan-welcome-hero">
               <div className="bayan-welcome-icon-box">
-                <Bot size={36} className="text-teal-400" aria-hidden="true" />
+                <Bot size={34} aria-hidden="true" />
               </div>
-              <h2 className="text-xl font-bold text-bayan-50">
-                مرحباً بك في واجهة بيان الذكية
-              </h2>
+              <h2>مرحباً بك في واجهة بيان الذكية</h2>
               <p className="bayan-welcome-desc">
                 اسأل باللغة العربية عن إحصاءات الطلاب، البرامج الأكاديمية، والرسوم.
                 يقوم وكيل SQL بتحليل سؤالك وبناء استعلامات آمنة مع عرض جدول النتائج وأثر التنفيذ.
               </p>
               <div className="bayan-welcome-features">
                 <div className="bayan-feature-item">
-                  <Sparkles size={16} className="text-gold-400" />
+                  <Sparkles size={16} className="text-amber-500" aria-hidden="true" />
                   <span>توليد آمن لاستعلامات SQL</span>
                 </div>
                 <div className="bayan-feature-item">
-                  <MessageSquare size={16} className="text-teal-400" />
+                  <MessageSquare size={16} className="text-teal-600" aria-hidden="true" />
                   <span>بث فوري عبر تقنية SSE</span>
                 </div>
                 <div className="bayan-feature-item">
-                  <Bot size={16} className="text-sky-400" />
+                  <Bot size={16} className="text-sky-600" aria-hidden="true" />
                   <span>شفافية كاملة لأثر الوكلاء</span>
                 </div>
               </div>
@@ -272,19 +275,19 @@ export function ChatInterface() {
               <div ref={messagesEndRef} />
             </div>
           )}
-        </div>
 
-        {/* خانة كتابة السؤال والأزرار */}
-        <ChatInput
-          value={inputValue}
-          onChange={setInputValue}
-          onSend={() => handleSend()}
-          onStop={handleStop}
-          onNewChat={handleNewChat}
-          isStreaming={isStreaming}
-          conversationId={conversationId}
-        />
-      </main>
-    </div>
+          {/* خانة كتابة السؤال والأزرار */}
+          <ChatInput
+            value={inputValue}
+            onChange={setInputValue}
+            onSend={() => handleSend()}
+            onStop={handleStop}
+            onNewChat={handleNewChat}
+            isStreaming={isStreaming}
+            conversationId={conversationId}
+          />
+        </div>
+      </div>
+    </ChatLayout>
   );
 }

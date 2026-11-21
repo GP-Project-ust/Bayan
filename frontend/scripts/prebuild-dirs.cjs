@@ -24,4 +24,17 @@ function mirrorDirs(src, dest) {
 mirrorDirs(appDir, serverTargetDir);
 mirrorDirs(appDir, staticTargetDir);
 mirrorDirs(appDir, typesTargetDir);
+
+// Pre-create Next.js internal directories that are outside src/app
+// to prevent ENOENT errors with non-ASCII folder paths during build traces
+const internalDirs = [
+  path.join(root, '.next', 'server', 'app', '_not-found'),
+  path.join(root, '.next', 'server', 'app', '_error'),
+];
+for (const dir of internalDirs) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
 console.log('Pre-created directory tree for .next/server/app, .next/static/chunks/app, and .next/types/app');

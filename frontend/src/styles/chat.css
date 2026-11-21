@@ -1,759 +1,813 @@
 /* ==========================================================================
-   Bayan AI Platform — Real Next.js AI Chat Interface Styles
-   Institutional Navy & Teal Identity | True Arabic RTL | Fully Responsive
+   BAYAN ENTERPRISE DESIGN SYSTEM — CHAT INTERFACE (/chat)
+   Visual Redesign Aligned to Approved Admin Dashboard (/admin)
+   Institutional Light Workspace (#F8FAFC) | White Cards (#FFFFFF) | Readex Pro
+   Scoped strictly to .chat-layout / .chat-workspace / .bayan-chat-page
    ========================================================================== */
 
-.bayan-chat-layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  height: 100vh;
-  background-color: var(--bayan-navy-950, #061527);
-  color: var(--bayan-slate-100, #f1f5f9);
-  font-family: var(--font-bayan-arabic), "IBM Plex Sans Arabic", "Alexandria", sans-serif;
-  direction: rtl;
-  overflow: hidden;
+/* --------------------------------------------------------------------------
+   0. ARABIC TYPOGRAPHY (READEX PRO & ALEXANDRIA)
+   -------------------------------------------------------------------------- */
+.chat-layout,
+.chat-layout .chat-workspace,
+.bayan-chat-page,
+.bayan-chat-page h1,
+.bayan-chat-page h2,
+.bayan-chat-page h3,
+.bayan-chat-page h4,
+.bayan-chat-page p,
+.bayan-chat-page span,
+.bayan-chat-page button,
+.bayan-chat-page textarea,
+.bayan-chat-page input,
+.bayan-chat-page select,
+.bayan-chat-page td,
+.bayan-chat-page th,
+.bayan-chat-page label,
+.bayan-chat-page strong,
+.bayan-chat-page b,
+.bayan-chat-page small {
+  font-family: 'Readex Pro', var(--font-readex-pro, "Readex Pro"), "Alexandria", "IBM Plex Sans Arabic", "Noto Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: normal !important;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* --------------------------------------------------------------------------
-   1. الهيدر والشعار وشارات المزوّد والحالة
+   1. WORKSPACE LAYOUT & APPLICATION SHELL
    -------------------------------------------------------------------------- */
-.bayan-chat-header {
+.chat-layout .chat-workspace {
+  background-color: var(--bayan-bg-page, #f8fafc);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.bayan-chat-page {
+  flex: 1;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 24px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  direction: rtl;
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   2. HERO HEADER (.bayan-chat-hero) — MATCHING .admin-hero
+   -------------------------------------------------------------------------- */
+.bayan-chat-hero {
+  position: relative;
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  border: 1px solid var(--bayan-border-subtle, #e2e8f0);
+  border-radius: var(--bayan-radius-xl, 16px);
+  padding: 22px 28px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 4px 14px rgba(10, 37, 64, 0.025);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 12px 24px;
-  background-color: rgba(10, 35, 66, 0.85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.1);
-  z-index: 20;
-  flex-shrink: 0;
+  gap: 20px;
+  flex-wrap: wrap;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-.bayan-brand-cluster {
+.bayan-chat-hero-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+  max-width: 680px;
+}
+
+.bayan-chat-hero-title {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.bayan-logo-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #00A6B2 0%, #007681 100%);
-  color: #ffffff;
-  font-weight: 800;
-  font-size: 20px;
-  box-shadow: 0 4px 12px rgba(0, 166, 178, 0.3);
-  text-decoration: none;
+.bayan-chat-hero-title h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--bayan-navy-900, #0a2540);
+  line-height: 1.35;
+  margin: 0;
 }
 
-.bayan-brand-title {
+.bayan-chat-hero-desc {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--bayan-text-secondary, #475569);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.bayan-chat-hero-meta {
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
 }
 
-.bayan-header-badges {
+.bayan-hero-badges-row {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .bayan-h-badge {
-  font-size: 11.5px;
-  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
   border-radius: 999px;
-  background-color: rgba(30, 41, 59, 0.7);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  color: #cbd5e1;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  white-space: nowrap;
 }
 
 .bayan-h-badge.mode.mode-mock {
-  background-color: rgba(245, 158, 11, 0.15);
-  border-color: rgba(245, 158, 11, 0.35);
-  color: #f59e0b;
+  background-color: #fef3c7;
+  border-color: #fde68a;
+  color: #92400e;
+  font-weight: 600;
 }
 
 .bayan-h-badge.mode.mode-real {
-  background-color: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.35);
-  color: #10b981;
+  background-color: #d1fae5;
+  border-color: #a7f3d0;
+  color: #065f46;
+  font-weight: 600;
 }
 
-.bayan-header-actions {
+.bayan-hero-health-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
 }
 
 .bayan-health-cluster {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background-color: rgba(15, 23, 42, 0.6);
-  padding: 4px 10px;
+  gap: 12px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 5px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(226, 232, 240, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
-.bayan-health-dot-item {
+.bayan-health-item {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  color: #94a3b8;
+  gap: 6px;
+  font-size: 12px;
+  color: #475569;
 }
 
-.bayan-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
+.bayan-health-dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background-color: #64748b;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
-.bayan-health-dot-item.up .bayan-dot {
+.bayan-health-dot.up {
   background-color: #10b981;
-  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
 }
 
-.bayan-health-dot-item.down .bayan-dot {
+.bayan-health-dot.down {
   background-color: #ef4444;
-}
-
-.bayan-health-dot-item.checking .bayan-dot {
-  background-color: #f59e0b;
-  animation: pulse 1s infinite;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
 }
 
 .bayan-health-refresh {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: #64748b;
   cursor: pointer;
   padding: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
   transition: color 0.15s;
 }
 
 .bayan-health-refresh:hover:not(:disabled) {
-  color: #00A6B2;
-}
-
-.bayan-quick-links {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.bayan-nav-link {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  background-color: rgba(30, 41, 59, 0.6);
-  color: #cbd5e1;
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  text-decoration: none;
-  transition: all 0.15s;
-}
-
-.bayan-nav-link:hover {
-  background-color: rgba(45, 212, 191, 0.15);
-  border-color: rgba(45, 212, 191, 0.3);
-  color: #2dd4bf;
+  color: #0a2540;
 }
 
 /* --------------------------------------------------------------------------
-   2. مساحة المحادثة والرسائل
+   3. CONVERSATION WORKSPACE CARD (.bayan-chat-workspace-card)
    -------------------------------------------------------------------------- */
-.bayan-chat-main {
-  flex: 1;
+.bayan-chat-workspace-card {
+  background-color: #ffffff;
+  border: 1px solid var(--bayan-border-subtle, #e2e8f0);
+  border-radius: var(--bayan-radius-xl, 16px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 4px 14px rgba(10, 37, 64, 0.025);
   display: flex;
   flex-direction: column;
+  min-height: 560px;
   overflow: hidden;
-  max-width: 1000px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 16px;
+  box-sizing: border-box;
 }
 
-.bayan-messages-container {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px 0;
+/* --------------------------------------------------------------------------
+   4. WELCOME HERO (EMPTY STATE)
+   -------------------------------------------------------------------------- */
+.bayan-welcome-hero {
+  padding: 56px 24px 40px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-/* شاشة الترحيب الابتدائية */
-.bayan-welcome-hero {
-  margin: auto;
+  align-items: center;
   text-align: center;
-  max-width: 580px;
-  padding: 40px 24px;
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px dashed rgba(226, 232, 240, 0.15);
-  border-radius: 20px;
-  animation: fadeIn 0.4s ease-out;
+  max-width: 760px;
+  margin: 0 auto;
 }
 
 .bayan-welcome-icon-box {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  background: rgba(0, 166, 178, 0.12);
-  border: 1px solid rgba(0, 166, 178, 0.3);
+  width: 68px;
+  height: 68px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(0, 166, 178, 0.1) 0%, rgba(0, 118, 129, 0.16) 100%);
+  border: 1px solid rgba(0, 166, 178, 0.28);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 16px;
+  margin-bottom: 20px;
+  color: var(--bayan-teal-700, #007681);
+  box-shadow: 0 4px 14px rgba(0, 166, 178, 0.15);
+}
+
+.bayan-welcome-hero h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--bayan-navy-900, #0a2540);
+  margin: 0 0 12px 0;
+  line-height: 1.35;
 }
 
 .bayan-welcome-desc {
-  font-size: 14px;
-  color: #94a3b8;
-  line-height: 1.8;
-  margin-top: 10px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--bayan-text-secondary, #475569);
+  margin: 0 0 28px 0;
+  max-width: 640px;
 }
 
 .bayan-welcome-features {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 24px;
-  text-align: right;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
 .bayan-feature-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  color: #cbd5e1;
-  background: rgba(30, 41, 59, 0.4);
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(226, 232, 240, 0.06);
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 8px 16px;
+  border-radius: 999px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
-/* صفوف الرسائل */
+/* --------------------------------------------------------------------------
+   5. MESSAGES LIST & BUBBLES
+   -------------------------------------------------------------------------- */
 .bayan-messages-list {
+  flex: 1;
+  padding: 28px 32px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+  overflow-y: visible;
 }
 
 .bayan-msg-row {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 14px;
   width: 100%;
 }
 
 .bayan-msg-row.user {
-  flex-direction: row-reverse;
+  justify-content: flex-start;
 }
 
-.bayan-avatar {
+.bayan-msg-row.assistant {
+  justify-content: flex-start;
+}
+
+.bayan-avatar.user {
   width: 38px;
   height: 38px;
-  border-radius: 12px;
+  border-radius: 50%;
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-}
-
-.bayan-avatar.user {
-  background: rgba(0, 166, 178, 0.2);
-  border: 1px solid rgba(0, 166, 178, 0.4);
+  margin-top: 2px;
 }
 
 .bayan-avatar.assistant {
-  background: rgba(10, 35, 66, 0.9);
-  border: 1px solid rgba(210, 158, 44, 0.4);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00A6B2 0%, #007681 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(0, 166, 178, 0.28);
+  margin-top: 2px;
 }
 
-.bayan-msg-bubble {
-  max-width: min(88%, 760px);
-  padding: 14px 18px;
-  border-radius: 16px;
-  font-size: 14.5px;
-  line-height: 1.8;
+/* فقاعة المستخدم */
+.bayan-msg-bubble.user {
+  background-color: #f0f7ff;
+  border: 1px solid #cbe0f8;
+  border-radius: 16px 16px 2px 16px;
+  padding: 14px 22px;
+  max-width: 82%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  animation: messageSlideIn 0.25s ease-out;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(10, 37, 64, 0.03);
 }
 
-.bayan-msg-bubble.user {
-  background: linear-gradient(135deg, #007681 0%, #004D54 100%);
-  color: #ffffff;
-  border-bottom-right-radius: 4px;
-  box-shadow: 0 4px 16px rgba(0, 118, 129, 0.2);
-}
-
-.bayan-msg-bubble.assistant {
-  background: rgba(30, 41, 59, 0.7);
-  color: #f1f5f9;
-  border: 1px solid rgba(226, 232, 240, 0.1);
-  border-bottom-left-radius: 4px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  width: 100%;
-}
-
-.bayan-msg-content {
-  white-space: pre-wrap;
-  word-break: break-word;
+.bayan-msg-bubble.user .bayan-msg-content {
+  color: #0a2540;
+  font-size: 15.5px;
+  font-weight: 500;
+  line-height: 1.65;
+  margin: 0;
 }
 
 .bayan-msg-time {
-  font-size: 11px;
-  color: rgba(203, 213, 225, 0.65);
-  align-self: flex-end;
+  font-size: 11.5px;
+  color: #64748b;
+  align-self: flex-start;
 }
 
+/* بطاقة إجابة المساعد */
+.bayan-msg-bubble.assistant {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px 26px;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 4px 14px rgba(10, 37, 64, 0.025);
+  box-sizing: border-box;
+}
+
+.bayan-msg-bubble.assistant .bayan-msg-content {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* تذييل رسالة المساعد */
 .bayan-msg-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
   flex-wrap: wrap;
-  padding-top: 8px;
-  border-top: 1px solid rgba(226, 232, 240, 0.08);
-  font-size: 11px;
-  color: #94a3b8;
 }
 
 .bayan-meta-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(226, 232, 240, 0.08);
-  padding: 2px 8px;
+  gap: 6px;
+  font-size: 12px;
+  color: #475569;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 3px 10px;
   border-radius: 6px;
 }
 
+/* مؤشر البث المباشر */
+.bayan-streaming-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  color: #0f766e;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.bayan-pulsing-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #00a6b2;
+  box-shadow: 0 0 0 4px rgba(0, 166, 178, 0.25);
+  animation: bayan-pulse 1.4s infinite ease-in-out;
+}
+
+@keyframes bayan-pulse {
+  0%, 100% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+    box-shadow: 0 0 0 8px rgba(0, 166, 178, 0.15);
+  }
+}
+
 /* --------------------------------------------------------------------------
-   3. جدول نتائج الاستعلام (ResultsTable)
+   6. RESULTS TABLE (.bayan-results-panel) — MATCHING ADMIN TABLES
    -------------------------------------------------------------------------- */
 .bayan-results-panel {
-  margin-top: 8px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(226, 232, 240, 0.12);
+  background: #ffffff;
+  border: 1px solid var(--bayan-border-subtle, #e2e8f0);
   border-radius: 12px;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
   overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .bayan-results-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  padding: 12px 20px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .bayan-results-title {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13.5px;
-  font-weight: 700;
-  color: #f1f5f9;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0a2540;
 }
 
 .bayan-results-count {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 2px 8px;
+  padding: 3px 12px;
+  background: #ccfbf1;
+  color: #0f766e;
+  border: 1px solid #99f6e4;
   border-radius: 999px;
-  background: rgba(30, 41, 59, 0.8);
-  color: #2dd4bf;
-  border: 1px solid rgba(45, 212, 191, 0.25);
-  font-variant-numeric: tabular-nums;
 }
 
 .bayan-results-table-wrap {
   overflow-x: auto;
-  border: 1px solid rgba(226, 232, 240, 0.08);
-  border-radius: 8px;
-  background: #0b1122;
+  max-width: 100%;
 }
 
 .bayan-results-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 13.5px;
+  direction: rtl;
   text-align: right;
-  font-size: 13px;
-  line-height: 1.6;
 }
 
 .bayan-results-table th {
-  background-color: #16233a;
-  color: #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
   font-weight: 600;
-  padding: 10px 14px;
-  border-bottom: 2px solid rgba(226, 232, 240, 0.12);
+  padding: 11px 18px;
+  border-bottom: 1px solid #e2e8f0;
   white-space: nowrap;
+  font-size: 13px;
 }
 
 .bayan-results-table td {
-  padding: 10px 14px;
-  border-bottom: 1px solid #1e293b;
-  color: #e2e8f0;
-  white-space: nowrap;
+  padding: 12px 18px;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-.bayan-results-table tr:last-child td {
-  border-bottom: none;
+.bayan-results-table tbody tr:nth-child(even) {
+  background-color: #fafbfc;
 }
 
-.bayan-results-table tbody tr:hover td {
-  background-color: rgba(255, 255, 255, 0.03);
+.bayan-results-table tbody tr:hover {
+  background-color: #f1f5f9;
 }
 
 .bayan-results-table td.num-cell {
-  font-family: var(--font-mono, monospace);
-  font-variant-numeric: tabular-nums;
   direction: ltr;
-  text-align: left;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: #0a2540;
 }
 
 .bayan-results-table td.tbl-null {
+  color: #94a3b8;
+}
+
+.bayan-results-empty-cell {
+  text-align: center;
+  padding: 24px;
   color: #64748b;
   font-style: italic;
 }
 
-.bayan-results-empty-cell {
-  text-align: center !important;
-  color: #94a3b8;
-  padding: 24px !important;
-  font-style: italic;
-}
-
-.bayan-results-trunc-badge {
-  font-size: 12px;
-  color: #f59e0b;
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.4);
-  padding: 8px 14px;
-  border-radius: 8px;
-  text-align: center;
-  font-weight: 600;
-  display: flex;
+.bayan-truncated-badge {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  gap: 6px;
+  margin: 12px 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
 }
 
 /* --------------------------------------------------------------------------
-   4. كتلة استعلام SQL (SQLCodeBlock)
+   7. GENERATED SQL BLOCK (.bayan-sql-section)
    -------------------------------------------------------------------------- */
 .bayan-sql-section {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 4px;
+  background: #0a2342;
+  border: 1px solid #1e3a5f;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 .bayan-sql-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  padding: 9px 18px;
+  background: rgba(10, 25, 47, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .bayan-sql-title {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #5eead4;
 }
 
-.bayan-copy-btn {
-  display: inline-flex;
+.bayan-sql-copy-btn {
+  display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11.5px;
+  gap: 6px;
   padding: 4px 12px;
-  border-radius: 6px;
-  background: rgba(30, 41, 59, 0.8);
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  font-size: 12px;
   color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
-.bayan-copy-btn:hover {
+.bayan-sql-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
   color: #ffffff;
-  border-color: #00A6B2;
 }
 
-.bayan-copy-btn.copied {
-  color: #10b981;
-  border-color: #10b981;
-  background: rgba(16, 185, 129, 0.1);
-  font-weight: 600;
-}
-
-.bayan-copy-btn.failed {
-  color: #ef4444;
-  border-color: #ef4444;
-}
-
-.bayan-sql-wrap {
-  border-radius: 8px;
-  background-color: #0b1122;
-  border: 1px solid #1e293b;
+.bayan-sql-body {
+  padding: 16px 20px;
   overflow-x: auto;
 }
 
-.bayan-sql-block {
-  margin: 0;
-  padding: 12px 14px;
-  font-family: var(--font-mono, monospace);
-  font-size: 12.5px;
+.bayan-sql-code {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 13.5px;
   line-height: 1.6;
-  color: #cbd5e1;
-  white-space: pre;
+  color: #e2e8f0;
+  direction: ltr;
+  text-align: left;
+  white-space: pre-wrap;
+  margin: 0;
 }
 
 /* --------------------------------------------------------------------------
-   5. أثر الوكلاء (AgentExecutionTrace)
+   8. AGENT EXECUTION TRACE (.bayan-agent-trace)
    -------------------------------------------------------------------------- */
-.bayan-trace-container {
-  margin-top: 8px;
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(226, 232, 240, 0.1);
+.bayan-agent-trace {
+  background: #f8fafc;
+  border: 1px solid var(--bayan-border-subtle, #e2e8f0);
   border-radius: 12px;
   overflow: hidden;
 }
 
-.bayan-trace-toggle {
+.bayan-trace-header-btn {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
+  padding: 12px 20px;
   background: transparent;
   border: none;
   cursor: pointer;
-  text-align: right;
-  transition: background-color 0.15s;
+  transition: background 0.15s ease;
 }
 
-.bayan-trace-toggle:hover {
-  background-color: rgba(255, 255, 255, 0.03);
+.bayan-trace-header-btn:hover {
+  background: #f1f5f9;
 }
 
-.bayan-trace-badge {
-  font-size: 11px;
+.bayan-trace-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0a2540;
+}
+
+.bayan-trace-count-pill {
+  font-size: 11.5px;
+  font-weight: 600;
   padding: 2px 8px;
+  background: #e2e8f0;
+  color: #334155;
   border-radius: 999px;
-  background: rgba(30, 41, 59, 0.9);
-  color: #94a3b8;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-}
-
-.bayan-trace-live-pulse {
-  font-size: 11px;
-  color: #2dd4bf;
-  animation: pulse 1.5s infinite;
 }
 
 .bayan-trace-cards {
-  padding: 12px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  border-top: 1px solid rgba(226, 232, 240, 0.08);
+  gap: 14px;
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
 }
 
 .bayan-agent-card {
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(226, 232, 240, 0.08);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-inline-start-width: 4px;
-  border-inline-start-style: solid;
   border-radius: 10px;
-  padding: 12px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .bayan-card-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .bayan-agent-badge {
-  font-size: 11.5px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 999px;
-  border-width: 1px;
-  border-style: solid;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 6px;
+  border: 1px solid;
 }
 
 .bayan-status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 999px;
+  gap: 5px;
+  font-size: 12px;
   font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 999px;
 }
 
-.bayan-status-pill.bayan-status-done {
-  background: rgba(16, 185, 129, 0.15);
-  color: #10b981;
+.bayan-status-done {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
 }
 
-.bayan-status-pill.bayan-status-failed {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+.bayan-status-failed {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
 }
 
-.bayan-status-pill.bayan-status-skipped {
-  background: rgba(148, 163, 184, 0.15);
-  color: #94a3b8;
+.bayan-status-skipped {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
 }
 
 .bayan-card-note {
+  font-size: 14px;
+  color: #334155;
   margin: 0;
-  font-size: 13px;
-  color: #cbd5e1;
-  line-height: 1.6;
+  line-height: 1.55;
 }
 
 .bayan-card-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-top: 2px;
 }
 
-.bayan-meta-pill {
+.bayan-trace-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 999px;
-}
-
-.bayan-meta-pill.duration {
-  background: rgba(56, 189, 248, 0.12);
-  color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.3);
-}
-
-.bayan-meta-pill.rows {
-  background: rgba(45, 212, 191, 0.12);
-  color: #2dd4bf;
-  border: 1px solid rgba(45, 212, 191, 0.3);
-}
-
-/* --------------------------------------------------------------------------
-   6. شريط مؤشر البث المباشر (StreamingIndicator)
-   -------------------------------------------------------------------------- */
-.bayan-streaming-indicator {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: rgba(0, 166, 178, 0.08);
-  border: 1px solid rgba(0, 166, 178, 0.25);
-}
-
-.bayan-timer-pill {
-  font-family: var(--font-mono, monospace);
+  gap: 5px;
   font-size: 12px;
-  color: #2dd4bf;
-  background: rgba(15, 23, 42, 0.6);
-  padding: 2px 8px;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 3px 10px;
   border-radius: 6px;
-  border: 1px solid rgba(45, 212, 191, 0.2);
 }
 
 /* --------------------------------------------------------------------------
-   7. فقاعة الخطأ وإعادة المحاولة (ErrorMessage)
+   9. ERROR BUBBLE (.bayan-error-bubble)
    -------------------------------------------------------------------------- */
 .bayan-error-bubble {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 10px;
-  padding: 14px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  padding: 18px 22px;
+  color: #92400e;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .bayan-error-code {
-  font-family: var(--font-mono, monospace);
-  font-size: 11px;
-  color: #fca5a5;
-  background: rgba(0, 0, 0, 0.25);
-  padding: 2px 6px;
+  font-size: 11.5px;
+  font-family: Consolas, monospace;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  padding: 2px 8px;
   border-radius: 4px;
+  color: #b45309;
 }
 
 .bayan-retry-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  padding: 6px 16px;
+  font-size: 13px;
   font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 6px;
-  background: rgba(239, 68, 68, 0.2);
-  color: #fecaca;
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #92400e;
+  background: #ffffff;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
 }
 
 .bayan-retry-btn:hover {
-  background: rgba(239, 68, 68, 0.3);
-  color: #ffffff;
+  background: #fef3c7;
 }
 
 /* --------------------------------------------------------------------------
-   8. صندوق إدخال السؤال والأزرار (ChatInput)
+   10. MESSAGE COMPOSER (.bayan-chat-composer-wrap)
    -------------------------------------------------------------------------- */
-.bayan-composer-container {
-  padding: 16px 0 20px;
+.bayan-chat-composer-wrap {
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 20px 28px 24px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  flex-shrink: 0;
-  border-top: 1px solid rgba(226, 232, 240, 0.08);
+  gap: 14px;
+  box-sizing: border-box;
 }
 
-.bayan-examples-row {
+.bayan-composer-chips {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -762,7 +816,7 @@
   scrollbar-width: none;
 }
 
-.bayan-examples-row::-webkit-scrollbar {
+.bayan-composer-chips::-webkit-scrollbar {
   display: none;
 }
 
@@ -770,200 +824,234 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   padding: 6px 14px;
   border-radius: 999px;
-  background: rgba(30, 41, 59, 0.7);
-  color: #cbd5e1;
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.bayan-chip:hover:not(:disabled) {
-  background: rgba(0, 166, 178, 0.15);
-  border-color: rgba(0, 166, 178, 0.4);
-  color: #ffffff;
-}
-
-.bayan-chip:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+.bayan-chip:hover {
+  background: #f0fdfa;
+  border-color: #00a6b2;
+  color: #007681;
 }
 
 .bayan-composer-box {
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
   gap: 10px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
   border-radius: 14px;
-  padding: 8px 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  transition: border-color 0.15s;
+  padding: 14px 18px;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
 }
 
 .bayan-composer-box:focus-within {
-  border-color: #00A6B2;
-  box-shadow: 0 0 0 2px rgba(0, 166, 178, 0.2);
+  background: #ffffff;
+  border-color: #00a6b2;
+  box-shadow: 0 0 0 3px rgba(0, 166, 178, 0.12);
 }
 
 .bayan-textarea {
-  flex: 1;
-  min-height: 52px;
-  max-height: 180px;
-  background: transparent;
+  width: 100%;
   border: none;
   outline: none;
-  color: #f1f5f9;
-  font-family: inherit;
-  font-size: 14px;
-  line-height: 1.6;
+  background: transparent;
+  font-size: 15px;
+  color: #0f172a;
   resize: none;
-  padding: 6px 4px;
+  line-height: 1.6;
+  direction: rtl;
 }
 
 .bayan-textarea::placeholder {
-  color: #64748b;
+  color: #94a3b8;
 }
 
 .bayan-composer-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.bayan-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 40px;
-  padding: 0 18px;
-  border-radius: 10px;
-  font-size: 13.5px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: all 0.15s;
+  justify-content: flex-start;
+  gap: 12px;
 }
 
 .bayan-btn-primary {
-  background: #00A6B2;
-  color: #04211d;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 24px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #00A6B2 0%, #007681 100%);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14.5px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 166, 178, 0.28);
+  transition: filter 0.15s ease;
 }
 
 .bayan-btn-primary:hover:not(:disabled) {
-  background: #1ac3d0;
+  filter: brightness(1.08);
 }
 
 .bayan-btn-primary:disabled {
-  opacity: 0.45;
+  opacity: 0.5;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .bayan-btn-stop {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border-radius: 10px;
   background: #ef4444;
   color: #ffffff;
-}
-
-.bayan-btn-stop:hover {
-  background: #dc2626;
+  font-weight: 600;
+  font-size: 14.5px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);
 }
 
 .bayan-btn-ghost {
-  background: rgba(30, 41, 59, 0.6);
-  color: #94a3b8;
-  border-color: rgba(148, 163, 184, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: transparent;
+  color: #475569;
+  font-size: 13.5px;
+  font-weight: 500;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
 }
 
 .bayan-btn-ghost:hover:not(:disabled) {
-  color: #ffffff;
-  border-color: #00A6B2;
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 .bayan-composer-status {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  font-size: 11px;
+  font-size: 12px;
+  color: #64748b;
+  padding: 0 4px;
 }
 
 .bayan-conv-id-wrap {
   display: flex;
   align-items: center;
   gap: 6px;
-  max-width: 70%;
 }
 
 .bayan-conv-id {
-  font-family: var(--font-mono, monospace);
-  color: #2dd4bf;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-family: Consolas, monospace;
+  font-size: 11px;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 1px 6px;
+  border-radius: 4px;
 }
 
 /* --------------------------------------------------------------------------
-   9. التجاوب مع مختلف الشاشات (375px - 1440px)
+   11. RESPONSIVE BREAKPOINTS (360px to 1440px)
    -------------------------------------------------------------------------- */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@media (max-width: 900px) {
+  .bayan-chat-page {
+    padding: 14px 16px 28px;
+    gap: 16px;
+  }
 
-@keyframes messageSlideIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+  .bayan-chat-hero {
+    padding: 18px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
+  .bayan-chat-hero-meta {
+    align-items: flex-start;
+    width: 100%;
+  }
 
-@media (max-width: 768px) {
-  .bayan-chat-header {
-    padding: 10px 14px;
+  .bayan-hero-badges-row {
+    justify-content: flex-start;
+  }
+
+  .bayan-chat-workspace-card {
+    border-radius: 12px;
+  }
+
+  .bayan-messages-list {
+    padding: 18px 16px;
+    gap: 18px;
+  }
+
+  .bayan-msg-bubble.user {
+    max-width: 90%;
+    padding: 12px 16px;
+  }
+
+  .bayan-msg-bubble.assistant {
+    padding: 18px 18px;
+  }
+
+  .bayan-chat-composer-wrap {
+    padding: 16px 16px 20px;
+  }
+
+  .bayan-composer-actions {
     flex-wrap: wrap;
   }
-  .bayan-header-badges {
-    order: 3;
-    width: 100%;
-    margin-top: 4px;
-  }
-  .bayan-msg-bubble {
-    max-width: 92%;
-    padding: 12px 14px;
-    font-size: 14px;
-  }
-  .bayan-results-table th, .bayan-results-table td {
-    padding: 8px 10px;
-    font-size: 12px;
-  }
 }
 
-@media (max-width: 500px) {
-  .bayan-chat-main {
-    padding: 0 10px;
+@media (max-width: 600px) {
+  .bayan-chat-page {
+    padding: 12px 12px 24px;
+    gap: 12px;
   }
+
+  .bayan-chat-hero-title h1 {
+    font-size: 21px;
+  }
+
+  .bayan-welcome-hero {
+    padding: 36px 16px 24px;
+  }
+
+  .bayan-welcome-hero h2 {
+    font-size: 20px;
+  }
+
+  .bayan-msg-bubble.user {
+    max-width: 96%;
+  }
+
   .bayan-composer-box {
-    flex-direction: column;
-    align-items: stretch;
+    padding: 10px 12px;
   }
-  .bayan-composer-actions {
-    justify-content: space-between;
+
+  .bayan-btn-primary {
+    width: 100%;
+    justify-content: center;
   }
-  .bayan-btn {
-    flex: 1;
-  }
-  .bayan-avatar {
-    width: 32px;
-    height: 32px;
-  }
-  .bayan-msg-bubble {
-    max-width: 100%;
+
+  .bayan-btn-ghost {
+    width: 100%;
+    justify-content: center;
   }
 }

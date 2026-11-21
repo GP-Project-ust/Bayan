@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { getHealth } from "@/lib/api";
-import { ORGANIZATION_ROUTES } from "@/lib/routes";
 import type { ComponentStatus } from "@/types";
-import { RefreshCw, LayoutDashboard, History, Sparkles } from "lucide-react";
+import { Sparkles, RefreshCw } from "lucide-react";
 
 interface ChatHeaderProps {
   provider?: string;
@@ -52,96 +50,70 @@ export function ChatHeader({
   };
 
   return (
-    <header className={`bayan-chat-header ${className}`} role="banner">
-      {/* الشعار والهوية المؤسسية */}
-      <div className="bayan-brand-cluster">
-        <Link href="/" className="bayan-logo-badge" title="الرئيسية">
-          <span>ب</span>
-        </Link>
-        <div className="bayan-brand-title">
-          <div className="flex items-center gap-1.5">
-            <h1 className="text-base font-bold text-bayan-50">بيان</h1>
-            <Sparkles size={14} className="text-gold-400" aria-hidden="true" />
+    <div className={`bayan-chat-hero ${className}`} role="region" aria-label="ترويسة المساعد الذكي">
+      {/* 1. العنوان والوصف التنفيذي المطابق لهوية لوحة الإدارة */}
+      <div className="bayan-chat-hero-main">
+        <div className="bayan-chat-hero-title">
+          <Sparkles size={24} className="text-bayan-teal-500" aria-hidden="true" />
+          <h1>المساعد الذكي — بيان</h1>
+        </div>
+        <p className="bayan-chat-hero-desc">
+          اسأل عن بيانات مؤسستك باللغة العربية واستعرض النتائج وتحليل الوكلاء.
+        </p>
+      </div>
+
+      {/* 2. شارات المزوّد والنموذج ومؤشرات جاهزية البنية التحتية */}
+      <div className="bayan-chat-hero-meta">
+        <div className="bayan-hero-badges-row" aria-label="بيانات النموذج والمزود">
+          <span className="bayan-h-badge" title="مزود الذكاء الاصطناعي الحالي">
+            المزوّد: <bdi dir="ltr">{provider}</bdi>
+          </span>
+          <span className="bayan-h-badge" title="النموذج اللغوي الحالي">
+            النموذج: <bdi dir="ltr">{model}</bdi>
+          </span>
+          <span
+            className={`bayan-h-badge mode ${
+              mode === "mock" ? "mode-mock" : mode === "real" ? "mode-real" : ""
+            }`}
+            title="بيئة التشغيل الحالية"
+          >
+            {mode === "mock" ? "وضع تجريبي (mock)" : mode === "real" ? "وضع حقيقي" : mode}
+          </span>
+        </div>
+
+        <div className="bayan-hero-health-row">
+          <div
+            className="bayan-health-cluster"
+            role="group"
+            aria-label="حالة مكونات البنية التحتية"
+          >
+            {["database", "redis", "qdrant", "ollama"].map((comp) => {
+              const state = components[comp];
+              const isUp = state === "up";
+              return (
+                <span
+                  key={comp}
+                  className="bayan-health-item"
+                  title={`${COMPONENT_LABELS[comp]}: ${isUp ? "يعمل وجاهز" : "غير متصل"}`}
+                >
+                  <span className={`bayan-health-dot ${isUp ? "up" : "down"}`} aria-hidden="true" />
+                  <span className="bayan-health-label">{COMPONENT_LABELS[comp]}</span>
+                </span>
+              );
+            })}
+            <button
+              type="button"
+              onClick={refreshHealth}
+              disabled={checking}
+              className="bayan-health-refresh"
+              title="تحديث فحص صحة المكونات"
+              aria-label="تحديث فحص صحة المكونات"
+            >
+              <RefreshCw size={12} className={checking ? "animate-spin" : ""} aria-hidden="true" />
+            </button>
           </div>
-          <span className="text-xs text-bayan-300">واجهة المحادثة الذكية المباشرة</span>
         </div>
       </div>
-
-      {/* شارات المزوّد والنموذج والوضع */}
-      <div className="bayan-header-badges" aria-label="بيانات المزوّد والنموذج">
-        <span className="bayan-h-badge" title="مزود الذكاء الاصطناعي الحالي">
-          المزوّد: <bdi dir="ltr">{provider}</bdi>
-        </span>
-        <span className="bayan-h-badge" title="النموذج اللغوي الحالي">
-          النموذج: <bdi dir="ltr">{model}</bdi>
-        </span>
-        <span
-          className={`bayan-h-badge mode ${
-            mode === "mock" ? "mode-mock" : mode === "real" ? "mode-real" : ""
-          }`}
-          title="بيئة التشغيل"
-        >
-          {mode === "mock" ? "وضع تجريبي (mock)" : mode === "real" ? "وضع حقيقي" : mode}
-        </span>
-      </div>
-
-      {/* مؤشرات صحة المكونات وروابط التنقل */}
-      <div className="bayan-header-actions">
-        <div
-          className="bayan-health-cluster"
-          role="group"
-          aria-label="حالة مكونات البنية التحتية"
-        >
-          {["database", "redis", "qdrant", "ollama"].map((comp) => {
-            const state = components[comp];
-            const isUp = state === "up";
-            return (
-              <span
-                key={comp}
-                className={`bayan-health-dot-item ${
-                  isUp ? "up" : state === "down" ? "down" : "checking"
-                }`}
-                title={`${COMPONENT_LABELS[comp] || comp}: ${
-                  isUp ? "متصل وجاهز" : "غير متصل"
-                }`}
-              >
-                <i className="bayan-dot" aria-hidden="true" />
-                <span className="text-xs">{COMPONENT_LABELS[comp] || comp}</span>
-              </span>
-            );
-          })}
-          <button
-            type="button"
-            onClick={refreshHealth}
-            disabled={checking}
-            className="bayan-health-refresh"
-            title="تحديث حالة المكونات"
-            aria-label="تحديث حالة المكونات"
-          >
-            <RefreshCw size={13} className={checking ? "animate-spin" : ""} />
-          </button>
-        </div>
-
-        {/* روابط سريعة */}
-        <div className="bayan-quick-links">
-          <Link
-            href={ORGANIZATION_ROUTES.conversations}
-            className="bayan-nav-link"
-            title="سجل المحادثات"
-          >
-            <History size={15} />
-            <span className="hidden sm:inline">السجل</span>
-          </Link>
-          <Link
-            href={ORGANIZATION_ROUTES.dashboard}
-            className="bayan-nav-link"
-            title="لوحة الإدارة"
-          >
-            <LayoutDashboard size={15} />
-            <span className="hidden sm:inline">لوحة الإدارة</span>
-          </Link>
-        </div>
-      </div>
-    </header>
+    </div>
   );
 }
