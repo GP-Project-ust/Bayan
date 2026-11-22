@@ -22,6 +22,7 @@ langchain-ollama>=0.2
 
 # --- أدوات ---
 httpx>=0.27
+sqlglot>=23.0.0  # تحقق AST لـ SQL — Issue #6 (Waleed)
 
 # --- أدوات التطوير ---
 pytest>=8.0
