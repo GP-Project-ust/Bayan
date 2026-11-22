@@ -3,9 +3,15 @@
 Sprint 1 — التوليد الحقيقي عبر LLM + تحقق AST + إصلاح ذاتي:
   1. مطابقة مفاهيم أولية من الكتالوج لتحديد المشاهد المرشحة.
   2. توليد SQL عبر get_llm("sql") حصراً (ADR-002).
-  3. تحقق AST عبر sqlglot: SELECT/CTE فقط، مصادر الكتالوج فقط، LIMIT إجباري.
+  3. تحقق AST عبر sqlglot: SELECT/CTE/UNION فقط، مصادر الكتالوج فقط، LIMIT إجباري.
   4. إصلاح ذاتي: حتى 3 محاولات كلية مع تغذية راجعة بالخطأ.
   5. تنفيذ فعلي عبر دور bayan_reader (قراءة فقط، مهلة 5 ثوانٍ).
+
+إصلاحات PR2:
+  - LIMIT يُضاف عبر شجرة AST (بدل اللصق النصي) → يصمد مع تعليقات -- في نهاية الرد.
+  - فحص الفاصلة (;) ينقل إلى ما بعد التحليل الشجري → لا يرفض ; داخل نصوص.
+  - rows_truncated وexec_sql يُحسبان عبر AST → يصمدان مع CTE والتعليقات.
+  - UNION بين المشاهد المسموحة مقبول الآن.
 
 الملفات المحظورة (ADR-004): state.py, events.py, graph.py, supervisor.py,
   api/v1/router.py, schemas/chat.py, llm/provider.py, llm/mock.py, sql_catalog.py
@@ -90,29 +96,24 @@ def validate_sql_ast(sql: str, allowed_views: list[str], max_rows: int) -> str:
     """تحقق AST كامل من استعلام SQL وإرجاع نسخة آمنة مضمونة.
 
     المدخل : sql (نص خام من النموذج)
-    المخرج : استعلام آمن مع LIMIT مضمون
+    المخرج : استعلام آمن مع LIMIT مضمون (مُضاف عبر AST دائماً)
     الاستثناء: ValueError برسالة عربية واضحة عند أي انتهاك
 
-    الضمانات:
-      ✅ عبارة واحدة فقط
-      ✅ الجذر SELECT أو WITH (CTE مقبول)
+    الضمانات (PR2):
+      ✅ عبارة واحدة فقط — مكتشفة عبر AST (لا تُرفض ; داخل نصوص)
+      ✅ الجذر SELECT أو WITH (CTE) أو UNION بين مشاهد مسموحة
       ✅ لا DML/DDL/MERGE/COPY/GRANT في أي مكان بما في ذلك داخل CTE
       ✅ لا SELECT INTO
       ✅ كل مصادر البيانات من allowed_views فقط (يتعامل مع CTE aliases)
-      ✅ LIMIT مضمون بالحد الأقصى إن غاب
+      ✅ LIMIT مضمون عبر AST — يصمد مع تعليقات -- في نهاية رد النموذج
     """
-    # 1. تنظيف أولي وإزالة الفواصل الزائدة
+    # 1. تنظيف أولي — إزالة تنسيق markdown والفواصل الزائدة
     sql = sql.strip()
-    # احذف نص SQL: أو ```sql إن أرسله النموذج بتنسيق
     sql = re.sub(r"^```(?:sql)?\s*", "", sql, flags=re.IGNORECASE)
     sql = re.sub(r"\s*```$", "", sql)
     sql = sql.strip().rstrip(";")
 
-    # 2. رفض متعدد العبارات بفاصلة منقوطة
-    if ";" in sql:
-        raise ValueError("الحارس يرفض: عبارة واحدة فقط مسموحة — لا فواصل (;) بين العبارات")
-
-    # 3. تحليل AST
+    # 2. تحليل AST — نقطة الحقيقة الوحيدة (قبل أي فحص نصي)
     try:
         statements = sqlglot.parse(sql, dialect="postgres")
     except sqlglot.errors.ParseError as exc:
@@ -121,13 +122,15 @@ def validate_sql_ast(sql: str, allowed_views: list[str], max_rows: int) -> str:
     if not statements or statements[0] is None:
         raise ValueError("الحارس يرفض: لم يتمكن المحلل من فهم الاستعلام")
 
+    # 3. رفض متعدد العبارات — عبر AST (لا يُخطئ ; داخل نصوص مثل 'أحمد;DROP')
     if len(statements) > 1:
         raise ValueError("الحارس يرفض: تم اكتشاف أكثر من عبارة SQL")
 
     stmt = statements[0]
 
     # 4. تحقق من نوع العبارة الجذر
-    if not isinstance(stmt, (exp.Select, exp.With)):
+    # UNION مقبول الآن بين المشاهد المسموحة (يحتاجه فريق القياس)
+    if not isinstance(stmt, (exp.Select, exp.With, exp.Union)):
         raise ValueError(
             f"الحارس يرفض: نوع العبارة غير مسموح ({type(stmt).__name__}) — SELECT فقط"
         )
@@ -176,16 +179,13 @@ def validate_sql_ast(sql: str, allowed_views: list[str], max_rows: int) -> str:
                 f"المسموح: {sorted(allowed_views)}"
             )
 
-    # 10. ضمان LIMIT — أضفه تلقائياً إن غاب
-    # نبحث عن LIMIT في أعلى مستوى SELECT
-    top_select = stmt.find(exp.Select)
-    if top_select is not None:
-        limit_node = top_select.args.get("limit")
-        if limit_node is None:
-            # أضف LIMIT للاستعلام
-            sql = f"{sql} LIMIT {max_rows}"
+    # 10. ضمان LIMIT عبر AST — يصمد حتى لو انتهى رد النموذج بتعليق (--)
+    limit_node = stmt.args.get("limit")
+    if limit_node is None:
+        # نضيف LIMIT عبر شجرة AST ثم نُعيد توليد النص — لا لصق نصي
+        stmt = stmt.limit(max_rows)
 
-    return sql
+    return stmt.sql(dialect="postgres")
 
 
 # ---------------------------------------------------------------------------
@@ -277,22 +277,29 @@ def sql_agent_node(state: AgentState) -> dict:
         # ج. تنفيذ الاستعلام مع فحص الاقتصاص الدقيق (Sentinel lookahead)
         try:
             # نتحقق إن كان الاستعلام يحوي LIMIT صريح أصغر من السقف
+            # كشف الاقتصاص بيقين عبر AST — يصمد مع CTE والتعليقات وUNION (PR2)
             has_explicit_smaller_limit = False
+            sentinel_stmt = safe_sql  # الاستعلام الفعلي المُنفَّذ (max_rows+1 للكشف)
             try:
                 parsed = sqlglot.parse(safe_sql, dialect="postgres")
                 if parsed and parsed[0]:
-                    sel = parsed[0].find(exp.Select)
-                    if sel and sel.args.get("limit"):
-                        limit_val = int(sel.args["limit"].expression.this)
-                        if limit_val < max_rows:
-                            has_explicit_smaller_limit = True
+                    stmt_parsed = parsed[0]
+                    limit_node = stmt_parsed.args.get("limit")
+                    if limit_node is not None:
+                        try:
+                            limit_val = int(limit_node.expression.this)
+                            if limit_val < max_rows:
+                                has_explicit_smaller_limit = True
+                        except Exception:
+                            pass
+                    if not has_explicit_smaller_limit:
+                        # استبدل LIMIT بـ max_rows+1 عبر AST — لا نصياً
+                        sentinel = stmt_parsed.limit(max_rows + 1)
+                        sentinel_stmt = sentinel.sql(dialect="postgres")
             except Exception:
                 pass
 
-            # إذا لم يكن هناك LIMIT مخصص أصغر، نطلب max_rows + 1 صف لكشف الاقتصاص بيقين
-            exec_sql = safe_sql
-            if not has_explicit_smaller_limit and f"LIMIT {max_rows}" in safe_sql:
-                exec_sql = safe_sql.replace(f"LIMIT {max_rows}", f"LIMIT {max_rows + 1}")
+            exec_sql = sentinel_stmt
 
             rows, duration_s = execute_readonly(exec_sql)
 

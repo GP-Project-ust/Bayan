@@ -1,10 +1,12 @@
-"""اختبارات وكيل SQL — Issue #6 (Waleed) — PR1.
+"""اختبارات وكيل SQL — Issue #6 (Waleed) — PR2.
 
 التغطية:
   1. تحقق AST: المسار السعيد + رفض DML/DDL + رفض مصادر خارج الكتالوج
   2. CTE / WITH: مقبول الآن (كان مرفوضاً في Sprint 0)
-  3. مطابقة المفاهيم الأولية
-  4. تكامل مع القاعدة الحية (يتخطى تلقائياً بلا قاعدة)
+  3. UNION بين المشاهد المسموحة: مقبول الآن (PR2)
+  4. مطابقة المفاهيم الأولية
+  5. تكامل مع القاعدة الحية (يتخطى تلقائياً بلا قاعدة)
+  6. إصلاحات PR2: LIMIT عبر AST، فاصلة داخل نص، rows_truncated
 
 ملاحظات تقنية:
   - كل اختبارات الوحدة تعمل عبر mock بلا اتصال خارجي.
@@ -89,6 +91,34 @@ class TestASTAccepts:
         assert "```" not in result
         assert "SELECT" in result.upper()
 
+    def test_limit_added_via_ast_with_trailing_comment(self):
+        """ثغرة التعليقات: LIMIT يضاف عبر AST حتى لو انتهى الاستعلام بتعليق --."""
+        sql = "SELECT * FROM v_student_profile -- تعليق في نهاية الاستعلام"
+        result = validate_sql_ast(sql, _ALLOWED_VIEWS, _MAX_ROWS)
+        assert "LIMIT" in result.upper()
+        # نتحقق من أن LIMIT ليس مبتلعاً داخل تعليق سطر واحد
+        import sqlglot
+        parsed = sqlglot.parse(result, dialect="postgres")[0]
+        assert parsed.args.get("limit") is not None
+
+    def test_semicolon_inside_string_literal_accepted(self):
+        """الفاصلة المنقوطة داخل نص لا تُرفض لأن التحقق أصبح عبر AST."""
+        sql = "SELECT * FROM v_student_profile WHERE student_name = 'أحمد;DROP'"
+        result = validate_sql_ast(sql, _ALLOWED_VIEWS, _MAX_ROWS)
+        assert "أحمد;DROP" in result
+        assert "LIMIT" in result.upper()
+
+    def test_union_between_allowed_views_accepted(self):
+        """UNION بين المشاهد المسموحة مقبول الآن (PR2)."""
+        sql = (
+            "SELECT student_name FROM v_student_profile "
+            "UNION "
+            "SELECT program_name FROM v_program_stats"
+        )
+        result = validate_sql_ast(sql, _ALLOWED_VIEWS, _MAX_ROWS)
+        assert "UNION" in result.upper()
+        assert "LIMIT" in result.upper()
+
 
 # ===========================================================================
 # § 2 — تحقق AST: رفض DML / DDL
@@ -157,6 +187,16 @@ class TestASTRejectsInjectionAndOutOfCatalog:
         # يجب ألا يرفض my_data لأنه CTE alias
         result = validate_sql_ast(sql, _ALLOWED_VIEWS, _MAX_ROWS)
         assert "WITH" in result.upper()
+
+    def test_rejects_union_with_disallowed_source(self):
+        """UNION مع مصدر خارج الكتالوج يجب أن يُرفض."""
+        sql = (
+            "SELECT student_name FROM v_student_profile "
+            "UNION "
+            "SELECT username FROM pg_user"
+        )
+        with pytest.raises(ValueError, match="الحارس يرفض"):
+            validate_sql_ast(sql, _ALLOWED_VIEWS, _MAX_ROWS)
 
 
 # ===========================================================================
