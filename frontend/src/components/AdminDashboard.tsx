@@ -53,6 +53,7 @@ import {
 import AdminRowMenu, { type RowMenuGroup } from "./admin/AdminRowMenu";
 import { SmartViewInspector, UserInspector } from "./admin/AdminRecordInspector";
 import { RoleIcon } from "./admin/roleIcon";
+import { ROLE_SCOPE } from "./admin/roleMeta";
 
 const STORAGE_KEYS = {
   USERS: "bayan_demo_admin_users_v3",
@@ -1447,7 +1448,7 @@ export default function AdminDashboard() {
         {/* Dialogs */}
         {Boolean(modal) && (
           <div
-            className="dialog-overlay"
+            className="ad-overlay"
             onMouseDown={(event) => {
               if (event.currentTarget === event.target) closeModal();
             }}
@@ -1455,14 +1456,19 @@ export default function AdminDashboard() {
             <div
               ref={dialogRef}
               tabIndex={-1}
-              className="dialog-card"
+              className={
+                "ad-card " +
+                (modal === "delete-user" || modal === "delete-view" ? "is-danger size-sm" : "") +
+                (modal === "reset-confirm" ? " is-info size-sm" : "") +
+                (modal === "full-log" ? " size-lg" : "")
+              }
               role="dialog"
               aria-modal="true"
               aria-labelledby="dialog-title"
             >
               <button
                 type="button"
-                className="close-dialog"
+                className="ad-close"
                 aria-label="إغلاق النافذة"
                 onClick={closeModal}
               >
@@ -1471,430 +1477,693 @@ export default function AdminDashboard() {
 
               {modal === "add-user" && (
                 <>
-                  <h2 id="dialog-title">إضافة مستخدم جديد</h2>
-                  <p>بيانات تجريبية تُحفظ محليًا في متصفحك وتنعكس فورًا على الجداول والإحصاءات.</p>
+                  <header className="ad-head">
+                    <span className="ad-badge" aria-hidden="true">
+                      <UserRoundPlus size={18} />
+                    </span>
+                    <div>
+                      <h2 id="dialog-title">إضافة مستخدم جديد</h2>
+                      <p>يُحفظ الحساب محليًا في المتصفح وينعكس فورًا على الجدول والإحصاءات.</p>
+                    </div>
+                  </header>
+
                   <form
+                    id="ad-user-create-form"
+                    className="ad-body"
                     onSubmit={(event) => {
                       event.preventDefault();
                       handleCreateUser();
                     }}
                     noValidate
                   >
-                    <label>
-                      الاسم الكامل:
-                      <input
-                        placeholder="مثال: د. فهد الغامدي"
-                        value={userName}
-                        onChange={(event) => setUserName(event.target.value)}
-                        autoFocus
-                      />
-                      {userFormErrors.name && <span className="field-error">{userFormErrors.name}</span>}
-                    </label>
-                    <label>
-                      البريد الإلكتروني الجامعي:
-                      <input
-                        type="email"
-                        dir="ltr"
-                        placeholder="name@univ.edu.sa"
-                        value={userEmail}
-                        onChange={(event) => setUserEmail(event.target.value)}
-                      />
-                      {userFormErrors.email && (
-                        <span className="field-error">{userFormErrors.email}</span>
-                      )}
-                    </label>
-                    <label>
-                      القسم / الإدارة:
-                      <input
-                        placeholder="مثال: تقنية المعلومات"
-                        value={userDepartment}
-                        onChange={(event) => setUserDepartment(event.target.value)}
-                      />
-                    </label>
-                    <label>
-                      الدور والصلاحيات:
-                      <select
-                        value={userRole}
-                        onChange={(event) => setUserRole(event.target.value as AdminRole)}
-                      >
-                        {AVAILABLE_ROLES.map((role) => (
-                          <option key={role} value={role}>
-                            {role}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <div className="checkbox-field">
-                      <label>
+                    <section className="ad-section" aria-labelledby="ad-user-account-title">
+                      <h3 className="ad-section-title" id="ad-user-account-title">بيانات الحساب</h3>
+                      <div className="ad-grid">
+                        <div className="ad-field">
+                          <label className="ad-label" htmlFor="ad-user-name">الاسم الكامل</label>
+                          <input
+                            id="ad-user-name"
+                            className="ad-input"
+                            data-autofocus
+                            placeholder="مثال: د. فهد الغامدي"
+                            value={userName}
+                            onChange={(event) => setUserName(event.target.value)}
+                            aria-invalid={Boolean(userFormErrors.name)}
+                            aria-describedby={userFormErrors.name ? "ad-user-name-error" : undefined}
+                          />
+                          {userFormErrors.name && (
+                            <span className="ad-error" id="ad-user-name-error">
+                              <AlertTriangle size={12} aria-hidden="true" />
+                              {userFormErrors.name}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="ad-field">
+                          <label className="ad-label" htmlFor="ad-user-email">البريد الإلكتروني الجامعي</label>
+                          <input
+                            id="ad-user-email"
+                            className="ad-input"
+                            type="email"
+                            dir="ltr"
+                            placeholder="name@univ.edu.sa"
+                            value={userEmail}
+                            onChange={(event) => setUserEmail(event.target.value)}
+                            aria-invalid={Boolean(userFormErrors.email)}
+                            aria-describedby={userFormErrors.email ? "ad-user-email-error" : undefined}
+                          />
+                          {userFormErrors.email && (
+                            <span className="ad-error" id="ad-user-email-error">
+                              <AlertTriangle size={12} aria-hidden="true" />
+                              {userFormErrors.email}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="ad-field is-wide">
+                          <label className="ad-label" htmlFor="ad-user-department">القسم / الإدارة</label>
+                          <input
+                            id="ad-user-department"
+                            className="ad-input"
+                            placeholder="مثال: تقنية المعلومات"
+                            value={userDepartment}
+                            onChange={(event) => setUserDepartment(event.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </section>
+
+                    <section className="ad-section" aria-labelledby="ad-user-role-title">
+                      <h3 className="ad-section-title" id="ad-user-role-title">الدور والصلاحيات</h3>
+                      <div className="ad-field">
+                        <label className="ad-label" htmlFor="ad-user-role">الدور</label>
+                        <select
+                          id="ad-user-role"
+                          className="ad-select"
+                          value={userRole}
+                          onChange={(event) => setUserRole(event.target.value as AdminRole)}
+                        >
+                          {AVAILABLE_ROLES.map((role) => (
+                            <option key={role} value={role}>{role}</option>
+                          ))}
+                        </select>
+                        <span className="ad-role">
+                          <RoleIcon role={userRole} size={14} />
+                          {ROLE_SCOPE[userRole]}
+                        </span>
+                      </div>
+                    </section>
+
+                    <section className="ad-section" aria-labelledby="ad-user-status-title">
+                      <h3 className="ad-section-title" id="ad-user-status-title">حالة الحساب</h3>
+                      <label className="ad-switch" htmlFor="ad-user-active">
                         <input
+                          id="ad-user-active"
                           type="checkbox"
                           checked={userActive}
                           onChange={(event) => setUserActive(event.target.checked)}
                         />
-                        تفعيل الحساب فور الإنشاء (حالة نشطة)
+                        <span className="ad-switch-track" aria-hidden="true" />
+                        <span className="ad-switch-text">
+                          <b>{userActive ? "نشط" : "موقوف"}</b>
+                          <small>يُفعّل الحساب فور الإنشاء ويمكن لمستخدمه الدخول مباشرة.</small>
+                        </span>
                       </label>
-                    </div>
-                    <div className="dialog-actions">
-                      <button type="button" className="outline-button" onClick={closeModal}>
-                        إلغاء
-                      </button>
-                      <button type="submit" className="action-primary dialog-submit">
-                        حفظ المستخدم
-                      </button>
-                    </div>
+                    </section>
                   </form>
+
+                  <div className="ad-foot">
+                    <button type="button" className="ad-btn" onClick={closeModal}>إلغاء</button>
+                    <button type="submit" form="ad-user-create-form" className="ad-btn is-primary">
+                      حفظ المستخدم
+                    </button>
+                  </div>
                 </>
               )}
 
               {modal === "edit-user" && selectedUser && (
                 <>
-                  <h2 id="dialog-title">تعديل بيانات المستخدم</h2>
-                  <p>تعديل الحساب المحدد وتحديث الدور وصلاحيات الوصول محليًا.</p>
+                  <header className="ad-head">
+                    <span className="ad-badge" aria-hidden="true">
+                      <Pencil size={17} />
+                    </span>
+                    <div>
+                      <h2 id="dialog-title">تعديل بيانات المستخدم</h2>
+                      <p>تحديث بيانات الحساب ودوره؛ تُوثَّق العملية في سجل التدقيق.</p>
+                    </div>
+                  </header>
+
                   <form
+                    id="ad-user-edit-form"
+                    className="ad-body"
                     onSubmit={(event) => {
                       event.preventDefault();
                       handleUpdateUser();
                     }}
                     noValidate
                   >
-                    <label>
-                      الاسم الكامل:
-                      <input
-                        value={userName}
-                        onChange={(event) => setUserName(event.target.value)}
-                        autoFocus
-                      />
-                      {userFormErrors.name && <span className="field-error">{userFormErrors.name}</span>}
-                    </label>
-                    <label>
-                      البريد الإلكتروني:
-                      <input
-                        type="email"
-                        dir="ltr"
-                        value={userEmail}
-                        onChange={(event) => setUserEmail(event.target.value)}
-                      />
-                      {userFormErrors.email && (
-                        <span className="field-error">{userFormErrors.email}</span>
-                      )}
-                    </label>
-                    <label>
-                      القسم / الإدارة:
-                      <input
-                        value={userDepartment}
-                        onChange={(event) => setUserDepartment(event.target.value)}
-                      />
-                    </label>
-                    <label>
-                      الدور:
-                      <select
-                        value={userRole}
-                        onChange={(event) => setUserRole(event.target.value as AdminRole)}
-                      >
-                        {AVAILABLE_ROLES.map((role) => (
-                          <option key={role} value={role}>
-                            {role}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <div className="checkbox-field">
-                      <label>
+                    <section className="ad-section" aria-labelledby="ad-user-edit-account-title">
+                      <h3 className="ad-section-title" id="ad-user-edit-account-title">بيانات الحساب</h3>
+                      <div className="ad-grid">
+                        <div className="ad-field">
+                          <label className="ad-label" htmlFor="ad-user-edit-name">الاسم الكامل</label>
+                          <input
+                            id="ad-user-edit-name"
+                            className="ad-input"
+                            data-autofocus
+                            value={userName}
+                            onChange={(event) => setUserName(event.target.value)}
+                            aria-invalid={Boolean(userFormErrors.name)}
+                            aria-describedby={userFormErrors.name ? "ad-user-edit-name-error" : undefined}
+                          />
+                          {userFormErrors.name && (
+                            <span className="ad-error" id="ad-user-edit-name-error">
+                              <AlertTriangle size={12} aria-hidden="true" />
+                              {userFormErrors.name}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="ad-field">
+                          <label className="ad-label" htmlFor="ad-user-edit-email">البريد الإلكتروني</label>
+                          <input
+                            id="ad-user-edit-email"
+                            className="ad-input"
+                            type="email"
+                            dir="ltr"
+                            value={userEmail}
+                            onChange={(event) => setUserEmail(event.target.value)}
+                            aria-invalid={Boolean(userFormErrors.email)}
+                            aria-describedby={userFormErrors.email ? "ad-user-edit-email-error" : undefined}
+                          />
+                          {userFormErrors.email && (
+                            <span className="ad-error" id="ad-user-edit-email-error">
+                              <AlertTriangle size={12} aria-hidden="true" />
+                              {userFormErrors.email}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="ad-field is-wide">
+                          <label className="ad-label" htmlFor="ad-user-edit-department">القسم / الإدارة</label>
+                          <input
+                            id="ad-user-edit-department"
+                            className="ad-input"
+                            value={userDepartment}
+                            onChange={(event) => setUserDepartment(event.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </section>
+
+                    <section className="ad-section" aria-labelledby="ad-user-edit-role-title">
+                      <h3 className="ad-section-title" id="ad-user-edit-role-title">الدور والصلاحيات</h3>
+                      <div className="ad-field">
+                        <label className="ad-label" htmlFor="ad-user-edit-role">الدور</label>
+                        <select
+                          id="ad-user-edit-role"
+                          className="ad-select"
+                          value={userRole}
+                          onChange={(event) => setUserRole(event.target.value as AdminRole)}
+                        >
+                          {AVAILABLE_ROLES.map((role) => (
+                            <option key={role} value={role}>{role}</option>
+                          ))}
+                        </select>
+                        <span className="ad-role">
+                          <RoleIcon role={userRole} size={14} />
+                          {ROLE_SCOPE[userRole]}
+                        </span>
+                      </div>
+                    </section>
+
+                    <section className="ad-section" aria-labelledby="ad-user-edit-status-title">
+                      <h3 className="ad-section-title" id="ad-user-edit-status-title">حالة الحساب</h3>
+                      <label className="ad-switch" htmlFor="ad-user-edit-active">
                         <input
+                          id="ad-user-edit-active"
                           type="checkbox"
                           checked={userActive}
                           onChange={(event) => setUserActive(event.target.checked)}
                         />
-                        الحساب نشط
+                        <span className="ad-switch-track" aria-hidden="true" />
+                        <span className="ad-switch-text">
+                          <b>{userActive ? "نشط" : "موقوف"}</b>
+                          <small>الحساب الموقوف يبقى في السجلات دون صلاحية دخول.</small>
+                        </span>
                       </label>
-                    </div>
-                    <div className="dialog-actions">
-                      <button type="button" className="outline-button" onClick={closeModal}>
-                        إلغاء
-                      </button>
-                      <button type="submit" className="action-primary dialog-submit">
-                        حفظ التعديلات
-                      </button>
-                    </div>
+                    </section>
                   </form>
+
+                  <div className="ad-foot">
+                    <button type="button" className="ad-btn" onClick={closeModal}>إلغاء</button>
+                    <button type="submit" form="ad-user-edit-form" className="ad-btn is-primary">
+                      حفظ التعديلات
+                    </button>
+                  </div>
                 </>
               )}
 
               {modal === "delete-user" && selectedUser && (
-                <div className="confirm-dialog-content">
-                  <div className="confirm-icon warning">
-                    <AlertTriangle size={32} />
+                <>
+                  <header className="ad-head">
+                    <span className="ad-badge" aria-hidden="true">
+                      <Trash2 size={17} />
+                    </span>
+                    <div>
+                      <h2 id="dialog-title">حذف المستخدم</h2>
+                      <p>يُزال الحساب من القوائم ويُوثَّق الحذف في سجل التدقيق.</p>
+                    </div>
+                  </header>
+
+                  <div className="ad-body">
+                    <dl className="ad-summary">
+                      <div>
+                        <dt>الاسم</dt>
+                        <dd>{selectedUser.name}</dd>
+                      </div>
+                      <div>
+                        <dt>الدور</dt>
+                        <dd>
+                          <RoleIcon role={selectedUser.role} size={13} />
+                          {selectedUser.role}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>البريد الإلكتروني</dt>
+                        <dd className="is-ltr">{selectedUser.email}</dd>
+                      </div>
+                      <div>
+                        <dt>القسم</dt>
+                        <dd>{selectedUser.department || "غير محدد"}</dd>
+                      </div>
+                    </dl>
+
+                    <div className="ad-note" role="note">
+                      <AlertTriangle size={15} aria-hidden="true" />
+                      <span>لا يمكن التراجع عن الحذف من هذه الشاشة؛ لإعادة الحساب يجب إنشاء مستخدم جديد.</span>
+                    </div>
                   </div>
-                  <h2 id="dialog-title">تأكيد حذف المستخدم</h2>
-                  <p>
-                    هل أنت متأكد من رغبتك في حذف المستخدم <strong>{selectedUser.name}</strong> (
-                    {selectedUser.email})؟ سيتم تحديث الجداول فورًا وتوثيق العملية في سجل التدقيق.
-                  </p>
-                  <div className="dialog-actions">
-                    <button type="button" className="outline-button" onClick={closeModal}>
-                      إلغاء
-                    </button>
-                    <button type="button" className="action-danger" onClick={handleDeleteUser}>
+
+                  <div className="ad-foot">
+                    <button type="button" className="ad-btn" onClick={closeModal}>إلغاء</button>
+                    <button type="button" className="ad-btn is-danger" onClick={handleDeleteUser}>
+                      <Trash2 size={14} aria-hidden="true" />
                       تأكيد الحذف
                     </button>
                   </div>
-                </div>
+                </>
               )}
 
               {modal === "add-view" && (
                 <>
-                  <h2 id="dialog-title">إنشاء عرض ذكي جديد</h2>
-                  <p>إنشاء نموذج توضيحي لعرض بيانات منظم وآمن مع تصنيف أمني محدد.</p>
+                  <header className="ad-head">
+                    <span className="ad-badge" aria-hidden="true">
+                      <Layers3 size={18} />
+                    </span>
+                    <div>
+                      <h2 id="dialog-title">إنشاء عرض ذكي جديد</h2>
+                      <p>عرض منظم لبيانات مصدر محدد، بدرجة حساسية مضبوطة قبل نشره.</p>
+                    </div>
+                  </header>
+
                   <form
+                    id="ad-view-create-form"
+                    className="ad-body"
                     onSubmit={(event) => {
                       event.preventDefault();
                       handleCreateView();
                     }}
                     noValidate
                   >
-                    <label>
-                      اسم العرض الذكي:
-                      <input
-                        placeholder="مثال: عرض الخريجين والتوظيف"
-                        value={viewName}
-                        onChange={(event) => setViewName(event.target.value)}
-                        autoFocus
-                      />
-                      {viewFormErrors.name && <span className="field-error">{viewFormErrors.name}</span>}
-                    </label>
-                    <label>
-                      مصدر البيانات الأكاديمي:
-                      <select value={viewSource} onChange={(event) => setViewSource(event.target.value)}>
-                        {AVAILABLE_SOURCES.map((source) => (
-                          <option key={source} value={source}>
-                            {source}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label>
-                      المستوى الأمني وحساسية البيانات:
-                      <select
-                        value={viewSecurity}
-                        onChange={(event) => setViewSecurity(event.target.value as SecurityLevel)}
-                      >
-                        {AVAILABLE_SECURITIES.map((security) => (
-                          <option key={security} value={security}>
-                            {security}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <div className="checkbox-field">
-                      <label>
+                    <section className="ad-section" aria-labelledby="ad-view-name-title">
+                      <h3 className="ad-section-title" id="ad-view-name-title">بيانات العرض</h3>
+                      <div className="ad-field">
+                        <label className="ad-label" htmlFor="ad-view-name">اسم العرض الذكي</label>
                         <input
+                          id="ad-view-name"
+                          className="ad-input"
+                          data-autofocus
+                          placeholder="مثال: عرض الخريجين والتوظيف"
+                          value={viewName}
+                          onChange={(event) => setViewName(event.target.value)}
+                          aria-invalid={Boolean(viewFormErrors.name)}
+                          aria-describedby={viewFormErrors.name ? "ad-view-name-error" : "ad-view-name-hint"}
+                        />
+                        {viewFormErrors.name ? (
+                          <span className="ad-error" id="ad-view-name-error">
+                            <AlertTriangle size={12} aria-hidden="true" />
+                            {viewFormErrors.name}
+                          </span>
+                        ) : (
+                          <span className="ad-hint" id="ad-view-name-hint">
+                            يظهر الاسم في قائمة العروض وفي سجل التدقيق.
+                          </span>
+                        )}
+                      </div>
+                    </section>
+
+                    <section className="ad-section" aria-labelledby="ad-view-scope-title">
+                      <h3 className="ad-section-title" id="ad-view-scope-title">المصدر والتصنيف</h3>
+                      <div className="ad-grid">
+                        <div className="ad-field">
+                          <label className="ad-label" htmlFor="ad-view-source">مصدر البيانات الأكاديمي</label>
+                          <select
+                            id="ad-view-source"
+                            className="ad-select"
+                            value={viewSource}
+                            onChange={(event) => setViewSource(event.target.value)}
+                          >
+                            {AVAILABLE_SOURCES.map((source) => (
+                              <option key={source} value={source}>{source}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="ad-field">
+                          <label className="ad-label" htmlFor="ad-view-security">المستوى الأمني</label>
+                          <select
+                            id="ad-view-security"
+                            className="ad-select"
+                            value={viewSecurity}
+                            onChange={(event) => setViewSecurity(event.target.value as SecurityLevel)}
+                          >
+                            {AVAILABLE_SECURITIES.map((security) => (
+                              <option key={security} value={security}>{security}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      <span className="ad-hint">المستوى الأمني يحدد من يمكنه الوصول إلى نتائج العرض.</span>
+                    </section>
+
+                    <section className="ad-section" aria-labelledby="ad-view-status-title">
+                      <h3 className="ad-section-title" id="ad-view-status-title">الحالة</h3>
+                      <label className="ad-switch" htmlFor="ad-view-active">
+                        <input
+                          id="ad-view-active"
                           type="checkbox"
                           checked={viewActive}
                           onChange={(event) => setViewActive(event.target.checked)}
                         />
-                        تفعيل العرض فور الإنشاء
+                        <span className="ad-switch-track" aria-hidden="true" />
+                        <span className="ad-switch-text">
+                          <b>{viewActive ? "متاح للاستخدام" : "مسودة"}</b>
+                          <small>العرض المتاح يظهر مباشرة في قائمة العروض النشطة.</small>
+                        </span>
                       </label>
-                    </div>
-                    <div className="dialog-actions">
-                      <button type="button" className="outline-button" onClick={closeModal}>
-                        إلغاء
-                      </button>
-                      <button type="submit" className="action-primary dialog-submit">
-                        حفظ العرض الذكي
-                      </button>
-                    </div>
+                    </section>
                   </form>
+
+                  <div className="ad-foot">
+                    <button type="button" className="ad-btn" onClick={closeModal}>إلغاء</button>
+                    <button type="submit" form="ad-view-create-form" className="ad-btn is-primary">
+                      حفظ العرض الذكي
+                    </button>
+                  </div>
                 </>
               )}
 
               {modal === "edit-view" && selectedView && (
                 <>
-                  <h2 id="dialog-title">تعديل العرض الذكي</h2>
-                  <p>تعديل إعدادات المصدر والتصنيف الأمني وحالة التفعيل للعرض المحدد.</p>
+                  <header className="ad-head">
+                    <span className="ad-badge" aria-hidden="true">
+                      <Pencil size={17} />
+                    </span>
+                    <div>
+                      <h2 id="dialog-title">تعديل العرض الذكي</h2>
+                      <p>تحديث المصدر والتصنيف الأمني وحالة التفعيل للعرض المحدد.</p>
+                    </div>
+                  </header>
+
                   <form
+                    id="ad-view-edit-form"
+                    className="ad-body"
                     onSubmit={(event) => {
                       event.preventDefault();
                       handleUpdateView();
                     }}
                     noValidate
                   >
-                    <label>
-                      اسم العرض الذكي:
-                      <input
-                        value={viewName}
-                        onChange={(event) => setViewName(event.target.value)}
-                        autoFocus
-                      />
-                      {viewFormErrors.name && <span className="field-error">{viewFormErrors.name}</span>}
-                    </label>
-                    <label>
-                      مصدر البيانات:
-                      <select value={viewSource} onChange={(event) => setViewSource(event.target.value)}>
-                        {AVAILABLE_SOURCES.map((source) => (
-                          <option key={source} value={source}>
-                            {source}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label>
-                      المستوى الأمني:
-                      <select
-                        value={viewSecurity}
-                        onChange={(event) => setViewSecurity(event.target.value as SecurityLevel)}
-                      >
-                        {AVAILABLE_SECURITIES.map((security) => (
-                          <option key={security} value={security}>
-                            {security}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <div className="checkbox-field">
-                      <label>
+                    <section className="ad-section" aria-labelledby="ad-view-edit-name-title">
+                      <h3 className="ad-section-title" id="ad-view-edit-name-title">بيانات العرض</h3>
+                      <div className="ad-field">
+                        <label className="ad-label" htmlFor="ad-view-edit-name">اسم العرض الذكي</label>
                         <input
+                          id="ad-view-edit-name"
+                          className="ad-input"
+                          data-autofocus
+                          value={viewName}
+                          onChange={(event) => setViewName(event.target.value)}
+                          aria-invalid={Boolean(viewFormErrors.name)}
+                          aria-describedby={viewFormErrors.name ? "ad-view-edit-name-error" : undefined}
+                        />
+                        {viewFormErrors.name && (
+                          <span className="ad-error" id="ad-view-edit-name-error">
+                            <AlertTriangle size={12} aria-hidden="true" />
+                            {viewFormErrors.name}
+                          </span>
+                        )}
+                      </div>
+                    </section>
+
+                    <section className="ad-section" aria-labelledby="ad-view-edit-scope-title">
+                      <h3 className="ad-section-title" id="ad-view-edit-scope-title">المصدر والتصنيف</h3>
+                      <div className="ad-grid">
+                        <div className="ad-field">
+                          <label className="ad-label" htmlFor="ad-view-edit-source">مصدر البيانات</label>
+                          <select
+                            id="ad-view-edit-source"
+                            className="ad-select"
+                            value={viewSource}
+                            onChange={(event) => setViewSource(event.target.value)}
+                          >
+                            {AVAILABLE_SOURCES.map((source) => (
+                              <option key={source} value={source}>{source}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="ad-field">
+                          <label className="ad-label" htmlFor="ad-view-edit-security">المستوى الأمني</label>
+                          <select
+                            id="ad-view-edit-security"
+                            className="ad-select"
+                            value={viewSecurity}
+                            onChange={(event) => setViewSecurity(event.target.value as SecurityLevel)}
+                          >
+                            {AVAILABLE_SECURITIES.map((security) => (
+                              <option key={security} value={security}>{security}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section className="ad-section" aria-labelledby="ad-view-edit-status-title">
+                      <h3 className="ad-section-title" id="ad-view-edit-status-title">الحالة</h3>
+                      <label className="ad-switch" htmlFor="ad-view-edit-active">
+                        <input
+                          id="ad-view-edit-active"
                           type="checkbox"
                           checked={viewActive}
                           onChange={(event) => setViewActive(event.target.checked)}
                         />
-                        العرض نشط ومتاح
+                        <span className="ad-switch-track" aria-hidden="true" />
+                        <span className="ad-switch-text">
+                          <b>{viewActive ? "متاح للاستخدام" : "مسودة"}</b>
+                          <small>إيقاف التفعيل يخفي العرض عن القائمة النشطة دون حذفه.</small>
+                        </span>
                       </label>
-                    </div>
-                    <div className="dialog-actions">
-                      <button type="button" className="outline-button" onClick={closeModal}>
-                        إلغاء
-                      </button>
-                      <button type="submit" className="action-primary dialog-submit">
-                        حفظ التعديلات
-                      </button>
-                    </div>
+                    </section>
                   </form>
+
+                  <div className="ad-foot">
+                    <button type="button" className="ad-btn" onClick={closeModal}>إلغاء</button>
+                    <button type="submit" form="ad-view-edit-form" className="ad-btn is-primary">
+                      حفظ التعديلات
+                    </button>
+                  </div>
                 </>
               )}
 
               {modal === "delete-view" && selectedView && (
-                <div className="confirm-dialog-content">
-                  <div className="confirm-icon warning">
-                    <AlertTriangle size={32} />
+                <>
+                  <header className="ad-head">
+                    <span className="ad-badge" aria-hidden="true">
+                      <Trash2 size={17} />
+                    </span>
+                    <div>
+                      <h2 id="dialog-title">حذف العرض الذكي</h2>
+                      <p>يُلغى ارتباط العرض بالتقارير ومصادر البيانات ويُوثَّق الحذف.</p>
+                    </div>
+                  </header>
+
+                  <div className="ad-body">
+                    <dl className="ad-summary">
+                      <div>
+                        <dt>اسم العرض</dt>
+                        <dd>{selectedView.name}</dd>
+                      </div>
+                      <div>
+                        <dt>المستوى الأمني</dt>
+                        <dd>{selectedView.security}</dd>
+                      </div>
+                      <div>
+                        <dt>مصدر البيانات</dt>
+                        <dd>{selectedView.source}</dd>
+                      </div>
+                      <div>
+                        <dt>الحالة</dt>
+                        <dd>{selectedView.active ? "متاح للاستخدام" : "مسودة"}</dd>
+                      </div>
+                    </dl>
+
+                    <div className="ad-note" role="note">
+                      <AlertTriangle size={15} aria-hidden="true" />
+                      <span>التقارير التي تعتمد على هذا العرض ستحتاج عرضًا بديلًا بعد الحذف.</span>
+                    </div>
                   </div>
-                  <h2 id="dialog-title">تأكيد حذف العرض الذكي</h2>
-                  <p>
-                    هل أنت متأكد من رغبتك في حذف العرض الذكي <strong>{selectedView.name}</strong>؟ سيتم
-                    إلغاء ارتباطه بالتقارير ومصادر البيانات المرتبطة.
-                  </p>
-                  <div className="dialog-actions">
-                    <button type="button" className="outline-button" onClick={closeModal}>
-                      إلغاء
-                    </button>
-                    <button type="button" className="action-danger" onClick={handleDeleteView}>
+
+                  <div className="ad-foot">
+                    <button type="button" className="ad-btn" onClick={closeModal}>إلغاء</button>
+                    <button type="button" className="ad-btn is-danger" onClick={handleDeleteView}>
+                      <Trash2 size={14} aria-hidden="true" />
                       تأكيد الحذف
                     </button>
                   </div>
-                </div>
+                </>
               )}
 
               {modal === "full-log" && (
                 <>
-                  <h2 id="dialog-title">سجل التدقيق الكامل</h2>
-                  <p>سجلات محلية توثق كافة العمليات والمحاكاة المنفذة في هذه الجلسة.</p>
-                  <div className="table-toolbar log-toolbar">
-                    <div className="search-field log-search-field">
-                      <Search size={15} />
-                      <input
-                        type="search"
-                        placeholder="بحث في السجلات..."
-                        value={auditSearch}
-                        onChange={(event) => setAuditSearch(event.target.value)}
-                        aria-label="بحث في سجلات التدقيق"
-                      />
-                      {auditSearch && (
-                        <button
-                          type="button"
-                          className="clear-search"
-                          onClick={() => setAuditSearch("")}
-                          aria-label="مسح نص البحث"
-                        >
-                          <X size={14} />
-                        </button>
-                      )}
+                  <header className="ad-head">
+                    <span className="ad-badge" aria-hidden="true">
+                      <ScrollText size={18} />
+                    </span>
+                    <div>
+                      <h2 id="dialog-title">سجل التدقيق الكامل</h2>
+                      <p>سجلات محلية توثق العمليات والمحاكاة المنفذة في هذه الجلسة.</p>
                     </div>
-                    <div className="filter-group">
+                  </header>
+
+                  <div className="ad-body">
+                    <div className="ad-toolbar">
+                      <div className="ad-search">
+                        <Search size={15} aria-hidden="true" />
+                        <input
+                          type="search"
+                          placeholder="بحث في السجلات..."
+                          value={auditSearch}
+                          onChange={(event) => setAuditSearch(event.target.value)}
+                          aria-label="بحث في سجلات التدقيق"
+                        />
+                      </div>
+
                       <select
+                        className="ad-select is-compact"
                         value={auditStatusFilter}
                         onChange={(event) => setAuditStatusFilter(event.target.value)}
                         aria-label="تصفية حسب حالة السجل"
                       >
                         <option value="ALL">كافة الحالات</option>
-                        <option value="نجاح">ناجحة (نجاح)</option>
+                        <option value="نجاح">ناجحة</option>
                         <option value="تنبيه">تنبيهات</option>
                         <option value="فشل">فاشلة</option>
                       </select>
+
                       <button
                         type="button"
-                        className="outline-button audit-sort-btn"
-                        onClick={() =>
-                          setAuditSortOrder((current) => (current === "desc" ? "asc" : "desc"))
-                        }
-                        title="تبديل ترتيب السجلات"
+                        className="ad-btn"
+                        onClick={() => setAuditSortOrder((current) => (current === "desc" ? "asc" : "desc"))}
                         aria-label="تبديل ترتيب السجلات"
+                        title="تبديل ترتيب السجلات"
                       >
                         {auditSortOrder === "desc" ? "الأحدث أولاً" : "الأقدم أولاً"}
                       </button>
                     </div>
-                  </div>
-                  <div className="audit-dialog-list" role="feed">
+
                     {filteredLogs.length === 0 ? (
-                      <p className="no-logs">لا توجد سجلات مطابقة للبحث.</p>
+                      <p className="ad-empty">لا توجد سجلات مطابقة للبحث.</p>
                     ) : (
-                      filteredLogs.map((log, index) => (
-                        <div className="dialog-log" key={`${log.id}-${index}`}>
-                          <div className="log-header">
-                            <span className="log-time">
-                              <Clock3 size={13} /> {log.time}
-                            </span>
-                            <span
-                              className={`state-pill ${
-                                log.status === "نجاح" ? "success" : "warning"
-                              }`}
-                            >
-                              {log.status}
-                            </span>
-                          </div>
-                          <div className="log-body">
-                            <strong>{log.user}</strong>: {log.action}
-                          </div>
-                          {log.target && <div className="log-target">الهدف: {log.target}</div>}
-                        </div>
-                      ))
+                      <ol className="ad-log-list">
+                        {filteredLogs.map((log, index) => (
+                          <li className="ad-log" key={log.id + "-" + index}>
+                            <div className="ad-log-head">
+                              <span className="ad-log-actor">{log.user}</span>
+                              <span
+                                className={
+                                  "ao-pill " +
+                                  (log.status === "نجاح" ? "is-ok" : log.status === "تنبيه" ? "is-warn" : "is-danger")
+                                }
+                              >
+                                {log.status}
+                              </span>
+                              <span className="ad-log-time">
+                                <Clock3 size={13} aria-hidden="true" />
+                                {log.time}
+                              </span>
+                            </div>
+                            <div className="ad-log-body">{log.action}</div>
+                            {log.target && <div className="ad-log-target">الهدف: {log.target}</div>}
+                          </li>
+                        ))}
+                      </ol>
                     )}
                   </div>
-                  <div className="dialog-actions">
-                    <button type="button" className="action-primary" onClick={closeModal}>
-                      إغلاق
-                    </button>
+
+                  <div className="ad-foot">
+                    <span className="ad-foot-note">{filteredLogs.length} سجل معروض</span>
+                    <button type="button" className="ad-btn is-primary" onClick={closeModal}>إغلاق</button>
                   </div>
                 </>
               )}
 
               {modal === "reset-confirm" && (
-                <div className="confirm-dialog-content">
-                  <div className="confirm-icon info">
-                    <RotateCcw size={32} />
+                <>
+                  <header className="ad-head">
+                    <span className="ad-badge" aria-hidden="true">
+                      <RotateCcw size={18} />
+                    </span>
+                    <div>
+                      <h2 id="dialog-title">استعادة البيانات الافتراضية</h2>
+                      <p>تُعاد المستخدمون والعروض الذكية وسجلات التدقيق إلى حالتها الأصلية.</p>
+                    </div>
+                  </header>
+
+                  <div className="ad-body">
+                    <dl className="ad-summary">
+                      <div>
+                        <dt>المستخدمون</dt>
+                        <dd>{users.length}</dd>
+                      </div>
+                      <div>
+                        <dt>العروض الذكية</dt>
+                        <dd>{views.length}</dd>
+                      </div>
+                      <div>
+                        <dt>سجلات التدقيق</dt>
+                        <dd>{logs.length}</dd>
+                      </div>
+                      <div>
+                        <dt>مكان الحفظ</dt>
+                        <dd className="is-ltr">localStorage</dd>
+                      </div>
+                    </dl>
+
+                    <div className="ad-note is-info" role="note">
+                      <AlertTriangle size={15} aria-hidden="true" />
+                      <span>يُمسح كل تعديل محفوظ في هذا المتصفح، ولا تتأثر بيانات الخادم أو قواعد البيانات.</span>
+                    </div>
                   </div>
-                  <h2 id="dialog-title">استعادة البيانات الافتراضية</h2>
-                  <p>
-                    هل ترغب في إعادة تعيين كافة بيانات المستخدمين والعروض الذكية وسجلات التدقيق إلى
-                    حالتها الأصلية؟ سيتم مسح التغييرات المحفوظة محليًا في المتصفح.
-                  </p>
-                  <div className="dialog-actions">
-                    <button type="button" className="outline-button" onClick={closeModal}>
-                      إلغاء
-                    </button>
-                    <button type="button" className="action-primary" onClick={handleResetDemoData}>
+
+                  <div className="ad-foot">
+                    <button type="button" className="ad-btn" onClick={closeModal}>إلغاء</button>
+                    <button type="button" className="ad-btn is-primary" onClick={handleResetDemoData}>
                       تأكيد الاستعادة
                     </button>
                   </div>
-                </div>
+                </>
               )}
             </div>
           </div>

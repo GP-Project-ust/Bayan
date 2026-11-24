@@ -1,7 +1,7 @@
 /* =============================================================================
    BAYAN ADMIN DIALOGS — shared language for the /admin modals
    Extends the admin overview visual system (navy headings, teal primary actions,
-   white card on a tinted sheet). Scoped to .ad-* so the legacy .dialog-*
+   white card over a tinted sheet). Scoped to .ad-* so the legacy .dialog-*
    styles used by other screens stay untouched.
    Values come from bayan-tokens.css.
    ============================================================================= */
