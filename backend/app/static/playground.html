@@ -74,7 +74,7 @@ body {
 .conversation { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .msg { max-width: min(78%, 560px); padding: 10px 16px; border-radius: 14px; font-size: 14.5px; line-height: 1.8; overflow-wrap: anywhere; white-space: pre-wrap; }
 .msg-user { align-self: flex-start; background: linear-gradient(135deg, rgba(20,184,166,.22), rgba(20,184,166,.10)); border: 1px solid rgba(20,184,166,.45); border-start-start-radius: 4px; }
-.msg-assistant { align-self: flex-end; background: var(--surface); border: 1px solid var(--border); border-start-end-radius: 4px; }
+.msg-assistant { align-self: flex-end; background: var(--surface); border: 1px solid var(--border); border-start-end-radius: 4px; max-width: min(94%, 780px); }
 .msg-system { align-self: center; max-width: 92%; text-align: center; color: var(--muted); background: transparent; border: 1px dashed var(--border); font-size: 13px; }
 .msg-error { align-self: flex-end; background: var(--err-soft); border: 1px solid rgba(239,68,68,.45); border-start-end-radius: 4px; }
 .err-title { margin: 0 0 4px; font-weight: 700; color: #fca5a5; font-size: 13.5px; }
@@ -120,34 +120,159 @@ body {
 .raw-json { margin: 0; flex: 1; min-height: 220px; font-family: var(--mono); font-size: 11.5px; line-height: 1.7; color: #9fb4d8; background: var(--code-bg); border: 1px solid #22304a; border-radius: 8px; padding: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
 
 /* ----- 7) بطاقة وكيل ----- */
-.agent-card { background: var(--surface); border: 1px solid var(--border); border-inline-start: 3px solid var(--agent-color, var(--muted)); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; animation: cardIn .3s ease-out; }
+.agent-card { background: var(--surface); border: 1px solid var(--border); border-inline-start: 3px solid var(--agent-color, var(--muted)); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; animation: cardIn .3s ease-out; }
 .card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
 .agent-badge { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--agent-color, var(--muted)); background: var(--agent-soft, var(--skip-soft)); border: 1px solid var(--agent-color, var(--muted)); padding: 2px 10px; border-radius: 999px; }
-.status-pill { font-size: 11px; padding: 2px 10px; border-radius: 999px; background: var(--skip-soft); color: var(--skip); }
+.status-pill { font-size: 11px; padding: 2px 10px; border-radius: 999px; background: var(--skip-soft); color: var(--skip); font-weight: 600; }
 .status-pill.status-done { background: var(--ok-soft); color: var(--ok); }
 .status-pill.status-failed { background: var(--err-soft); color: var(--err); }
 .status-pill.status-skipped { background: var(--skip-soft); color: var(--skip); }
-.card-note { margin: 0; font-size: 13px; line-height: 1.7; }
+.card-note { margin: 0; font-size: 13px; line-height: 1.7; color: var(--text); }
+.sql-section { display: flex; flex-direction: column; gap: 4px; margin-top: 2px; }
+.sql-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.sql-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
 .sql-wrap { position: relative; }
-.sql-block { margin: 0; background: var(--code-bg); border: 1px solid #22304a; border-radius: 8px; padding: 34px 12px 12px; font-family: var(--mono); font-size: 12px; line-height: 1.6; color: #cbd5e1; white-space: pre; overflow-x: auto; }
-.copy-btn { position: absolute; top: 6px; inset-inline-end: 6px; font-family: inherit; font-size: 11px; padding: 3px 12px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); cursor: pointer; }
+.sql-block { margin: 0; background: var(--code-bg); border: 1px solid #22304a; border-radius: 8px; padding: 10px 12px; font-family: var(--mono); font-size: 12px; line-height: 1.6; color: #cbd5e1; white-space: pre; overflow-x: auto; max-width: 100%; }
+.copy-btn { font-family: inherit; font-size: 11px; padding: 3px 12px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); cursor: pointer; transition: all .15s ease; }
 .copy-btn:hover { color: var(--text); border-color: var(--brand); }
-.copy-btn.copied { color: var(--ok); border-color: var(--ok); }
-.card-foot { display: flex; gap: 8px; }
-.rows-badge { font-size: 11.5px; color: var(--brand); background: var(--brand-soft); border: 1px solid rgba(20,184,166,.35); padding: 2px 10px; border-radius: 999px; }
+.copy-btn.copied { color: var(--ok); border-color: var(--ok); font-weight: 600; }
+.card-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+.meta-pill { font-size: 11.5px; padding: 2px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; }
+.meta-duration { color: #38bdf8; background: rgba(56, 189, 248, .12); border: 1px solid rgba(56, 189, 248, .3); font-variant-numeric: tabular-nums; }
+.meta-rows { color: var(--brand); background: var(--brand-soft); border: 1px solid rgba(20, 184, 166, .35); font-variant-numeric: tabular-nums; }
 @keyframes cardIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 
-/* ----- 8) التجاوب مع الشاشات الصغيرة ----- */
+/* ----- 7b) جدول نتائج الاستعلام (Results Table) ----- */
+.results-panel {
+  margin-top: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  white-space: normal; /* إلغاء pre-wrap الموروث من الفقاعة */
+  overflow: hidden;
+}
+.results-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.results-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--text);
+}
+.results-count {
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.results-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  max-width: 100%;
+}
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+.results-table th {
+  background: #17253d;
+  color: #cbd5e1;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.results-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #1e293b;
+  color: var(--text);
+  white-space: nowrap;
+}
+.results-table tr:last-child td {
+  border-bottom: none;
+}
+.results-table tbody tr:hover td {
+  background: rgba(255, 255, 255, .03);
+}
+.results-table .num-cell {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+  text-align: left;
+}
+.results-table .tbl-null {
+  color: #64748b;
+  font-style: italic;
+}
+.results-empty-cell {
+  text-align: center !important;
+  color: var(--muted);
+  padding: 16px !important;
+  font-style: italic;
+}
+.results-empty {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 14px;
+}
+.results-trunc-badge {
+  font-size: 11.5px;
+  color: var(--warn);
+  background: var(--warn-soft);
+  border: 1px solid rgba(245, 158, 11, .45);
+  padding: 6px 14px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* ----- 8) التجاوب مع الشاشات الصغيرة والمتوسطة ----- */
 @media (max-width: 980px) {
   body { overflow: auto; }
-  #layout { grid-template-columns: 1fr; }
-  #chat-pane { height: 74vh; }
+  #layout { grid-template-columns: 1fr; padding: 10px; }
+  #chat-pane { height: 72vh; }
   .trace-scroll { max-height: 55vh; }
   .composer-row { flex-direction: column; }
   .composer-actions { flex-direction: row; }
   .composer-actions .btn { flex: 1; }
-  .msg { max-width: 90%; }
+  .msg { max-width: 95%; }
   .conv-id { max-width: 180px; }
+}
+
+@media (max-width: 500px) {
+  .topbar { padding: 8px 12px; }
+  #layout { padding: 8px; gap: 10px; }
+  .conversation { padding: 10px; }
+  .msg { max-width: 100%; padding: 8px 12px; font-size: 13.5px; }
+  .results-panel { padding: 8px; }
+  .results-table th, .results-table td { padding: 6px 8px; font-size: 11.5px; }
+  .chip { font-size: 11.5px; padding: 4px 10px; }
 }
 </style>
 </head>
@@ -310,11 +435,12 @@ function copyText(text) {
 function onCopyClick(btn, text) {
   if (btn.dataset.locked) return;
   btn.dataset.locked = '1';
+  const originalText = btn.textContent;
   copyText(text).then(
     (ok) => {
       btn.textContent = ok ? 'تم النسخ' : 'تعذّر النسخ';
       btn.classList.toggle('copied', ok);
-      setTimeout(() => { btn.textContent = 'نسخ'; btn.classList.remove('copied'); delete btn.dataset.locked; }, 1600);
+      setTimeout(() => { btn.textContent = originalText; btn.classList.remove('copied'); delete btn.dataset.locked; }, 1600);
     }
   );
 }
@@ -381,9 +507,106 @@ function metaChip(label, latinValue) {
   chip.appendChild(el('bdi', '', latinValue)); /* bdi يعزل القيم اللاتينية عن اتجاه RTL */
   return chip;
 }
+
+/* جدول نتائج استعلام SQL — يُعرض عند توفر final.table فقط */
+function renderResultsTable(table) {
+  if (!table || typeof table !== 'object') return null;
+  const cols = Array.isArray(table.columns) ? table.columns : [];
+  const rows = Array.isArray(table.rows) ? table.rows : [];
+  if (!cols.length && !rows.length) return null;
+
+  const panel = el('div', 'results-panel');
+  panel.setAttribute('role', 'region');
+  panel.setAttribute('aria-label', 'نتائج استعلام SQL');
+
+  /* رأس اللوحة: العنوان + عدد الصفوف المعروضة */
+  const head = el('div', 'results-head');
+  const title = el('span', 'results-title', 'نتائج الاستعلام');
+  head.appendChild(title);
+
+  const countBadge = el('span', 'results-count', rows.length + ' صف');
+  head.appendChild(countBadge);
+  panel.appendChild(head);
+
+  /* غلاف الجدول للتمرير الأفقي مع صيانة التجاوب */
+  const wrap = el('div', 'results-table-wrap');
+  wrap.setAttribute('tabindex', '0');
+  wrap.setAttribute('role', 'region');
+  wrap.setAttribute('aria-label', 'جدول بيانات نتائج الاستعلام');
+
+  const tbl = el('table', 'results-table');
+
+  /* رأس الجدول: الأعمدة الفعلية من عقد الخلفية */
+  if (cols.length > 0) {
+    const thead = document.createElement('thead');
+    const tr = document.createElement('tr');
+    cols.forEach((col) => {
+      const th = el('th', '', String(col !== null && col !== undefined ? col : ''));
+      th.setAttribute('scope', 'col');
+      tr.appendChild(th);
+    });
+    thead.appendChild(tr);
+    tbl.appendChild(thead);
+  }
+
+  /* جسم الجدول: حماية تامة من حقن DOM واستخدام textContent حصراً */
+  const tbody = document.createElement('tbody');
+  if (rows.length === 0) {
+    const tr = document.createElement('tr');
+    const td = el('td', 'results-empty-cell', 'لا توجد صفوف مطابقة.');
+    td.setAttribute('colspan', String(Math.max(1, cols.length)));
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+  } else {
+    rows.forEach((row) => {
+      const tr = document.createElement('tr');
+      const cells = Array.isArray(row) ? row : [row];
+      const maxLen = Math.max(cols.length, cells.length);
+      for (let i = 0; i < maxLen; i++) {
+        const val = cells[i];
+        const td = document.createElement('td');
+        if (val === null || val === undefined) {
+          td.className = 'tbl-null';
+          td.textContent = '—';
+        } else if (typeof val === 'number') {
+          td.className = 'num-cell';
+          td.textContent = String(val); /* الصفر الرقمي قيمة صالحة وتُعرض */
+        } else if (typeof val === 'boolean') {
+          td.textContent = String(val);
+        } else {
+          td.textContent = String(val);
+        }
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    });
+  }
+  tbl.appendChild(tbody);
+  wrap.appendChild(tbl);
+  panel.appendChild(wrap);
+
+  /* شارة الاقتصاص: تظهر فقط عند table.truncated === true */
+  if (table.truncated === true) {
+    const trunc = el('div', 'results-trunc-badge', 'تم اقتصاص النتائج — قد توجد صفوف إضافية');
+    trunc.setAttribute('role', 'status');
+    panel.appendChild(trunc);
+  }
+
+  return panel;
+}
+
 function showFinalAnswer(data, elapsedMs) {
   const wrap = el('div', 'msg msg-assistant');
+  /* 1. الإجابة العربية النهائية */
   wrap.appendChild(el('div', 'msg-text', data.answer || '(إجابة فارغة)'));
+
+  /* 2. جدول نتائج SQL عند توفره */
+  if (data.table) {
+    const tableEl = renderResultsTable(data.table);
+    if (tableEl) wrap.appendChild(tableEl);
+  }
+
+  /* 3. بيانات المسار والوكلاء وإجمالي مدة التنفيذ */
   const foot = el('div', 'msg-meta');
   if (data.route) foot.appendChild(metaChip('المسار: ', data.route));
   if (Array.isArray(data.agents) && data.agents.length) {
@@ -391,6 +614,7 @@ function showFinalAnswer(data, elapsedMs) {
   }
   foot.appendChild(metaChip('الزمن: ', fmtMs(elapsedMs)));
   wrap.appendChild(foot);
+
   els.conversation.appendChild(wrap);
   scrollChat();
 }
@@ -415,32 +639,59 @@ function buildAgentCard(data) {
   const card = el('article', 'agent-card');
   card.style.setProperty('--agent-color', conf.color);
   card.style.setProperty('--agent-soft', conf.soft);
-  /* رأس البطاقة: شارة الوكيل + حالة */
+
+  /* رأس البطاقة: شارة الوكيل + شارة الحالة */
   const head = el('div', 'card-head');
   head.appendChild(el('span', 'agent-badge', String(data.agent || 'وكيل مجهول')));
   const statusKey = data.status || 'unknown';
   head.appendChild(el('span', 'status-pill status-' + statusKey, STATUS_LABELS[statusKey] || statusKey));
   card.appendChild(head);
-  /* الملاحظة */
+
+  /* ملاحظة التنفيذ */
   if (data.note) card.appendChild(el('p', 'card-note', data.note));
-  /* كتلة SQL مع زر نسخ */
+
+  /* قسم SQL: الرأس وزر النسخ ومعاينة الكود في LTR */
   if (typeof data.sql === 'string' && data.sql.trim()) {
+    const sec = el('div', 'sql-section');
+    const sHead = el('div', 'sql-head');
+    sHead.appendChild(el('span', 'sql-title', 'استعلام SQL'));
+    const btn = el('button', 'copy-btn', 'نسخ SQL');
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'نسخ استعلام SQL');
+    btn.addEventListener('click', () => onCopyClick(btn, data.sql));
+    sHead.appendChild(btn);
+    sec.appendChild(sHead);
+
     const wrap = el('div', 'sql-wrap');
     const pre = el('pre', 'sql-block', data.sql);
     pre.dir = 'ltr';
-    const btn = el('button', 'copy-btn', 'نسخ');
-    btn.type = 'button';
-    btn.addEventListener('click', () => onCopyClick(btn, data.sql));
-    wrap.appendChild(btn);
     wrap.appendChild(pre);
-    card.appendChild(wrap);
+    sec.appendChild(wrap);
+    card.appendChild(sec);
   }
-  /* شارة عدد الصفوف */
-  if (data.rows_count !== null && data.rows_count !== undefined && !Number.isNaN(Number(data.rows_count))) {
-    const foot = el('div', 'card-foot');
-    foot.appendChild(el('span', 'rows-badge', String(data.rows_count) + ' صف'));
-    card.appendChild(foot);
+
+  /* بيانات التنفيذ الوصفية: مدة التنفيذ + عدد الصفوف مع الحفاظ التام على قيمة 0 */
+  const meta = el('div', 'card-meta');
+  let hasMeta = false;
+
+  const hasDuration = data.duration_ms !== null && data.duration_ms !== undefined && !Number.isNaN(Number(data.duration_ms));
+  if (hasDuration) {
+    const durPill = el('span', 'meta-pill meta-duration', 'مدة التنفيذ: ' + Number(data.duration_ms) + ' ms');
+    meta.appendChild(durPill);
+    hasMeta = true;
   }
+
+  const hasRows = data.rows_count !== null && data.rows_count !== undefined && !Number.isNaN(Number(data.rows_count));
+  if (hasRows) {
+    const rowsPill = el('span', 'meta-pill meta-rows', 'عدد الصفوف: ' + Number(data.rows_count));
+    meta.appendChild(rowsPill);
+    hasMeta = true;
+  }
+
+  if (hasMeta) {
+    card.appendChild(meta);
+  }
+
   return card;
 }
 
@@ -595,7 +846,7 @@ function onFinal(data) {
   flashHint('اكتملت الإجابة — يمكنك متابعة الأسئلة في نفس المحادثة أو بدء محادثة جديدة.');
 }
 function onStreamError(data) {
-  if (!state.streaming) return; /* درء التكرار عند تعدد المصادر */
+  if (state.finished) return; /* درء التكرار عند تعدد المصادر */
   state.finished = true;
   stopTimer();
   setBusy(false);
@@ -649,7 +900,11 @@ async function sendQuestion() {
     }
     await consumeSse(res, handleStreamEvent);
     if (!state.finished) {
-      onStreamError({ code: 'stream_ended', message: 'انقطع البث قبل حدث final — قد تكون الخلفية توقفت أثناء التنفيذ.' });
+      onStreamError({
+        code: 'stream_ended',
+        title: 'انقطع البث',
+        message: 'انقطع البث قبل حدث final — قد تكون الخلفية توقفت أثناء التنفيذ.',
+      });
     }
   } catch (err) {
     onStreamError({
@@ -657,6 +912,11 @@ async function sendQuestion() {
       title: 'تعذّر الاتصال بالخلفية',
       message: NETWORK_ERROR_MSG + ' (' + ((err && err.message) || err) + ')',
     });
+  } finally {
+    if (!state.finished) {
+      stopTimer();
+      setBusy(false);
+    }
   }
 }
 function newConversation() {
