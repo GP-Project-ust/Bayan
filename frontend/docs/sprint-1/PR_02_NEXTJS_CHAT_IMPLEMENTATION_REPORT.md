@@ -3,6 +3,7 @@
 
 **Branch:** `Mohammed-Alshareef`  
 **Date:** 2026-11-20  
+**Last verified:** 2026-11-24
 **Status:** COMPLETE
 
 ---
@@ -15,7 +16,7 @@
 - عميل SSE موحّد يتصل بـ `POST /api/v1/chat/stream`
 - مكونات عرض متخصصة: جدول نتائج SQL، عارض SQL، أثر تنفيذ الوكلاء
 - أنواع TypeScript متطابقة مع عقد الخلفية
-- 27 اختبار Vitest يمر بالكامل
+- 33 اختبار Vitest يمر بالكامل
 - 338 اختبار عقد مرور بالكامل
 - بناء الإنتاج ناجح (exit code 0)
 - صفر أخطاء TypeScript
@@ -29,7 +30,7 @@
 | مسار `/chat` كمسار مساعد منفصل | يحافظ على كتالوج الـ 42 شاشة دون تعديل |
 | `fetch()` + `ReadableStream` بدل `EventSource` | الطلب POST يمنع استخدام `EventSource` |
 | مكونات منفصلة في `src/components/chat/` | قابلية الصيانة والاختبار |
-| `sessionStorage` للجلسة | لا تخزين دائم — الخلفية هي مصدر الحقيقة |
+| `localStorage` لمساحة العمل | حفظ محادثة واحدة والمسودة محلياً، مع بقاء الخلفية مصدر الحقيقة |
 | `AbortController` للإلغاء | دعم إيقاف البث ومنع تحديثات الطلبات القديمة |
 
 ---
@@ -61,9 +62,12 @@
 | `src/components/chat/StreamingIndicator.tsx` | مؤشر البث مع مؤقت مرئي |
 | `src/components/chat/ErrorMessage.tsx` | رسالة الخطأ مع زر إعادة المحاولة |
 | `src/lib/chat/sse-client.ts` | عميل SSE المركزي الموحّد |
+| `src/lib/chat/chat-session.ts` | حفظ آمن للمحادثة الحالية والمسودة |
+| `src/lib/chat/csv.ts` | تصدير CSV مع حماية من صيغ الجداول |
 | `src/lib/chat/__tests__/sse-client.test.ts` | 12 اختبار SSE |
 | `src/components/chat/__tests__/chat-flow.test.ts` | 6 اختبار منطق المحادثة |
 | `src/components/chat/__tests__/results-table.test.tsx` | 9 اختبار جدول النتائج |
+| `src/lib/chat/__tests__/csv.test.ts` | 6 اختبارات CSV |
 | `src/styles/chat.css` | أنماط المحادثة الكاملة |
 
 ---
@@ -131,8 +135,12 @@ streamChat(request, callbacks, options?)
 
 ```
 Vitest (unit):
-  Test Files  3 passed (3)
-       Tests  27 passed (27)
+  Test Files  4 passed (4)
+       Tests  33 passed (33)
+
+Vitest on Node 20.20.2 (CI runtime):
+  Test Files  4 passed (4)
+       Tests  33 passed (33)
 
 Contract tests:
   # tests 338
@@ -145,8 +153,8 @@ Contract tests:
 ## 10. نتيجة بناء الإنتاج
 
 ```
-✓ Compiled successfully in 10.4s
-✓ /chat        11.8 kB   (118 kB first load)
+✓ Compiled successfully
+✓ /chat        13.8 kB   (171 kB first load)
 ✓ EXIT_CODE: 0
 TypeScript: 0 errors
 ```
@@ -166,8 +174,25 @@ TypeScript: 0 errors
 
 ## 12. نتائج اختبار التكامل
 
-- **Mock Mode**: NOT VERIFIED — الخادم غير مشغّل في البيئة الحالية
-- **Ollama Mode**: BLOCKED — غير متاح
+تم التحقق في 2026-11-24 عبر متصفح Chromium وواجهة Next.js فعلية واتصال SSE مباشر مع FastAPI وقاعدة بيانات الجامعة التجريبية.
+
+| الوضع | السؤال | النتيجة |
+|---|---|---|
+| `mock` | كم عدد الطلاب في كل برنامج؟ | PASS — 30 صفاً، جدول وSQL وأثر وكيلين، 0.139 ثانية |
+| `mock` | من الطلاب الذين عليهم رسوم متأخرة؟ | PASS — 50 صفاً مع شارة الاقتصاص، 0.066 ثانية |
+| `ollama` / `qwen2.5:14b` | كم عدد الطلاب في كل برنامج؟ | PASS — 30 صفاً، 0.059 ثانية |
+| `ollama` / `qwen2.5:14b` | من الطلاب الذين عليهم رسوم متأخرة؟ | PASS — 50 صفاً مع شارة الاقتصاص، 0.049 ثانية |
+
+تحققات إضافية:
+
+- بقي `conversation_id` ثابتاً بين سؤالين متتاليين في الجلسة نفسها.
+- ظهرت بيانات المزوّد والنموذج ووضع التشغيل الحقيقي في درج تفاصيل الجلسة.
+- أظهر بث SSE منتهٍ دون حدث `final` حالة فشل وزر إعادة المحاولة، دون بقاء مؤشر بث أو إنشاء إجابات مكررة.
+- أعادت إعادة المحاولة الحالة المستقرة نفسها عند استمرار الانقطاع، دون حلقة تلقائية.
+- عند عرض 375px بقي عرض الصفحة 375px، بينما كان جدول النتائج 301px مع محتوى 529px و`overflow-x: auto`.
+- عُرض SQL باتجاه `ltr`، ولم تظهر أخطاء JavaScript في وضع النجاح أو العرض المحمول.
+
+ملاحظة نطاق: هذا التحقق يثبت توافق واجهة PR 02 مع بيانات مزوّد `ollama` وعقد SSE. فرع العمل الحالي يسبق دمج SQL Agent الخاص بـ PR #14، لذلك تنفيذ NL2SQL المعتمد فعلياً على LLM يجب إعادة اختباره بعد دمج `origin/dev`، دون تكرار عمل PR #14 داخل هذا الفرع.
 
 ---
 
@@ -189,6 +214,7 @@ frontend/docs/sprint-1/PR_02_NEXTJS_CHAT_IMPLEMENTATION_REPORT.md
 ### معدَّلة
 ```
 frontend/scripts/prebuild-dirs.cjs — إضافة pre-creation لـ _not-found/_error
+backend/app/static/playground.html — ترقية playground إلى واجهة محادثة كاملة
 ```
 
 ### محمية — لم تُعدَّل
@@ -196,7 +222,6 @@ frontend/scripts/prebuild-dirs.cjs — إضافة pre-creation لـ _not-found/_
 backend/app/core/events.py
 backend/app/schemas/chat.py
 backend/app/api/v1/endpoints/stream.py
-backend/app/static/playground.html
 docs/adr/*
 .github/workflows/*
 ```
@@ -206,7 +231,7 @@ docs/adr/*
 ## 14. فجوات العقد
 
 1. **`agent_token`**: محجوز ومتجاهل آمناً — الواجهة ستعمل فور تفعيله
-2. **تاريخ المحادثة من الخادم**: محلي فقط حالياً — `sessionStorage`
+2. **تاريخ المحادثة من الخادم**: محادثة واحدة محلية فقط حالياً — `localStorage`
 3. **حد 2000 حرف**: مفروض من الخلفية (`max_length=2000`) ومن الواجهة
 
 ---
@@ -214,10 +239,10 @@ docs/adr/*
 ## 15. حالة Git
 
 ```
-Branch:              Mohammed-Alshareef  ✓
-git commit:          NOT done  ✓
-git push:            NOT done  ✓
-PR created:          NOT done  ✓
-Protected files:     Untouched  ✓
-Backend contracts:   Untouched  ✓
+Branch:                    Mohammed-Alshareef
+HEAD:                      34250693e886c42f9d5ab0ee9e16dcb4b405839b
+Ahead of tracked upstream: 4 commits
+PR created:                NOT done
+Protected contracts:       Untouched
+Pre-existing worktree:     Preserved without reset or overwrite
 ```
