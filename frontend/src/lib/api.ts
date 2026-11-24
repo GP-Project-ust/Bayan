@@ -4,8 +4,8 @@ import type { ChatResponse, HealthResponse } from "@/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-export async function getHealth(): Promise<HealthResponse> {
-  const res = await fetch(`${API_URL}/api/v1/health`, { cache: "no-store" });
+export async function getHealth(signal?: AbortSignal): Promise<HealthResponse> {
+  const res = await fetch(`${API_URL}/api/v1/health`, { cache: "no-store", signal });
   if (!res.ok) throw new Error(`فشل فحص الصحة: ${res.status}`);
   return res.json();
 }
