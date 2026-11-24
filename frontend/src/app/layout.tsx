@@ -6,6 +6,9 @@ import "@/components/ui/ui.css";
 import "@/styles/bayan-responsive.css";
 import "@/styles/bayan-legacy.css";
 import "@/styles/admin-dashboard.css";
+import "@/styles/admin-overview.css";
+import "@/styles/admin-dialogs.css";
+import "@/styles/chat.css";
 
 const ibmPlexSansArabic = localFont({
   src: [

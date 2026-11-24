@@ -111,19 +111,14 @@ async function run() {
   // 1. التقاط الحالة الأولية قبل السؤال (Empty State with Sidebar)
   await capture("00_chat_initial_empty_1440px.png", 1440, 900, false);
 
-  // 2. النقر على شريحة السؤال النموذجي وإرسال الاستعلام
+  // 2. النقر على شريحة السؤال وإرسال الاستعلام
   console.log("Testing question submission...");
-  const chipClick = await evalJs(`(() => {
+  await evalJs(`(() => {
     const chip = document.querySelector('.bayan-chip');
-    if (chip) {
-      chip.click();
-      return "chip clicked: " + chip.textContent.trim();
-    }
-    return "no chip found";
+    if (chip) chip.click();
   })()`);
-  console.log("Chip result:", chipClick);
 
-  await new Promise(r => setTimeout(r, 600));
+  await new Promise(r => setTimeout(r, 800));
 
   const sendClick = await evalJs(`(() => {
     const sendBtn = document.querySelector('.bayan-btn-primary');
@@ -131,9 +126,27 @@ async function run() {
       sendBtn.click();
       return "send button clicked";
     }
+    const textarea = document.querySelector('textarea#bayan-chat-input');
+    if (textarea) {
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+      setter.call(textarea, "كم عدد الطلاب في كل برنامج؟");
+      if (textarea._valueTracker) textarea._valueTracker.setValue("");
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+      textarea.dispatchEvent(new Event("change", { bubbles: true }));
+      return "value set manually";
+    }
     return "send button disabled or missing";
   })()`);
-  console.log("Send result:", sendClick);
+  console.log("Send result 1:", sendClick);
+
+  await new Promise(r => setTimeout(r, 600));
+
+  await evalJs(`(() => {
+    const sendBtn = document.querySelector('.bayan-btn-primary');
+    if (sendBtn && !sendBtn.disabled) {
+      sendBtn.click();
+    }
+  })()`);
 
   // انتظار انتهاء البث وظهور النتيجة
   for (let i = 0; i < 30; i++) {

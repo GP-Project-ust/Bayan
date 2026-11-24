@@ -44,8 +44,8 @@ describe("ResultsTable Component", () => {
 
     const html = renderToString(React.createElement(ResultsTable, { table }));
     expect(html).toContain("قواعد البيانات");
-    expect(html).toContain("tbl-null");
     expect(html).toContain("—");
+    expect(html).not.toContain(">null<");
   });
 
   it("4. يحافظ على القيمة الصفرية 0 كقيمة صالحة ولا يعتبرها قيمة فارغة", () => {
@@ -57,7 +57,7 @@ describe("ResultsTable Component", () => {
 
     const html = renderToString(React.createElement(ResultsTable, { table }));
     expect(html).toContain("0");
-    expect(html).toContain("num-cell");
+    expect(html).toContain("is-num");
   });
 
   it("5. يعرض حالة فارغة واضحة عندما يكون جدول النتائج بلا صفوف", () => {
@@ -68,8 +68,8 @@ describe("ResultsTable Component", () => {
     };
 
     const html = renderToString(React.createElement(ResultsTable, { table }));
-    expect(html).toContain("لا توجد نتائج مطابقة في قاعدة البيانات");
-    expect(html).toContain("bayan-results-empty-cell");
+    expect(html).toContain("لا توجد نتائج مطابقة");
+    expect(html).toContain("is-empty");
   });
 
   it("6. يظهر شارة الاقتصاص عندما يكون truncated = true", () => {
@@ -80,7 +80,7 @@ describe("ResultsTable Component", () => {
     };
 
     const html = renderToString(React.createElement(ResultsTable, { table }));
-    expect(html).toContain("bayan-results-trunc-badge");
+    expect(html).toContain("cx-trunc");
     expect(html).toContain("تم اقتصاص النتائج — قد توجد صفوف إضافية");
   });
 
@@ -92,7 +92,7 @@ describe("ResultsTable Component", () => {
     };
 
     const html = renderToString(React.createElement(ResultsTable, { table }));
-    expect(html).not.toContain("bayan-results-trunc-badge");
+    expect(html).not.toContain("cx-trunc");
     expect(html).not.toContain("تم اقتصاص النتائج");
   });
 

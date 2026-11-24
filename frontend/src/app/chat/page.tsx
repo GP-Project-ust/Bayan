@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ChatInterface } from "@/components/chat";
 import "@/styles/chat.css";
+import "@/styles/chat-conversation.css";
 
 export const metadata: Metadata = {
   title: "المحادثة الذكية | بيان",

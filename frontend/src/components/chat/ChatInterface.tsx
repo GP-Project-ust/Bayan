@@ -1,84 +1,148 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChatMessage, MetaPayload, AgentTraceEntry } from "@/types";
 import { streamChat } from "@/lib/chat/sse-client";
+import {
+  clearSession,
+  loadDraft,
+  loadSession,
+  saveDraft,
+  saveSession,
+} from "@/lib/chat/chat-session";
 import { ChatLayout } from "@/components/layout";
 import { ChatHeader } from "./ChatHeader";
+import { SessionDetailsDrawer } from "./SessionDetailsDrawer";
 import { UserMessage } from "./UserMessage";
 import { AssistantMessage } from "./AssistantMessage";
 import { ChatInput } from "./ChatInput";
-import { Sparkles, MessageSquare, Bot } from "lucide-react";
+import { ScrollToLatest } from "./ScrollToLatest";
+import { ListTree, ShieldCheck, Table2 } from "lucide-react";
 
-const STORAGE_KEY_CONV_ID = "bayan_chat_conv_id";
-const STORAGE_KEY_MSGS = "bayan_chat_messages";
+type Exchange = {
+  question?: ChatMessage;
+  answer?: ChatMessage;
+};
+
+/** Distance from the bottom (px) that still counts as "pinned to newest". */
+const BOTTOM_THRESHOLD = 56;
+
+/** Group the flat message list into question/answer exchanges for rendering. */
+function groupExchanges(messages: ChatMessage[]): Exchange[] {
+  const exchanges: Exchange[] = [];
+
+  messages.forEach((message) => {
+    if (message.role === "user") {
+      exchanges.push({ question: message });
+      return;
+    }
+
+    const current = exchanges[exchanges.length - 1];
+    if (current && !current.answer) {
+      current.answer = message;
+    } else {
+      exchanges.push({ answer: message });
+    }
+  });
+
+  return exchanges;
+}
 
 export function ChatInterface() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [meta, setMeta] = useState<MetaPayload | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
-  const [meta, setMeta] = useState<MetaPayload | null>(null);
+  const [sessionOpen, setSessionOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+  const [atBottom, setAtBottom] = useState(true);
+  const [hasNewBelow, setHasNewBelow] = useState(false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const transcriptRef = useRef<HTMLDivElement>(null);
+  const pinnedRef = useRef(true);
   const startTimeRef = useRef<number>(0);
 
-  // استعادة الجلسة السابقة من sessionStorage عند التحميل
+  // Restore the previous session (transcript, model details, draft) on load.
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const savedId = sessionStorage.getItem(STORAGE_KEY_CONV_ID);
-        if (savedId) setConversationId(savedId);
-
-        const savedMsgs = sessionStorage.getItem(STORAGE_KEY_MSGS);
-        if (savedMsgs) {
-          const parsed = JSON.parse(savedMsgs);
-          if (Array.isArray(parsed)) setMessages(parsed);
-        }
-      } catch {
-        // تجاهل أي خطأ في قراءة التخزين المحلي
-      }
+    const saved = loadSession();
+    if (saved) {
+      setMessages(saved.messages);
+      setConversationId(saved.conversationId);
+      setMeta(saved.meta);
     }
+    setInputValue(loadDraft());
+    setHydrated(true);
   }, []);
 
-  // التمرير التلقائي لأسفل عند وصول رسائل جديدة أو تحديثات البث
+  // Mirror the workspace into storage so a reload or a new tab keeps it.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!hydrated) return;
+    if (messages.length === 0 && !conversationId && !meta) {
+      clearSession();
+      return;
+    }
+    saveSession({ conversationId, meta, messages });
+  }, [hydrated, messages, conversationId, meta]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    saveDraft(inputValue);
+  }, [hydrated, inputValue]);
+
+  const scrollToLatest = useCallback((behavior: ScrollBehavior = "smooth") => {
+    const element = transcriptRef.current;
+    if (!element) return;
+    element.scrollTo({ top: element.scrollHeight, behavior });
+    pinnedRef.current = true;
+    setAtBottom(true);
+    setHasNewBelow(false);
+  }, []);
+
+  const handleTranscriptScroll = useCallback(() => {
+    const element = transcriptRef.current;
+    if (!element) return;
+
+    const distance = element.scrollHeight - element.scrollTop - element.clientHeight;
+    const pinned = distance <= BOTTOM_THRESHOLD;
+    pinnedRef.current = pinned;
+    setAtBottom(pinned);
+    if (pinned) setHasNewBelow(false);
+  }, []);
+
+  // Follow new content only while the reader is at the bottom of the transcript.
+  useEffect(() => {
+    const element = transcriptRef.current;
+    if (!element) return;
+
+    if (pinnedRef.current) {
+      element.scrollTop = element.scrollHeight;
+    } else if (messages.length > 0) {
+      setHasNewBelow(true);
+    }
   }, [messages, isStreaming]);
 
-  // حفظ المحادثة في sessionStorage
-  const persistSession = (convId: string | null, msgs: ChatMessage[]) => {
-    if (typeof window === "undefined") return;
-    try {
-      if (convId) sessionStorage.setItem(STORAGE_KEY_CONV_ID, convId);
-      sessionStorage.setItem(STORAGE_KEY_MSGS, JSON.stringify(msgs));
-    } catch {
-      // التعامل مع حدود تخزين المتصفح
-    }
-  };
-
-  // إرسال السؤال عبر عميل SSE الموحد
-  const handleSend = async (overrideQuestion?: string) => {
+  const handleSend = async (overrideQuestion?: string, baseMessages?: ChatMessage[]) => {
     const questionText = (overrideQuestion || inputValue).trim();
     if (isStreaming || questionText.length < 2) return;
 
     setInputValue("");
     setIsStreaming(true);
+    pinnedRef.current = true;
+    setHasNewBelow(false);
     startTimeRef.current = Date.now();
 
-    const userMsgId = `user-${Date.now()}`;
-    const assistantMsgId = `assistant-${Date.now() + 1}`;
-
     const userMessage: ChatMessage = {
-      id: userMsgId,
+      id: `user-${Date.now()}`,
       role: "user",
       content: questionText,
       timestamp: Date.now(),
     };
 
+    const assistantMessageId = `assistant-${Date.now() + 1}`;
     const initialAssistantMessage: ChatMessage = {
-      id: assistantMsgId,
+      id: assistantMessageId,
       role: "assistant",
       content: "",
       timestamp: Date.now(),
@@ -86,25 +150,23 @@ export function ChatInterface() {
       agentTrace: [],
     };
 
-    const nextMessages = [...messages, userMessage, initialAssistantMessage];
-    setMessages(nextMessages);
+    setMessages([...(baseMessages ?? messages), userMessage, initialAssistantMessage]);
 
-    // إعداد وحدة التحكم في الإلغاء
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    let currentConvId = conversationId;
+    let currentConversationId = conversationId;
 
     await streamChat(
       {
         question: questionText,
-        conversation_id: currentConvId,
+        conversation_id: currentConversationId,
       },
       {
         onMeta: (metaData) => {
           setMeta(metaData);
           if (metaData.conversation_id) {
-            currentConvId = metaData.conversation_id;
+            currentConversationId = metaData.conversation_id;
             setConversationId(metaData.conversation_id);
           }
         },
@@ -112,14 +174,11 @@ export function ChatInterface() {
         onAgentEnd: (trace) => {
           setMessages((prev) => {
             const copy = [...prev];
-            const targetIdx = copy.findIndex((m) => m.id === assistantMsgId);
-            if (targetIdx !== -1) {
-              const currentTrace = copy[targetIdx].agentTrace || [];
+            const targetIndex = copy.findIndex((message) => message.id === assistantMessageId);
+            if (targetIndex !== -1) {
+              const currentTrace = copy[targetIndex].agentTrace || [];
               const updatedTrace: AgentTraceEntry[] = [...currentTrace, trace];
-              copy[targetIdx] = {
-                ...copy[targetIdx],
-                agentTrace: updatedTrace,
-              };
+              copy[targetIndex] = { ...copy[targetIndex], agentTrace: updatedTrace };
             }
             return copy;
           });
@@ -128,16 +187,16 @@ export function ChatInterface() {
         onFinal: (finalData) => {
           const totalDuration = Date.now() - startTimeRef.current;
           if (finalData.conversation_id) {
-            currentConvId = finalData.conversation_id;
+            currentConversationId = finalData.conversation_id;
             setConversationId(finalData.conversation_id);
           }
 
           setMessages((prev) => {
             const copy = [...prev];
-            const targetIdx = copy.findIndex((m) => m.id === assistantMsgId);
-            if (targetIdx !== -1) {
-              copy[targetIdx] = {
-                ...copy[targetIdx],
+            const targetIndex = copy.findIndex((message) => message.id === assistantMessageId);
+            if (targetIndex !== -1) {
+              copy[targetIndex] = {
+                ...copy[targetIndex],
                 content: finalData.answer || "(تم إكمال الاستعلام)",
                 table: finalData.table || null,
                 route: finalData.route,
@@ -146,7 +205,6 @@ export function ChatInterface() {
                 isStreaming: false,
               };
             }
-            persistSession(currentConvId, copy);
             return copy;
           });
 
@@ -154,18 +212,13 @@ export function ChatInterface() {
           abortControllerRef.current = null;
         },
 
-        onError: (err) => {
+        onError: (error) => {
           setMessages((prev) => {
             const copy = [...prev];
-            const targetIdx = copy.findIndex((m) => m.id === assistantMsgId);
-            if (targetIdx !== -1) {
-              copy[targetIdx] = {
-                ...copy[targetIdx],
-                error: err,
-                isStreaming: false,
-              };
+            const targetIndex = copy.findIndex((message) => message.id === assistantMessageId);
+            if (targetIndex !== -1) {
+              copy[targetIndex] = { ...copy[targetIndex], error, isStreaming: false };
             }
-            persistSession(currentConvId, copy);
             return copy;
           });
 
@@ -182,39 +235,58 @@ export function ChatInterface() {
     );
   };
 
-  // إيقاف البث النشط
   const handleStop = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      abortControllerRef.current = null;
-    }
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
     setIsStreaming(false);
+
+    setMessages((prev) =>
+      prev.map((message) =>
+        message.isStreaming ? { ...message, isStreaming: false, stopped: true } : message
+      )
+    );
   };
 
-  // بدء محادثة جديدة ومسح الجلسة
   const handleNewChat = () => {
     if (isStreaming) return;
     setMessages([]);
     setConversationId(null);
     setMeta(null);
-    if (typeof window !== "undefined") {
-      sessionStorage.removeItem(STORAGE_KEY_CONV_ID);
-      sessionStorage.removeItem(STORAGE_KEY_MSGS);
-    }
+    setSessionOpen(false);
+    setInputValue("");
+    setHasNewBelow(false);
+    pinnedRef.current = true;
+    clearSession();
   };
 
-  // إعادة محاولة السؤال الأخير
+  const lastUserIndex = useMemo(() => {
+    for (let index = messages.length - 1; index >= 0; index -= 1) {
+      if (messages[index].role === "user") return index;
+    }
+    return -1;
+  }, [messages]);
+
+  /** Drops the trailing answer and asks the same question again. */
+  const handleRegenerate = () => {
+    if (isStreaming || lastUserIndex === -1) return;
+    const question = messages[lastUserIndex];
+    const trimmed = messages.slice(0, lastUserIndex);
+    setMessages(trimmed);
+    handleSend(question.content, trimmed);
+  };
+
   const handleRetry = () => {
     if (isStreaming) return;
-    // العثور على آخر سؤال للمستخدم
-    const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
-    if (lastUserMsg) {
-      // إزالة رسالة المساعد الفاشلة السابقة
-      const filtered = messages.slice(0, -1);
-      setMessages(filtered);
-      handleSend(lastUserMsg.content);
-    }
+    const lastMessage = messages[messages.length - 1];
+    if (!lastMessage || lastMessage.role !== "assistant" || !lastMessage.error) return;
+    handleRegenerate();
   };
+
+  const exchanges = useMemo(() => groupExchanges(messages), [messages]);
+  const lastAssistantId = useMemo(
+    () => [...messages].reverse().find((message) => message.role === "assistant")?.id,
+    [messages]
+  );
 
   return (
     <ChatLayout
@@ -222,72 +294,99 @@ export function ChatInterface() {
       onNewChat={handleNewChat}
       activeChat={messages.length > 0 ? messages[0].content : undefined}
     >
-      <div className="bayan-chat-page" role="main" aria-label="مساحة المحادثة">
-        {/* الترويسة التنفيذية للمحادثة المطابقة لهوية لوحة الإدارة */}
+      <div className="bayan-chat-page cx-page">
         <ChatHeader
           provider={meta?.provider}
           model={meta?.model}
           mode={meta?.mode}
+          isStreaming={isStreaming}
+          onNewChat={handleNewChat}
+          onOpenSession={() => setSessionOpen(true)}
         />
 
-        {/* بطاقة مساحة المحادثة المؤسسية الموحدة */}
-        <div className="bayan-chat-workspace-card">
-          {messages.length === 0 ? (
-            /* بطاقة الترحيب عند بدء جلسة جديدة */
-            <div className="bayan-welcome-hero">
-              <div className="bayan-welcome-icon-box">
-                <Bot size={34} aria-hidden="true" />
+        <div className="cx-stage">
+          <div
+            ref={transcriptRef}
+            className="cx-transcript"
+            role="log"
+            aria-live="polite"
+            aria-relevant="additions"
+            aria-label="سجل المحادثة"
+            tabIndex={0}
+            onScroll={handleTranscriptScroll}
+          >
+            {messages.length === 0 ? (
+              <div className="cx-empty">
+                <h2>اسأل عن بيانات الجامعة</h2>
+                <p>
+                  اكتب سؤالك بالعربية، وسيبنى بيان الاستعلام المناسب على العروض الذكية المعتمدة،
+                  ثم يعرض الإجابة مع النتائج ومسار التنفيذ.
+                </p>
+                <ul className="cx-caps">
+                  <li>
+                    <ShieldCheck size={16} aria-hidden="true" />
+                    استعلامات قراءة فقط على مصادر البيانات المعتمدة
+                  </li>
+                  <li>
+                    <Table2 size={16} aria-hidden="true" />
+                    جدول نتائج مع استعلام SQL المستخدم
+                  </li>
+                  <li>
+                    <ListTree size={16} aria-hidden="true" />
+                    أثر تنفيذ لكل وكيل مع الزمن وعدد الصفوف
+                  </li>
+                </ul>
               </div>
-              <h2>مرحباً بك في واجهة بيان الذكية</h2>
-              <p className="bayan-welcome-desc">
-                اسأل باللغة العربية عن إحصاءات الطلاب، البرامج الأكاديمية، والرسوم.
-                يقوم وكيل SQL بتحليل سؤالك وبناء استعلامات آمنة مع عرض جدول النتائج وأثر التنفيذ.
-              </p>
-              <div className="bayan-welcome-features">
-                <div className="bayan-feature-item">
-                  <Sparkles size={16} className="text-amber-500" aria-hidden="true" />
-                  <span>توليد آمن لاستعلامات SQL</span>
-                </div>
-                <div className="bayan-feature-item">
-                  <MessageSquare size={16} className="text-teal-600" aria-hidden="true" />
-                  <span>بث فوري عبر تقنية SSE</span>
-                </div>
-                <div className="bayan-feature-item">
-                  <Bot size={16} className="text-sky-600" aria-hidden="true" />
-                  <span>شفافية كاملة لأثر الوكلاء</span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* قائمة الرسائل المتبادلة */
-            <div className="bayan-messages-list">
-              {messages.map((msg) =>
-                msg.role === "user" ? (
-                  <UserMessage key={msg.id} message={msg} />
-                ) : (
-                  <AssistantMessage
-                    key={msg.id}
-                    message={msg}
-                    onRetry={handleRetry}
-                  />
-                )
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-          )}
+            ) : (
+              exchanges.map((exchange, index) => {
+                const answer = exchange.answer;
+                const answerIsLatest = answer?.id === lastAssistantId;
 
-          {/* خانة كتابة السؤال والأزرار */}
-          <ChatInput
-            value={inputValue}
-            onChange={setInputValue}
-            onSend={() => handleSend()}
-            onStop={handleStop}
-            onNewChat={handleNewChat}
-            isStreaming={isStreaming}
-            conversationId={conversationId}
+                return (
+                  <div className="cx-exchange" key={exchange.question?.id ?? answer?.id ?? index}>
+                    {exchange.question && <UserMessage message={exchange.question} />}
+                    {answer && (
+                      <AssistantMessage
+                        message={answer}
+                        isLatest={answerIsLatest}
+                        canRetry={answerIsLatest}
+                        onRetry={handleRetry}
+                        canRegenerate={answerIsLatest && !isStreaming}
+                        onRegenerate={handleRegenerate}
+                      />
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <ScrollToLatest
+            visible={messages.length > 0 && !atBottom}
+            unread={hasNewBelow && isStreaming}
+            onClick={() => scrollToLatest()}
           />
         </div>
+
+        <ChatInput
+          value={inputValue}
+          onChange={setInputValue}
+          onSend={() => handleSend()}
+          onStop={handleStop}
+          onNewChat={handleNewChat}
+          isStreaming={isStreaming}
+          hasConversation={messages.length > 0}
+        />
       </div>
+
+      <SessionDetailsDrawer
+        open={sessionOpen}
+        onClose={() => setSessionOpen(false)}
+        provider={meta?.provider}
+        model={meta?.model}
+        mode={meta?.mode}
+        conversationId={conversationId}
+      />
     </ChatLayout>
   );
 }

@@ -113,6 +113,60 @@ export const INITIAL_DEMO_USERS: DemoUser[] = [
     department: "أمن المعلومات",
     createdAt: "2026-10-28",
   },
+  {
+    id: "usr-007",
+    name: "أ. ماجد العنزي",
+    email: "m.alanazi@univ.edu.sa",
+    role: "موظف المؤسسة",
+    active: true,
+    department: "الشؤون المالية",
+    createdAt: "2026-11-01",
+  },
+  {
+    id: "usr-008",
+    name: "د. هند السبيعي",
+    email: "h.alsubaie@univ.edu.sa",
+    role: "موظف المؤسسة",
+    active: true,
+    department: "البحث العلمي",
+    createdAt: "2026-11-03",
+  },
+  {
+    id: "usr-009",
+    name: "م. فيصل الزهراني",
+    email: "f.alzahrani@univ.edu.sa",
+    role: "مسؤول المنصة",
+    active: true,
+    department: "مركز البيانات",
+    createdAt: "2026-11-06",
+  },
+  {
+    id: "usr-010",
+    name: "أ. نورة الشمري",
+    email: "n.alshammari@univ.edu.sa",
+    role: "موظف المؤسسة",
+    active: true,
+    department: "الموارد البشرية",
+    createdAt: "2026-11-09",
+  },
+  {
+    id: "usr-011",
+    name: "أ. عبد العزيز القرني",
+    email: "a.alqarni@univ.edu.sa",
+    role: "مسؤول تقنية المعلومات",
+    active: true,
+    department: "تقنية المعلومات",
+    createdAt: "2026-11-12",
+  },
+  {
+    id: "usr-012",
+    name: "أ. جواهر المطيري",
+    email: "j.almutairi@univ.edu.sa",
+    role: "موظف المؤسسة",
+    active: true,
+    department: "شؤون الطلاب",
+    createdAt: "2026-11-15",
+  },
 ];
 
 export const INITIAL_DEMO_VIEWS: DemoSmartView[] = [
@@ -159,6 +213,15 @@ export const INITIAL_DEMO_VIEWS: DemoSmartView[] = [
 ];
 
 export const INITIAL_DEMO_LOGS: DemoAuditEvent[] = [
+  {
+    id: "log-000",
+    time: "اليوم، 11:02 ص",
+    user: "م. خالد الشهري",
+    action: "حذف المستخدم (أ. بدر الحميدي) من النظام",
+    target: "b.alhumaidi@univ.edu.sa",
+    status: "تنبيه",
+    isDemo: true,
+  },
   {
     id: "log-001",
     time: "اليوم، 10:18 ص",
@@ -225,10 +288,10 @@ export const AVAILABLE_SOURCES = [
 export const AVAILABLE_SECURITIES: SecurityLevel[] = ["محدود", "محدد", "داخلي", "سري"];
 
 const STORAGE_KEYS = {
-  USERS: "bayan_demo_admin_users_v2",
-  VIEWS: "bayan_demo_admin_views_v2",
-  LOGS: "bayan_demo_admin_logs_v2",
-  ACTIVE_ROLE: "bayan_demo_active_preview_role_v2",
+  USERS: "bayan_demo_admin_users_v3",
+  VIEWS: "bayan_demo_admin_views_v3",
+  LOGS: "bayan_demo_admin_logs_v3",
+  ACTIVE_ROLE: "bayan_demo_active_preview_role_v3",
 };
 
 /**

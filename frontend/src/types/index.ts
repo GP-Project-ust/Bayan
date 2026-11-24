@@ -129,5 +129,7 @@ export interface ChatMessage {
   agents?: string[];
   durationMs?: number | null;
   isStreaming?: boolean;
+  /** Set when the reader stopped the stream before the answer completed. */
+  stopped?: boolean;
   error?: ErrorPayload | null;
 }

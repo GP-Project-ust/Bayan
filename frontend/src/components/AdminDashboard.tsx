@@ -1,42 +1,36 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Activity,
+  AlertTriangle,
+  CalendarDays,
+  ChartNoAxesColumnIncreasing,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  Copy,
+  ExternalLink,
+  Gauge,
+  Layers3,
+  Lock,
+  Pencil,
+  Plus,
+  RotateCcw,
+  Search,
+  ScrollText,
+  ShieldAlert,
+  SlidersHorizontal,
+  Trash2,
+  Unlock,
+  UserRoundPlus,
+  UsersRound,
+  X,
+  Zap,
+} from "lucide-react";
 import { useOverlay } from "./ui/useOverlay";
 import { AdminLayout } from "./layout";
-import {
-  Sparkles,
-  UsersRound,
-  Layers3,
-  ScrollText,
-  Activity,
-  CheckCircle2,
-  Plus,
-  UserRound,
-  Pencil,
-  MoreHorizontal,
-  Crown,
-  Laptop,
-  ShieldCheck,
-  Timer,
-  Zap,
-  UserRoundPlus,
-  Settings,
-  ExternalLink,
-  CalendarDays,
-  RefreshCw,
-  ChartNoAxesColumnIncreasing,
-  X,
-  Clock3,
-  Search,
-  Trash2,
-  Copy,
-  RotateCcw,
-  AlertTriangle,
-  ChevronRight,
-  ChevronLeft,
-  SlidersHorizontal,
-  ShieldAlert,
-} from "lucide-react";
 import {
   type AdminRole,
   type SecurityLevel,
@@ -56,35 +50,46 @@ import {
   validateEmailFormat,
   getCurrentArabicTimestamp,
 } from "@/lib/demo/admin-dashboard-store";
+import AdminRowMenu, { type RowMenuGroup } from "./admin/AdminRowMenu";
+import { SmartViewInspector, UserInspector } from "./admin/AdminRecordInspector";
+import { RoleIcon } from "./admin/roleIcon";
 
 const STORAGE_KEYS = {
-  USERS: "bayan_demo_admin_users_v2",
-  VIEWS: "bayan_demo_admin_views_v2",
-  LOGS: "bayan_demo_admin_logs_v2",
-  ACTIVE_ROLE: "bayan_demo_active_preview_role_v2",
+  USERS: "bayan_demo_admin_users_v3",
+  VIEWS: "bayan_demo_admin_views_v3",
+  LOGS: "bayan_demo_admin_logs_v3",
+  ACTIVE_ROLE: "bayan_demo_active_preview_role_v3",
 };
+
+const USERS_PER_PAGE = 5;
+const EDIT_ROLE: AdminRole = "مسؤول تقنية المعلومات";
+
+type DashboardTab = "users" | "views" | "audit";
+
+/** Icon shown beside each smart view, cycled so the list stays scannable. */
+function viewIcon(index: number) {
+  if (index % 3 === 0) return <UsersRound size={18} aria-hidden="true" />;
+  if (index % 3 === 1) return <CalendarDays size={18} aria-hidden="true" />;
+  return <ChartNoAxesColumnIncreasing size={18} aria-hidden="true" />;
+}
 
 export default function AdminDashboard() {
   const [mounted, setMounted] = useState(false);
 
-  // 1. Data Store States (Initialized from initial fixtures for SSR safety)
+  // 1. Data store states, initialized from fixtures so server and client match.
   const [users, setUsers] = useState<DemoUser[]>(INITIAL_DEMO_USERS);
   const [views, setViews] = useState<DemoSmartView[]>(INITIAL_DEMO_VIEWS);
   const [logs, setLogs] = useState<DemoAuditEvent[]>(INITIAL_DEMO_LOGS);
-  const [activePreviewRole, setActivePreviewRole] = useState<AdminRole>("مسؤول تقنية المعلومات");
+  const [activePreviewRole, setActivePreviewRole] = useState<AdminRole>(EDIT_ROLE);
 
-  // Load from localStorage immediately on mount
   useEffect(() => {
     setUsers(loadFromStorage<DemoUser[]>(STORAGE_KEYS.USERS, INITIAL_DEMO_USERS));
     setViews(loadFromStorage<DemoSmartView[]>(STORAGE_KEYS.VIEWS, INITIAL_DEMO_VIEWS));
     setLogs(loadFromStorage<DemoAuditEvent[]>(STORAGE_KEYS.LOGS, INITIAL_DEMO_LOGS));
-    setActivePreviewRole(
-      loadFromStorage<AdminRole>(STORAGE_KEYS.ACTIVE_ROLE, "مسؤول تقنية المعلومات")
-    );
+    setActivePreviewRole(loadFromStorage<AdminRole>(STORAGE_KEYS.ACTIVE_ROLE, EDIT_ROLE));
     setMounted(true);
   }, []);
 
-  // Sync to localStorage on mutations only after initial client mounting
   useEffect(() => {
     if (mounted) saveToStorage(STORAGE_KEYS.USERS, users);
   }, [users, mounted]);
@@ -101,7 +106,7 @@ export default function AdminDashboard() {
     if (mounted) saveToStorage(STORAGE_KEYS.ACTIVE_ROLE, activePreviewRole);
   }, [activePreviewRole, mounted]);
 
-  // 2. Toast Notification Stack
+  // 2. Toast notification stack.
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const showToast = useCallback(
     (title: string, description?: string, type: ToastMessage["type"] = "success") => {
@@ -118,7 +123,7 @@ export default function AdminDashboard() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  // Helper to add audit event
+  // Helper to append to the local audit trail.
   const appendAuditEvent = useCallback(
     (action: string, target?: string, status: "نجاح" | "تنبيه" | "فشل" = "نجاح") => {
       const newEvent: DemoAuditEvent = {
@@ -135,7 +140,23 @@ export default function AdminDashboard() {
     []
   );
 
-  // 3. Modals & Dialog State
+  // 3. Tabs, selected record and row menu presentation state.
+  const [activeTab, setActiveTab] = useState<DashboardTab>("users");
+  const [inspectedUserId, setInspectedUserId] = useState<string | null>(null);
+  const [inspectedViewId, setInspectedViewId] = useState<string | null>(null);
+  const [openRowMenu, setOpenRowMenu] = useState<string | null>(null);
+  const closeRowMenu = useCallback(() => setOpenRowMenu(null), []);
+
+  const inspectedUser = useMemo(
+    () => users.find((user) => user.id === inspectedUserId) ?? null,
+    [users, inspectedUserId]
+  );
+  const inspectedView = useMemo(
+    () => views.find((view) => view.id === inspectedViewId) ?? null,
+    [views, inspectedViewId]
+  );
+
+  // 4. Dialogs.
   const [modal, setModal] = useState<
     | ""
     | "add-user"
@@ -147,15 +168,13 @@ export default function AdminDashboard() {
     | "full-log"
     | "reset-confirm"
   >("");
-
   const closeModal = useCallback(() => setModal(""), []);
   const dialogRef = useOverlay(Boolean(modal), closeModal);
 
-  // Active items for editing/deletion
   const [selectedUser, setSelectedUser] = useState<DemoUser | null>(null);
   const [selectedView, setSelectedView] = useState<DemoSmartView | null>(null);
 
-  // User form fields & validation errors
+  // User form fields and validation.
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userDepartment, setUserDepartment] = useState("");
@@ -163,32 +182,28 @@ export default function AdminDashboard() {
   const [userActive, setUserActive] = useState(true);
   const [userFormErrors, setUserFormErrors] = useState<{ name?: string; email?: string }>({});
 
-  // View form fields & validation errors
+  // Smart view form fields and validation.
   const [viewName, setViewName] = useState("");
   const [viewSource, setViewSource] = useState(AVAILABLE_SOURCES[0]);
   const [viewSecurity, setViewSecurity] = useState<SecurityLevel>("محدود");
   const [viewActive, setViewActive] = useState(true);
   const [viewFormErrors, setViewFormErrors] = useState<{ name?: string }>({});
 
-  // 4. Search, Filter, Sort & Pagination States
-  // Users table
+  // 5. Search, filter, sort and pagination.
   const [userSearch, setUserSearch] = useState("");
   const [userRoleFilter, setUserRoleFilter] = useState<string>("ALL");
   const [userStatusFilter, setUserStatusFilter] = useState<string>("ALL");
   const [userPage, setUserPage] = useState(1);
-  const USERS_PER_PAGE = 5;
 
-  // Smart views table
   const [viewSearch, setViewSearch] = useState("");
   const [viewSecurityFilter, setViewSecurityFilter] = useState<string>("ALL");
   const [viewStatusFilter, setViewStatusFilter] = useState<string>("ALL");
 
-  // Audit search, filter & sort
   const [auditSearch, setAuditSearch] = useState("");
   const [auditStatusFilter, setAuditStatusFilter] = useState<string>("ALL");
   const [auditSortOrder, setAuditSortOrder] = useState<"desc" | "asc">("desc");
 
-  // 5. User Management Actions
+  // 6. User actions.
   const openAddUserModal = () => {
     setUserName("");
     setUserEmail("");
@@ -226,9 +241,9 @@ export default function AdminDashboard() {
       errors.email = "صيغة البريد الإلكتروني غير صحيحة (name@domain.com).";
     } else {
       const emailExists = users.some(
-        (u) =>
-          u.email.toLowerCase() === userEmail.trim().toLowerCase() &&
-          (!isEditing || u.id !== selectedUser?.id)
+        (user) =>
+          user.email.toLowerCase() === userEmail.trim().toLowerCase() &&
+          (!isEditing || user.id !== selectedUser?.id)
       );
       if (emailExists) {
         errors.email = "البريد الإلكتروني مسجل مسبقًا لمستخدم آخر.";
@@ -258,63 +273,59 @@ export default function AdminDashboard() {
   const handleUpdateUser = () => {
     if (!selectedUser || !validateUserForm(true)) return;
     setUsers((prev) =>
-      prev.map((u) =>
-        u.id === selectedUser.id
+      prev.map((user) =>
+        user.id === selectedUser.id
           ? {
-              ...u,
+              ...user,
               name: userName.trim(),
               email: userEmail.trim().toLowerCase(),
               role: userRole,
               department: userDepartment.trim() || "عام",
               active: userActive,
             }
-          : u
+          : user
       )
     );
     appendAuditEvent(`تحديث بيانات المستخدم (${userName.trim()})`, selectedUser.email);
-    showToast("تم تحديث المستخدم بنجاح", `تم حفظ التغييرات محليًا.`);
+    showToast("تم تحديث المستخدم بنجاح", "تم حفظ التغييرات محليًا.");
     closeModal();
   };
 
   const handleDeleteUser = () => {
     if (!selectedUser) return;
-    setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
+    setUsers((prev) => prev.filter((user) => user.id !== selectedUser.id));
+    if (inspectedUserId === selectedUser.id) setInspectedUserId(null);
     appendAuditEvent(`حذف المستخدم (${selectedUser.name}) من النظام`, selectedUser.email, "تنبيه");
     showToast("تم حذف المستخدم", `تمت إزالة ${selectedUser.name} بنجاح.`);
     closeModal();
   };
 
-  const cycleUserRole = (id: string) => {
-    setUsers((prev) =>
-      prev.map((u) => {
-        if (u.id === id) {
-          const nextIndex = (AVAILABLE_ROLES.indexOf(u.role) + 1) % AVAILABLE_ROLES.length;
-          const newRole = AVAILABLE_ROLES[nextIndex];
-          appendAuditEvent(`تغيير دور المستخدم (${u.name}) إلى (${newRole})`, u.email);
-          showToast("تم تغيير الدور", `تم تعديل دور ${u.name} إلى ${newRole}.`);
-          return { ...u, role: newRole };
-        }
-        return u;
-      })
-    );
+  const changeUserRole = (id: string, newRole: AdminRole) => {
+    const target = users.find((user) => user.id === id);
+    if (!target || target.role === newRole) return;
+    setUsers((prev) => prev.map((user) => (user.id === id ? { ...user, role: newRole } : user)));
+    appendAuditEvent(`تغيير دور المستخدم (${target.name}) إلى (${newRole})`, target.email);
+    showToast("تم تغيير الدور", `دور ${target.name}: ${newRole}.`);
   };
 
   const toggleUserActive = (id: string) => {
+    const target = users.find((user) => user.id === id);
+    if (!target) return;
+    const nextActive = !target.active;
     setUsers((prev) =>
-      prev.map((u) => {
-        if (u.id === id) {
-          const nextActive = !u.active;
-          const statusText = nextActive ? "تنشيط" : "تعطيل";
-          appendAuditEvent(`${statusText} حساب المستخدم (${u.name})`, u.email);
-          showToast(`تم ${statusText} الحساب`, `حالة ${u.name}: ${nextActive ? "نشط" : "غير نشط"}.`);
-          return { ...u, active: nextActive };
-        }
-        return u;
-      })
+      prev.map((user) => (user.id === id ? { ...user, active: nextActive } : user))
+    );
+    appendAuditEvent(
+      `${nextActive ? "تنشيط" : "تعطيل"} حساب المستخدم (${target.name})`,
+      target.email
+    );
+    showToast(
+      `تم ${nextActive ? "تنشيط" : "تعطيل"} الحساب`,
+      `حالة ${target.name}: ${nextActive ? "نشط" : "غير نشط"}.`
     );
   };
 
-  // 6. Smart View Actions
+  // 7. Smart view actions.
   const openAddViewModal = () => {
     setViewName("");
     setViewSource(AVAILABLE_SOURCES[0]);
@@ -345,9 +356,9 @@ export default function AdminDashboard() {
       errors.name = "يرجى إدخال اسم صحيح للعرض الذكي.";
     } else {
       const exists = views.some(
-        (v) =>
-          v.name.trim().toLowerCase() === viewName.trim().toLowerCase() &&
-          (!isEditing || v.id !== selectedView?.id)
+        (view) =>
+          view.name.trim().toLowerCase() === viewName.trim().toLowerCase() &&
+          (!isEditing || view.id !== selectedView?.id)
       );
       if (exists) {
         errors.name = "يوجد عرض ذكي آخر بنفس هذا الاسم.";
@@ -376,16 +387,16 @@ export default function AdminDashboard() {
   const handleUpdateView = () => {
     if (!selectedView || !validateViewForm(true)) return;
     setViews((prev) =>
-      prev.map((v) =>
-        v.id === selectedView.id
+      prev.map((view) =>
+        view.id === selectedView.id
           ? {
-              ...v,
+              ...view,
               name: viewName.trim(),
               source: viewSource,
               security: viewSecurity,
               active: viewActive,
             }
-          : v
+          : view
       )
     );
     appendAuditEvent(`تحديث العرض الذكي (${viewName.trim()})`);
@@ -395,7 +406,8 @@ export default function AdminDashboard() {
 
   const handleDeleteView = () => {
     if (!selectedView) return;
-    setViews((prev) => prev.filter((v) => v.id !== selectedView.id));
+    setViews((prev) => prev.filter((view) => view.id !== selectedView.id));
+    if (inspectedViewId === selectedView.id) setInspectedViewId(null);
     appendAuditEvent(`حذف العرض الذكي (${selectedView.name})`, undefined, "تنبيه");
     showToast("تم حذف العرض الذكي", `تم حذف "${selectedView.name}".`);
     closeModal();
@@ -416,42 +428,45 @@ export default function AdminDashboard() {
   };
 
   const toggleViewActive = (id: string) => {
+    const target = views.find((view) => view.id === id);
+    if (!target) return;
+    const nextActive = !target.active;
     setViews((prev) =>
-      prev.map((v) => {
-        if (v.id === id) {
-          const nextActive = !v.active;
-          appendAuditEvent(`${nextActive ? "تنشيط" : "إيقاف"} العرض الذكي (${v.name})`);
-          showToast("تم تغيير حالة العرض", `العرض ${v.name}: ${nextActive ? "نشط" : "متوقف"}.`);
-          return { ...v, active: nextActive };
-        }
-        return v;
-      })
+      prev.map((view) => (view.id === id ? { ...view, active: nextActive } : view))
+    );
+    appendAuditEvent(`${nextActive ? "تنشيط" : "إيقاف"} العرض الذكي (${target.name})`);
+    showToast(
+      "تم تغيير حالة العرض",
+      `العرض ${target.name}: ${nextActive ? "نشط" : "متوقف"}.`
     );
   };
 
-  // 7. Reset Demonstration Data
+  // 8. Reset the local demonstration data.
   const handleResetDemoData = () => {
     resetDemoStorage();
     setUsers(INITIAL_DEMO_USERS);
     setViews(INITIAL_DEMO_VIEWS);
     setLogs(INITIAL_DEMO_LOGS);
-    setActivePreviewRole("مسؤول تقنية المعلومات");
+    setActivePreviewRole(EDIT_ROLE);
+    setInspectedUserId(null);
+    setInspectedViewId(null);
+    setOpenRowMenu(null);
     showToast("تمت استعادة البيانات الافتراضية", "تمت إعادة ضبط المستودع التجريبي إلى حالته الأولى.");
     closeModal();
   };
 
-  // 8. Filtered and Paginated Users
+  // 9. Derived lists.
   const filteredUsers = useMemo(() => {
-    return users.filter((u) => {
+    return users.filter((user) => {
       const matchSearch =
         !userSearch.trim() ||
-        u.name.toLowerCase().includes(userSearch.trim().toLowerCase()) ||
-        u.email.toLowerCase().includes(userSearch.trim().toLowerCase());
-      const matchRole = userRoleFilter === "ALL" || u.role === userRoleFilter;
+        user.name.toLowerCase().includes(userSearch.trim().toLowerCase()) ||
+        user.email.toLowerCase().includes(userSearch.trim().toLowerCase());
+      const matchRole = userRoleFilter === "ALL" || user.role === userRoleFilter;
       const matchStatus =
         userStatusFilter === "ALL" ||
-        (userStatusFilter === "ACTIVE" && u.active) ||
-        (userStatusFilter === "INACTIVE" && !u.active);
+        (userStatusFilter === "ACTIVE" && user.active) ||
+        (userStatusFilter === "INACTIVE" && !user.active);
       return matchSearch && matchRole && matchStatus;
     });
   }, [users, userSearch, userRoleFilter, userStatusFilter]);
@@ -462,41 +477,43 @@ export default function AdminDashboard() {
     return filteredUsers.slice(start, start + USERS_PER_PAGE);
   }, [filteredUsers, userPage]);
 
-  // Reset page when filters change
   useEffect(() => {
     setUserPage(1);
   }, [userSearch, userRoleFilter, userStatusFilter]);
 
-  // 9. Filtered Smart Views
+  // Keep the current page valid after deleting the last row of a page.
+  useEffect(() => {
+    if (userPage > totalUserPages) setUserPage(totalUserPages);
+  }, [userPage, totalUserPages]);
+
   const filteredViews = useMemo(() => {
-    return views.filter((v) => {
+    return views.filter((view) => {
       const matchSearch =
         !viewSearch.trim() ||
-        v.name.toLowerCase().includes(viewSearch.trim().toLowerCase()) ||
-        v.source.toLowerCase().includes(viewSearch.trim().toLowerCase());
-      const matchSec = viewSecurityFilter === "ALL" || v.security === viewSecurityFilter;
+        view.name.toLowerCase().includes(viewSearch.trim().toLowerCase()) ||
+        view.source.toLowerCase().includes(viewSearch.trim().toLowerCase());
+      const matchSecurity = viewSecurityFilter === "ALL" || view.security === viewSecurityFilter;
       const matchStatus =
         viewStatusFilter === "ALL" ||
-        (viewStatusFilter === "ACTIVE" && v.active) ||
-        (viewStatusFilter === "INACTIVE" && !v.active);
-      return matchSearch && matchSec && matchStatus;
+        (viewStatusFilter === "ACTIVE" && view.active) ||
+        (viewStatusFilter === "INACTIVE" && !view.active);
+      return matchSearch && matchSecurity && matchStatus;
     });
   }, [views, viewSearch, viewSecurityFilter, viewStatusFilter]);
 
-  // 10. Filtered Audit Logs
   const filteredLogs = useMemo(() => {
     let result = logs;
     if (auditSearch.trim()) {
       const query = auditSearch.trim().toLowerCase();
       result = result.filter(
-        (l) =>
-          l.user.toLowerCase().includes(query) ||
-          l.action.toLowerCase().includes(query) ||
-          (l.target && l.target.toLowerCase().includes(query))
+        (log) =>
+          log.user.toLowerCase().includes(query) ||
+          log.action.toLowerCase().includes(query) ||
+          (log.target && log.target.toLowerCase().includes(query))
       );
     }
     if (auditStatusFilter !== "ALL") {
-      result = result.filter((l) => l.status === auditStatusFilter);
+      result = result.filter((log) => log.status === auditStatusFilter);
     }
     if (auditSortOrder === "asc") {
       return [...result].reverse();
@@ -504,13 +521,89 @@ export default function AdminDashboard() {
     return result;
   }, [logs, auditSearch, auditStatusFilter, auditSortOrder]);
 
-  // Check whether current demo role has edit permission
-  const canEdit = activePreviewRole === "مسؤول تقنية المعلومات";
+  const activeViews = views.filter((view) => view.active).length;
+  const activeUsers = users.filter((user) => user.active).length;
+  const canEdit = activePreviewRole === EDIT_ROLE;
+
+  // 10. Row menu definitions.
+  const userMenuGroups = (user: DemoUser): RowMenuGroup[] => [
+    {
+      heading: "تغيير الدور",
+      items: AVAILABLE_ROLES.map((role) => ({
+        key: role,
+        label: role,
+        checked: user.role === role,
+        icon: <RoleIcon role={role} size={14} />,
+        onSelect: () => changeUserRole(user.id, role),
+      })),
+    },
+    {
+      items: [
+        {
+          key: "toggle-active",
+          label: user.active ? "تعطيل الحساب" : "تنشيط الحساب",
+          icon: user.active ? (
+            <Clock3 size={14} aria-hidden="true" />
+          ) : (
+            <CheckCircle2 size={14} aria-hidden="true" />
+          ),
+          onSelect: () => toggleUserActive(user.id),
+        },
+        {
+          key: "delete",
+          label: "حذف المستخدم",
+          icon: <Trash2 size={14} aria-hidden="true" />,
+          danger: true,
+          onSelect: () => openDeleteUserModal(user),
+        },
+      ],
+    },
+  ];
+
+  const viewMenuGroups = (view: DemoSmartView): RowMenuGroup[] => [
+    {
+      items: [
+        {
+          key: "edit",
+          label: "تعديل العرض الذكي",
+          icon: <Pencil size={14} aria-hidden="true" />,
+          onSelect: () => openEditViewModal(view),
+        },
+        {
+          key: "duplicate",
+          label: "نسخ العرض الذكي",
+          icon: <Copy size={14} aria-hidden="true" />,
+          onSelect: () => duplicateView(view),
+        },
+      ],
+    },
+    {
+      items: [
+        {
+          key: "toggle-active",
+          label: view.active ? "إيقاف العرض" : "تنشيط العرض",
+          icon: view.active ? (
+            <Clock3 size={14} aria-hidden="true" />
+          ) : (
+            <CheckCircle2 size={14} aria-hidden="true" />
+          ),
+          onSelect: () => toggleViewActive(view.id),
+        },
+        {
+          key: "delete",
+          label: "حذف العرض الذكي",
+          icon: <Trash2 size={14} aria-hidden="true" />,
+          danger: true,
+          onSelect: () => openDeleteViewModal(view),
+        },
+      ],
+    },
+  ];
 
   return (
     <AdminLayout>
-      <div className="admin-main admin-readex admin-alexandria">
-        {/* Floating Toast Notification Stack */}
+      <div className="admin-main admin-readex admin-alexandria admin-overview">
+        {/* Floating toast stack */}
         {toasts.length > 0 && (
           <aside className="toast-container" aria-live="polite" aria-label="الإشعارات الفورية">
             {toasts.map((toast) => (
@@ -541,50 +634,74 @@ export default function AdminDashboard() {
           </aside>
         )}
 
-        {/* Executive Hero Banner */}
-        <header className="admin-hero">
-          <img
-            className="admin-campus-top"
-            src="/assets/campus-admin-top.png"
-            alt="صرح الجامعة"
-          />
-          <div className="admin-heading">
-            <h1>
-              <Sparkles size={30} /> لوحة <em>الإدارة المركزية</em>
-            </h1>
-            <p>
-              إدارة مستخدمي المؤسسة وتعيين الأدوار وصلاحيات الوصول، وبناء العروض الذكية، ومراجعة سجل
-              التدقيق، ومراقبة حالة البنية التحتية.
-            </p>
-          </div>
-          <div className="admin-hero-actions">
-            <button
-              type="button"
-              className="reset-demo-button"
-              title="إعادة ضبط كافة البيانات التجريبية إلى حالتها الأصلية"
-              onClick={() => setModal("reset-confirm")}
-            >
-              <RotateCcw size={16} /> استعادة الافتراضي
-            </button>
-          </div>
+        {/* Page heading */}
+        <header className="ao-head">
+          <h1>لوحة الإدارة</h1>
+          <button
+            type="button"
+            className="ao-ghost"
+            title="إعادة ضبط كافة البيانات التجريبية إلى حالتها الأصلية"
+            onClick={() => setModal("reset-confirm")}
+          >
+            <RotateCcw size={16} aria-hidden="true" />
+            استعادة الافتراضي
+          </button>
         </header>
 
-        {/* Role Demonstration Simulator Bar */}
-        <nav className="role-preview-bar" aria-label="محاكاة أدوار النظام">
-          <div className="role-preview-label">
-            <SlidersHorizontal size={17} />
-            <span>محاكاة صلاحيات العرض (تجريبية):</span>
+        {/* Metric band */}
+        <section className="ao-metrics" aria-label="مؤشرات لوحة الإدارة">
+          <div className="ao-metric">
+            <span className="ao-metric-label">
+              <UsersRound size={14} aria-hidden="true" />
+              إجمالي المستخدمين
+            </span>
+            <strong className="ao-metric-value ao-num">{users.length}</strong>
+            <span className="ao-metric-sub">
+              <b>{activeUsers}</b> نشط
+            </span>
           </div>
-          <div className="role-preview-pills" role="radiogroup" aria-label="أدوار النظام">
+          <div className="ao-metric">
+            <span className="ao-metric-label">
+              <Layers3 size={14} aria-hidden="true" />
+              العروض الذكية النشطة
+            </span>
+            <strong className="ao-metric-value ao-num">{activeViews}</strong>
+            <span className="ao-metric-sub">من أصل {views.length}</span>
+          </div>
+          <div className="ao-metric">
+            <span className="ao-metric-label">
+              <ScrollText size={14} aria-hidden="true" />
+              أحداث التدقيق المسجلة
+            </span>
+            <strong className="ao-metric-value ao-num">{logs.length}</strong>
+            <span className="ao-metric-sub">سجل محلي</span>
+          </div>
+          <div className="ao-metric">
+            <span className="ao-metric-label">
+              <Activity size={14} aria-hidden="true" />
+              حالة النظام <span className="ao-demo">محاكاة</span>
+            </span>
+            <span className="ao-metric-state">يعمل بشكل طبيعي</span>
+          </div>
+        </section>
+
+        {/* Role preview simulator */}
+        <nav className="ao-role" aria-label="محاكاة أدوار النظام">
+          <div className="ao-role-label">
+            <SlidersHorizontal size={17} aria-hidden="true" />
+            <span>محاكاة صلاحيات العرض (تجريبية)</span>
+          </div>
+          <div className="ao-roles" role="radiogroup" aria-label="أدوار النظام">
             {AVAILABLE_ROLES.map((role) => (
               <button
-                type="button"
                 key={role}
+                type="button"
                 role="radio"
                 aria-checked={activePreviewRole === role}
-                className={`role-preview-pill ${activePreviewRole === role ? "active" : ""}`}
+                className="ao-role-pill"
                 onClick={() => {
                   setActivePreviewRole(role);
+                  setOpenRowMenu(null);
                   showToast(
                     "تم تغيير وضع المعاينة",
                     `تستعرض الآن الواجهة بصلاحيات "${role}".`,
@@ -592,157 +709,157 @@ export default function AdminDashboard() {
                   );
                 }}
               >
-                {role === "مدير المؤسسة" ? (
-                  <Crown size={15} />
-                ) : role === "مسؤول تقنية المعلومات" ? (
-                  <Laptop size={15} />
-                ) : role === "مسؤول المنصة" ? (
-                  <ShieldCheck size={15} />
-                ) : (
-                  <UserRound size={15} />
-                )}
+                <RoleIcon role={role} size={15} />
                 {role}
               </button>
             ))}
           </div>
+          <span className="ao-cap">
+            <Unlock size={14} aria-hidden="true" />
+            {canEdit ? "التحرير متاح" : "استعراض فقط"}
+          </span>
         </nav>
 
         {!canEdit && (
-          <div className="role-restriction-banner" role="status">
-            <ShieldAlert size={20} />
+          <div className="ao-notice" role="status">
+            <ShieldAlert size={18} aria-hidden="true" />
             <span>
               <strong>وضع المعاينة المقيدة ({activePreviewRole}):</strong> هذا الدور يمتلك صلاحيات
-              استعراض فقط وفقًا لمصفوفة RBAC. تم تعطيل عمليات الإضافة والتعديل والحذف تجريبيًا.
-              للتبديل إلى الصلاحيات الكاملة اختر <strong>"مسؤول تقنية المعلومات"</strong> أعلاه.
+              استعراض فقط وفقًا لمصفوفة RBAC، لذلك تم تعطيل عمليات الإضافة والتعديل والحذف. للتبديل
+              إلى الصلاحيات الكاملة اختر <strong>{EDIT_ROLE}</strong> أعلاه.
             </span>
           </div>
         )}
 
-        {/* 4-Column KPI Metrics Grid */}
-        <div className="stats-grid">
-          <div className="stat-card">
-            <UsersRound size={32} />
-            <div>
-              إجمالي المستخدمين
-              <strong>
-                {120 + users.length}
-                <small>{users.filter((u) => u.active).length} نشط</small>
-              </strong>
-            </div>
-          </div>
-          <div className="stat-card">
-            <Layers3 size={32} />
-            <div>
-              العروض الذكية النشطة
-              <strong>
-                {views.filter((v) => v.active).length}
-                <small>من أصل {views.length}</small>
-              </strong>
-            </div>
-          </div>
-          <div className="stat-card">
-            <ScrollText size={32} />
-            <div>
-              أحداث التدقيق المسجلة
-              <strong>
-                {logs.length}
-                <small>سجل محلي</small>
-              </strong>
-            </div>
-          </div>
-          <div className="stat-card system-status-stat">
-            <Activity size={32} />
-            <div>
-              حالة النظام (محاكاة)
-              <strong className="status-kpi-text">
-                <CheckCircle2 size={17} /> يعمل بشكل طبيعي
-              </strong>
-            </div>
-          </div>
+        {/* Task tabs */}
+        <div className="ao-tabs" role="tablist" aria-label="أقسام لوحة الإدارة">
+          <button
+            type="button"
+            role="tab"
+            id="ao-tab-users"
+            aria-selected={activeTab === "users"}
+            aria-controls="ao-panel-users"
+            className="ao-tab"
+            onClick={() => {
+              setActiveTab("users");
+              setOpenRowMenu(null);
+            }}
+          >
+            <UsersRound size={18} aria-hidden="true" />
+            المستخدمون
+            <span className="ao-tab-count">{users.length}</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="ao-tab-views"
+            aria-selected={activeTab === "views"}
+            aria-controls="ao-panel-views"
+            className="ao-tab"
+            onClick={() => {
+              setActiveTab("views");
+              setOpenRowMenu(null);
+            }}
+          >
+            <Layers3 size={18} aria-hidden="true" />
+            العروض الذكية
+            <span className="ao-tab-count">{views.length}</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="ao-tab-audit"
+            aria-selected={activeTab === "audit"}
+            aria-controls="ao-panel-audit"
+            className="ao-tab"
+            onClick={() => {
+              setActiveTab("audit");
+              setOpenRowMenu(null);
+            }}
+          >
+            <ScrollText size={18} aria-hidden="true" />
+            سجل التدقيق
+            <span className="ao-tab-count">{logs.length}</span>
+          </button>
         </div>
 
-        {/* Asymmetric Columns: Main Content + Sticky Aside Widgets */}
-        <div className="admin-columns">
-          <main className="admin-primary">
-            {/* 1. USERS & ROLES PANEL */}
-            <section id="users" className="admin-panel users-panel" aria-labelledby="users-heading">
-              <div className="panel-heading">
-                <div>
-                  <h2 id="users-heading">
-                    <UsersRound size={26} /> إدارة المستخدمين والأدوار
-                  </h2>
-                  <p>
-                    إدارة حسابات المستخدمين، التحقق من هوياتهم، وتحديد الأدوار وصلاحيات الوصول (RBAC).
-                  </p>
-                </div>
-                {canEdit && (
+        {/* Users tab */}
+        {activeTab === "users" && (
+          <div
+            className="ao-stage"
+            role="tabpanel"
+            id="ao-panel-users"
+            aria-labelledby="ao-tab-users"
+            tabIndex={0}
+          >
+            <section className="ao-panel" aria-label="إدارة المستخدمين والأدوار">
+              <div className="ao-panel-head">
+                <h2>المستخدمون والأدوار</h2>
+                <div className="ao-panel-actions">
                   <button
                     type="button"
-                    className="action-primary"
+                    className="ao-primary"
                     onClick={openAddUserModal}
-                    title="إضافة مستخدم جديد إلى قاعدة البيانات المحلية"
+                    disabled={!canEdit}
                   >
-                    <Plus size={20} /> إضافة مستخدم
+                    <Plus size={17} aria-hidden="true" />
+                    إضافة مستخدم
                   </button>
-                )}
+                </div>
               </div>
 
-              {/* Toolbar: Search & Filters */}
-              <div className="table-toolbar">
-                <div className="search-field">
-                  <Search size={16} />
+              <div className="ao-toolbar">
+                <div className="ao-search">
+                  <Search size={16} aria-hidden="true" />
                   <input
                     type="search"
-                    placeholder="بحث بالاسم أو البريد..."
+                    placeholder="بحث بالاسم أو البريد الإلكتروني"
                     value={userSearch}
-                    onChange={(e) => setUserSearch(e.target.value)}
+                    onChange={(event) => setUserSearch(event.target.value)}
                     aria-label="البحث عن مستخدم"
                   />
-                  {userSearch && (
-                    <button
-                      type="button"
-                      className="clear-search"
-                      aria-label="مسح نص البحث"
-                      onClick={() => setUserSearch("")}
-                    >
-                      <X size={14} />
-                    </button>
-                  )}
                 </div>
-                <div className="filter-group">
-                  <select
-                    value={userRoleFilter}
-                    onChange={(e) => setUserRoleFilter(e.target.value)}
-                    aria-label="تصفية حسب الدور"
-                  >
-                    <option value="ALL">كافة الأدوار</option>
-                    {AVAILABLE_ROLES.map((role) => (
-                      <option key={role} value={role}>
-                        {role}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={userStatusFilter}
-                    onChange={(e) => setUserStatusFilter(e.target.value)}
-                    aria-label="تصفية حسب الحالة"
-                  >
-                    <option value="ALL">كافة الحالات</option>
-                    <option value="ACTIVE">النشطون فقط</option>
-                    <option value="INACTIVE">غير النشطين</option>
-                  </select>
-                </div>
+                <select
+                  className="ao-select"
+                  value={userRoleFilter}
+                  onChange={(event) => setUserRoleFilter(event.target.value)}
+                  aria-label="تصفية حسب الدور"
+                >
+                  <option value="ALL">كافة الأدوار</option>
+                  {AVAILABLE_ROLES.map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="ao-select"
+                  value={userStatusFilter}
+                  onChange={(event) => setUserStatusFilter(event.target.value)}
+                  aria-label="تصفية حسب الحالة"
+                >
+                  <option value="ALL">كافة الحالات</option>
+                  <option value="ACTIVE">النشطون فقط</option>
+                  <option value="INACTIVE">غير النشطين</option>
+                </select>
               </div>
 
-              {/* Data Table */}
               <div
-                className="table-scroller"
+                className="ao-table-wrap"
                 role="region"
                 aria-label="جدول المستخدمين والأدوار"
                 tabIndex={0}
               >
-                <table className="data-table users-table">
+                <table className="ao-table">
                   <caption className="bayan-sr-only">جدول المستخدمين والأدوار</caption>
+                  <colgroup>
+                    <col style={{ width: "23%" }} />
+                    <col style={{ width: "23%" }} />
+                    <col style={{ width: "15%" }} />
+                    <col style={{ width: "19%" }} />
+                    <col style={{ width: "9%" }} />
+                    <col style={{ width: "11%" }} />
+                  </colgroup>
                   <thead>
                     <tr>
                       <th scope="col">الاسم</th>
@@ -750,20 +867,24 @@ export default function AdminDashboard() {
                       <th scope="col">القسم</th>
                       <th scope="col">الدور</th>
                       <th scope="col">الحالة</th>
-                      <th scope="col">الإجراءات</th>
+                      <th scope="col" className="ao-th-end">
+                        الإجراءات
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {paginatedUsers.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="empty-table-cell">
-                          <div className="empty-state">
-                            <UsersRound size={36} />
+                        <td colSpan={6}>
+                          <div className="ao-empty">
+                            <UsersRound size={34} aria-hidden="true" />
                             <p>لا يوجد مستخدمون مطابقون لمعايير البحث الحالية.</p>
-                            {(userSearch || userRoleFilter !== "ALL" || userStatusFilter !== "ALL") && (
+                            {(userSearch ||
+                              userRoleFilter !== "ALL" ||
+                              userStatusFilter !== "ALL") && (
                               <button
                                 type="button"
-                                className="outline-button"
+                                className="ao-secondary"
                                 onClick={() => {
                                   setUserSearch("");
                                   setUserRoleFilter("ALL");
@@ -777,91 +898,77 @@ export default function AdminDashboard() {
                         </td>
                       </tr>
                     ) : (
-                      paginatedUsers.map((u) => (
-                        <tr key={u.id}>
+                      paginatedUsers.map((user) => (
+                        <tr
+                          key={user.id}
+                          className={inspectedUserId === user.id ? "is-selected" : undefined}
+                        >
                           <td>
-                            <span className="person-name">
-                              <span className="tiny-person" aria-hidden="true">
-                                <UserRound size={16} />
-                              </span>
-                              <b title={u.name}>{u.name}</b>
-                            </span>
-                          </td>
-                          <td dir="ltr" className="email-td" title={u.email}>
-                            {u.email}
-                          </td>
-                          <td>
-                            <span className="dept-tag" title={u.department || "عام"}>{u.department || "عام"}</span>
-                          </td>
-                          <td>
-                            <span
-                              className={`role-pill role-${AVAILABLE_ROLES.indexOf(u.role)}`}
-                            >
-                              {u.role === "مدير المؤسسة" ? (
-                                <Crown size={15} />
-                              ) : u.role === "موظف المؤسسة" ? (
-                                <UserRound size={15} />
-                              ) : u.role === "مسؤول تقنية المعلومات" ? (
-                                <Laptop size={15} />
-                              ) : (
-                                <ShieldCheck size={15} />
-                              )}
-                              {u.role}
+                            <span className="ao-name">
+                              <UsersRound size={18} aria-hidden="true" />
+                              <button
+                                type="button"
+                                className="ao-name-btn"
+                                aria-pressed={inspectedUserId === user.id}
+                                title={`عرض تفاصيل ${user.name}`}
+                                onClick={() =>
+                                  setInspectedUserId((current) =>
+                                    current === user.id ? null : user.id
+                                  )
+                                }
+                              >
+                                {user.name}
+                              </button>
                             </span>
                           </td>
                           <td>
-                            <span className={`state-pill ${u.active ? "success" : "warning"}`}>
-                              {u.active ? <CheckCircle2 size={15} /> : <Clock3 size={15} />}
-                              {u.active ? "نشط" : "غير نشط"}
+                            <span className="ao-email" title={user.email}>
+                              {user.email}
                             </span>
                           </td>
                           <td>
-                            <div className="table-actions">
-                              {canEdit ? (
-                                <>
-                                  <button
-                                    type="button"
-                                    className="compact-action-btn"
-                                    title="تعديل بيانات المستخدم"
-                                    aria-label="تعديل بيانات المستخدم"
-                                    onClick={() => openEditUserModal(u)}
-                                  >
-                                    <Pencil size={13} />
-                                    <span className="btn-label">تعديل</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="compact-action-btn"
-                                    title="تبديل الدور تلقائيًا"
-                                    aria-label="تبديل الدور تلقائيًا"
-                                    onClick={() => cycleUserRole(u.id)}
-                                  >
-                                    <RefreshCw size={13} />
-                                    <span className="btn-label">الدور</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="icon-action"
-                                    title={u.active ? "تعطيل الحساب" : "تنشيط الحساب"}
-                                    aria-label={u.active ? "تعطيل الحساب" : "تنشيط الحساب"}
-                                    onClick={() => toggleUserActive(u.id)}
-                                  >
-                                    {u.active ? <Clock3 size={14} /> : <CheckCircle2 size={14} />}
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="icon-action delete-action"
-                                    title="حذف المستخدم"
-                                    aria-label="حذف المستخدم"
-                                    onClick={() => openDeleteUserModal(u)}
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                </>
-                              ) : (
-                                <span className="read-only-badge">للعرض فقط</span>
-                              )}
-                            </div>
+                            <span className="ao-muted-cell" title={user.department || "عام"}>
+                              {user.department || "عام"}
+                            </span>
+                          </td>
+                          <td>
+                            <span className="ao-role-cell">
+                              <RoleIcon role={user.role} />
+                              <span>{user.role}</span>
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`ao-pill ${user.active ? "is-ok" : "is-warn"}`}>
+                              {user.active ? "نشط" : "غير نشط"}
+                            </span>
+                          </td>
+                          <td className="ao-td-end">
+                            {canEdit ? (
+                              <div className="ao-row-actions">
+                                <button
+                                  type="button"
+                                  className="ao-link-btn"
+                                  onClick={() => openEditUserModal(user)}
+                                  aria-label={`تعديل بيانات ${user.name}`}
+                                >
+                                  <Pencil size={13} aria-hidden="true" />
+                                  تعديل
+                                </button>
+                                <AdminRowMenu
+                                  label={`إجراءات المستخدم ${user.name}`}
+                                  groups={userMenuGroups(user)}
+                                  open={openRowMenu === user.id}
+                                  onToggle={() =>
+                                    setOpenRowMenu((current) =>
+                                      current === user.id ? null : user.id
+                                    )
+                                  }
+                                  onClose={closeRowMenu}
+                                />
+                              </div>
+                            ) : (
+                              <span className="ao-readonly">للعرض فقط</span>
+                            )}
                           </td>
                         </tr>
                       ))
@@ -870,288 +977,236 @@ export default function AdminDashboard() {
                 </table>
               </div>
 
-              {/* Pagination Bar */}
-              {totalUserPages > 1 && (
-                <div className="pagination-bar">
-                  <span>
-                    صفحة {userPage} من {totalUserPages} ({filteredUsers.length} مستخدم)
-                  </span>
-                  <div className="pagination-controls">
-                    <button
-                      type="button"
-                      disabled={userPage <= 1}
-                      onClick={() => setUserPage((p) => Math.max(1, p - 1))}
-                    >
-                      <ChevronRight size={16} /> السابق
-                    </button>
-                    {Array.from({ length: totalUserPages }, (_, i) => i + 1).map((num) => (
-                      <button
-                        type="button"
-                        key={num}
-                        className={userPage === num ? "active-page" : ""}
-                        onClick={() => setUserPage(num)}
-                      >
-                        {num}
-                      </button>
-                    ))}
-                    <button
-                      type="button"
-                      disabled={userPage >= totalUserPages}
-                      onClick={() => setUserPage((p) => Math.min(totalUserPages, p + 1))}
-                    >
-                      التالي <ChevronLeft size={16} />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </section>
-
-            {/* 2. AUDIT TRAIL PANEL */}
-            <section id="audit" className="admin-panel audit-panel" aria-labelledby="audit-heading">
-              <div className="panel-heading">
-                <div>
-                  <h2 id="audit-heading">
-                    <ScrollText size={25} /> سجل التدقيق والأنشطة
-                  </h2>
-                  <p>
-                    تسجيل تلقائي وتوثيق لكافة العمليات المهمة وتعديل الصلاحيات والحسابات والعروض
-                    الذكية.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="outline-button"
-                  onClick={() => setModal("full-log")}
-                >
-                  <ExternalLink size={16} /> السجل الكامل ({logs.length})
-                </button>
-              </div>
-
-              <div
-                className="table-scroller"
-                role="region"
-                aria-label="جدول سجل التدقيق"
-                tabIndex={0}
-              >
-                <table className="data-table audit-table">
-                  <caption className="bayan-sr-only">جدول سجل التدقيق</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">الوقت</th>
-                      <th scope="col">المستخدم المنفذ</th>
-                      <th scope="col">الإجراء</th>
-                      <th scope="col">الهدف</th>
-                      <th scope="col">الحالة</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {logs.slice(0, 5).map((log, idx) => (
-                      <tr key={`${log.id}-${idx}`}>
-                        <td>
-                          <span className="time-cell">
-                            <CalendarDays size={15} />
-                            {log.time}
-                          </span>
-                        </td>
-                        <td>
-                          <b>{log.user}</b>
-                        </td>
-                        <td>{log.action}</td>
-                        <td>
-                          <span className="target-tag">{log.target || "عام"}</span>
-                        </td>
-                        <td>
-                          <span className={`state-pill ${log.status === "نجاح" ? "success" : "warning"}`}>
-                            <CheckCircle2 size={14} />
-                            {log.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            {/* 3. SMART VIEWS PANEL */}
-            <section
-              id="smart-views"
-              className="admin-panel smart-panel"
-              aria-labelledby="smart-heading"
-            >
-              <div className="panel-heading">
-                <div>
-                  <h2 id="smart-heading">
-                    <Layers3 size={26} /> إدارة العروض الذكية
-                  </h2>
-                  <p>
-                    بناء وتحديث العروض الذكية المعززة بنماذج الذكاء الاصطناعي لحوكمة وتسهيل الوصول
-                    للبيانات.
-                  </p>
-                </div>
-                {canEdit && (
+              <div className="ao-pager">
+                <span>
+                  صفحة <span className="ao-num">{userPage}</span> من{" "}
+                  <span className="ao-num">{totalUserPages}</span> —{" "}
+                  <span className="ao-num">{filteredUsers.length}</span> مستخدم
+                </span>
+                <div className="ao-pager-controls">
                   <button
                     type="button"
-                    className="action-primary"
-                    onClick={openAddViewModal}
-                    title="إنشاء عرض ذكي جديد"
+                    disabled={userPage <= 1}
+                    onClick={() => setUserPage((page) => Math.max(1, page - 1))}
                   >
-                    <Plus size={20} /> إنشاء عرض ذكي
+                    <ChevronRight size={15} aria-hidden="true" />
+                    السابق
                   </button>
-                )}
-              </div>
-
-              {/* Smart Views Toolbar */}
-              <div className="table-toolbar">
-                <div className="search-field">
-                  <Search size={16} />
-                  <input
-                    type="search"
-                    placeholder="بحث باسم العرض أو المصدر..."
-                    value={viewSearch}
-                    onChange={(e) => setViewSearch(e.target.value)}
-                    aria-label="البحث عن عرض ذكي"
-                  />
-                  {viewSearch && (
+                  {Array.from({ length: totalUserPages }, (_, index) => index + 1).map((page) => (
                     <button
                       type="button"
-                      className="clear-search"
-                      aria-label="مسح نص البحث"
-                      onClick={() => setViewSearch("")}
+                      key={page}
+                      aria-current={userPage === page ? "page" : undefined}
+                      aria-label={`الصفحة ${page}`}
+                      onClick={() => setUserPage(page)}
                     >
-                      <X size={14} />
+                      {page}
                     </button>
-                  )}
-                </div>
-                <div className="filter-group">
-                  <select
-                    value={viewSecurityFilter}
-                    onChange={(e) => setViewSecurityFilter(e.target.value)}
-                    aria-label="تصفية حسب التصنيف الأمني"
+                  ))}
+                  <button
+                    type="button"
+                    disabled={userPage >= totalUserPages}
+                    onClick={() => setUserPage((page) => Math.min(totalUserPages, page + 1))}
                   >
-                    <option value="ALL">كافة التصنيفات</option>
-                    {AVAILABLE_SECURITIES.map((sec) => (
-                      <option key={sec} value={sec}>
-                        {sec}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={viewStatusFilter}
-                    onChange={(e) => setViewStatusFilter(e.target.value)}
-                    aria-label="تصفية حسب الحالة"
-                  >
-                    <option value="ALL">كافة الحالات</option>
-                    <option value="ACTIVE">النشطة فقط</option>
-                    <option value="INACTIVE">المتوقفة</option>
-                  </select>
+                    التالي
+                    <ChevronLeft size={15} aria-hidden="true" />
+                  </button>
                 </div>
+              </div>
+            </section>
+
+            {inspectedUser && (
+              <UserInspector
+                user={inspectedUser}
+                canEdit={canEdit}
+                onClose={() => setInspectedUserId(null)}
+                onEdit={() => openEditUserModal(inspectedUser)}
+                onToggleActive={() => toggleUserActive(inspectedUser.id)}
+                onDelete={() => openDeleteUserModal(inspectedUser)}
+              />
+            )}
+          </div>
+        )}
+
+        {/* Smart views tab */}
+        {activeTab === "views" && (
+          <div
+            className="ao-stage"
+            role="tabpanel"
+            id="ao-panel-views"
+            aria-labelledby="ao-tab-views"
+            tabIndex={0}
+          >
+            <section className="ao-panel" aria-label="إدارة العروض الذكية">
+              <div className="ao-panel-head">
+                <h2>العروض الذكية</h2>
+                <div className="ao-panel-actions">
+                  <button
+                    type="button"
+                    className="ao-primary"
+                    onClick={openAddViewModal}
+                    disabled={!canEdit}
+                  >
+                    <Plus size={17} aria-hidden="true" />
+                    إنشاء عرض ذكي
+                  </button>
+                </div>
+              </div>
+
+              <div className="ao-toolbar">
+                <div className="ao-search">
+                  <Search size={16} aria-hidden="true" />
+                  <input
+                    type="search"
+                    placeholder="بحث باسم العرض أو المصدر"
+                    value={viewSearch}
+                    onChange={(event) => setViewSearch(event.target.value)}
+                    aria-label="البحث عن عرض ذكي"
+                  />
+                </div>
+                <select
+                  className="ao-select"
+                  value={viewSecurityFilter}
+                  onChange={(event) => setViewSecurityFilter(event.target.value)}
+                  aria-label="تصفية حسب التصنيف الأمني"
+                >
+                  <option value="ALL">كافة التصنيفات</option>
+                  {AVAILABLE_SECURITIES.map((security) => (
+                    <option key={security} value={security}>
+                      {security}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="ao-select"
+                  value={viewStatusFilter}
+                  onChange={(event) => setViewStatusFilter(event.target.value)}
+                  aria-label="تصفية حسب الحالة"
+                >
+                  <option value="ALL">كافة الحالات</option>
+                  <option value="ACTIVE">النشطة فقط</option>
+                  <option value="INACTIVE">المتوقفة</option>
+                </select>
               </div>
 
               <div
-                className="table-scroller"
+                className="ao-table-wrap"
                 role="region"
                 aria-label="جدول العروض الذكية"
                 tabIndex={0}
               >
-                <table className="data-table smart-table">
+                <table className="ao-table">
                   <caption className="bayan-sr-only">جدول العروض الذكية</caption>
+                  <colgroup>
+                    <col style={{ width: "29%" }} />
+                    <col style={{ width: "26%" }} />
+                    <col style={{ width: "16%" }} />
+                    <col style={{ width: "11%" }} />
+                    <col style={{ width: "18%" }} />
+                  </colgroup>
                   <thead>
                     <tr>
                       <th scope="col">اسم العرض</th>
                       <th scope="col">المصدر الأكاديمي</th>
                       <th scope="col">المستوى الأمني</th>
                       <th scope="col">الحالة</th>
-                      <th scope="col">الإجراءات</th>
+                      <th scope="col" className="ao-th-end">
+                        الإجراءات
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredViews.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="empty-table-cell">
-                          <div className="empty-state">
-                            <Layers3 size={36} />
+                        <td colSpan={5}>
+                          <div className="ao-empty">
+                            <Layers3 size={34} aria-hidden="true" />
                             <p>لا توجد عروض ذكية مطابقة لمعايير البحث الحالية.</p>
+                            {(viewSearch ||
+                              viewSecurityFilter !== "ALL" ||
+                              viewStatusFilter !== "ALL") && (
+                              <button
+                                type="button"
+                                className="ao-secondary"
+                                onClick={() => {
+                                  setViewSearch("");
+                                  setViewSecurityFilter("ALL");
+                                  setViewStatusFilter("ALL");
+                                }}
+                              >
+                                إعادة تعيين التصفية
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
                     ) : (
-                      filteredViews.map((view, i) => (
-                        <tr key={view.id}>
+                      filteredViews.map((view, index) => (
+                        <tr
+                          key={view.id}
+                          className={inspectedViewId === view.id ? "is-selected" : undefined}
+                        >
                           <td>
-                            <b className="smart-name">
-                              {i % 3 === 0 ? (
-                                <UsersRound size={17} />
-                              ) : i % 3 === 1 ? (
-                                <CalendarDays size={17} />
-                              ) : (
-                                <ChartNoAxesColumnIncreasing size={17} />
-                              )}
-                              {view.name}
-                            </b>
+                            <span className="ao-name">
+                              {viewIcon(index)}
+                              <button
+                                type="button"
+                                className="ao-name-btn"
+                                aria-pressed={inspectedViewId === view.id}
+                                title={`عرض تفاصيل ${view.name}`}
+                                onClick={() =>
+                                  setInspectedViewId((current) =>
+                                    current === view.id ? null : view.id
+                                  )
+                                }
+                              >
+                                {view.name}
+                              </button>
+                            </span>
                           </td>
-                          <td>{view.source}</td>
                           <td>
-                            <span
-                              className={`security-pill security-${AVAILABLE_SECURITIES.indexOf(view.security)}`}
-                            >
-                              <ShieldCheck size={14} />
+                            <span className="ao-muted-cell" title={view.source}>
+                              {view.source}
+                            </span>
+                          </td>
+                          <td>
+                            <span className="ao-security" data-level={view.security}>
+                              <Lock size={12} aria-hidden="true" />
                               {view.security}
                             </span>
                           </td>
                           <td>
-                            <span className={`state-pill ${view.active ? "success" : "warning"}`}>
-                              <CheckCircle2 size={14} />
+                            <span className={`ao-pill ${view.active ? "is-ok" : "is-warn"}`}>
                               {view.active ? "نشط" : "متوقف"}
                             </span>
                           </td>
-                          <td>
-                            <div className="table-actions">
-                              {canEdit ? (
-                                <>
-                                  <button
-                                    type="button"
-                                    className="compact-action-btn"
-                                    title="تعديل العرض الذكي"
-                                    aria-label="تعديل العرض الذكي"
-                                    onClick={() => openEditViewModal(view)}
-                                  >
-                                    <Pencil size={13} />
-                                    <span className="btn-label">تعديل</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="compact-action-btn"
-                                    title={view.active ? "إيقاف العرض" : "تنشيط العرض"}
-                                    aria-label={view.active ? "إيقاف العرض" : "تنشيط العرض"}
-                                    onClick={() => toggleViewActive(view.id)}
-                                  >
-                                    <RefreshCw size={13} />
-                                    <span className="btn-label">الحالة</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="icon-action"
-                                    title="نسخ العرض الذكي"
-                                    aria-label="نسخ العرض الذكي"
-                                    onClick={() => duplicateView(view)}
-                                  >
-                                    <Copy size={14} />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="icon-action delete-action"
-                                    title="حذف العرض الذكي"
-                                    aria-label="حذف العرض الذكي"
-                                    onClick={() => openDeleteViewModal(view)}
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                </>
-                              ) : (
-                                <span className="read-only-badge">للعرض فقط</span>
-                              )}
-                            </div>
+                          <td className="ao-td-end">
+                            {canEdit ? (
+                              <div className="ao-row-actions">
+                                <button
+                                  type="button"
+                                  className="ao-link-btn"
+                                  onClick={() => openEditViewModal(view)}
+                                  aria-label={`تعديل ${view.name}`}
+                                >
+                                  <Pencil size={13} aria-hidden="true" />
+                                  تعديل
+                                </button>
+                                <AdminRowMenu
+                                  label={`إجراءات العرض الذكي ${view.name}`}
+                                  groups={viewMenuGroups(view)}
+                                  open={openRowMenu === view.id}
+                                  onToggle={() =>
+                                    setOpenRowMenu((current) =>
+                                      current === view.id ? null : view.id
+                                    )
+                                  }
+                                  onClose={closeRowMenu}
+                                />
+                              </div>
+                            ) : (
+                              <span className="ao-readonly">للعرض فقط</span>
+                            )}
                           </td>
                         </tr>
                       ))
@@ -1160,581 +1215,691 @@ export default function AdminDashboard() {
                 </table>
               </div>
             </section>
-          </main>
 
-          {/* Sticky Aside Widgets Column */}
-          <aside className="admin-widgets" id="settings">
-            {/* Health Telemetry Widget with Explicit Demo Badge */}
-            <div className="status-widget">
-              <h2>
-                <Activity size={24} /> حالة النظام
-              </h2>
-              <div className="health-list">
-                {[
-                  { name: "الخدمات الأساسية", desc: "FastAPI / Uvicorn (محاكاة)" },
-                  { name: "قاعدة البيانات", desc: "PostgreSQL 16 (محاكاة)" },
-                  { name: "محرك الاستعلامات", desc: "LangGraph Agent (محاكاة)" },
-                  { name: "خدمة العروض الذكية", desc: "Qdrant Vector DB (محاكاة)" },
-                ].map((item) => (
-                  <div key={item.name}>
-                    <div>
-                      <span>{item.name}</span>
-                      <small className="service-desc">{item.desc}</small>
-                    </div>
-                    <CheckCircle2 size={19} />
-                  </div>
-                ))}
-              </div>
-              <div className="response-time">
-                <Timer size={24} />
-                <span>
-                  زمن الاستجابة التقديري (محاكاة)
-                  <strong>320 مللي ثانية</strong>
-                </span>
-              </div>
-            </div>
-
-            {/* Quick Actions Shortcuts */}
-            <div className="quick-widget">
-              <h2>
-                <Zap size={24} /> إجراءات سريعة
-              </h2>
-              <button
-                type="button"
-                onClick={openAddUserModal}
-                disabled={!canEdit}
-                title={!canEdit ? "غير مصرح بهذا الإجراء لدور المعاينة الحالي" : undefined}
-              >
-                <span>
-                  <UserRoundPlus size={19} /> إضافة مستخدم جديد
-                </span>
-                <ChevronLeft size={16} />
-              </button>
-              <button
-                type="button"
-                onClick={openAddViewModal}
-                disabled={!canEdit}
-                title={!canEdit ? "غير مصرح بهذا الإجراء لدور المعاينة الحالي" : undefined}
-              >
-                <span>
-                  <Layers3 size={19} /> إنشاء عرض ذكي
-                </span>
-                <ChevronLeft size={16} />
-              </button>
-              <button type="button" onClick={() => setModal("full-log")}>
-                <span>
-                  <ScrollText size={19} /> مراجعة سجل التدقيق
-                </span>
-                <ChevronLeft size={16} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setModal("reset-confirm")}
-              >
-                <span>
-                  <RotateCcw size={19} /> إعادة ضبط البيانات التجريبية
-                </span>
-                <ChevronLeft size={16} />
-              </button>
-              <img
-                className="admin-campus-bottom"
-                src="/assets/campus-admin-bottom.png"
-                alt="زخرفة الجامعة"
+            {inspectedView && (
+              <SmartViewInspector
+                view={inspectedView}
+                canEdit={canEdit}
+                onClose={() => setInspectedViewId(null)}
+                onEdit={() => openEditViewModal(inspectedView)}
+                onToggleActive={() => toggleViewActive(inspectedView.id)}
+                onDuplicate={() => duplicateView(inspectedView)}
+                onDelete={() => openDeleteViewModal(inspectedView)}
               />
-            </div>
-          </aside>
-        </div>
-      </div>
+            )}
+          </div>
+        )}
 
-      {/* =========================================================================
-          MODALS & ACCESSIBLE DIALOGS
-          ========================================================================= */}
-      {Boolean(modal) && (
-        <div
-          className="dialog-overlay"
-          onMouseDown={(e) => {
-            if (e.currentTarget === e.target) closeModal();
-          }}
-        >
-          <div
-            ref={dialogRef}
-            tabIndex={-1}
-            className="dialog-card"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="dialog-title"
+        {/* Audit tab */}
+        {activeTab === "audit" && (
+          <section
+            className="ao-panel"
+            role="tabpanel"
+            id="ao-panel-audit"
+            aria-labelledby="ao-tab-audit"
+            tabIndex={0}
           >
-            <button
-              type="button"
-              className="close-dialog"
-              aria-label="إغلاق النافذة"
-              onClick={closeModal}
+            <div className="ao-panel-head">
+              <h2>سجل التدقيق</h2>
+              <div className="ao-panel-actions">
+                <button
+                  type="button"
+                  className="ao-secondary"
+                  onClick={() => setModal("full-log")}
+                >
+                  <ExternalLink size={16} aria-hidden="true" />
+                  السجل الكامل ({logs.length})
+                </button>
+              </div>
+            </div>
+
+            <div className="ao-toolbar">
+              <div className="ao-search">
+                <Search size={16} aria-hidden="true" />
+                <input
+                  type="search"
+                  placeholder="بحث في السجلات"
+                  value={auditSearch}
+                  onChange={(event) => setAuditSearch(event.target.value)}
+                  aria-label="بحث في سجلات التدقيق"
+                />
+              </div>
+              <select
+                className="ao-select"
+                value={auditStatusFilter}
+                onChange={(event) => setAuditStatusFilter(event.target.value)}
+                aria-label="تصفية حسب حالة السجل"
+              >
+                <option value="ALL">كافة الحالات</option>
+                <option value="نجاح">ناجحة (نجاح)</option>
+                <option value="تنبيه">تنبيهات</option>
+                <option value="فشل">فاشلة</option>
+              </select>
+              <button
+                type="button"
+                className="ao-secondary"
+                onClick={() =>
+                  setAuditSortOrder((current) => (current === "desc" ? "asc" : "desc"))
+                }
+                aria-label="تبديل ترتيب السجلات"
+              >
+                {auditSortOrder === "desc" ? "الأحدث أولاً" : "الأقدم أولاً"}
+              </button>
+            </div>
+
+            <div
+              className="ao-table-wrap"
+              role="region"
+              aria-label="جدول سجل التدقيق"
+              tabIndex={0}
             >
-              <X size={18} />
-            </button>
-
-            {/* MODAL 1: ADD USER */}
-            {modal === "add-user" && (
-              <>
-                <h2 id="dialog-title">إضافة مستخدم جديد</h2>
-                <p>بيانات تجريبية تُحفظ محليًا في متصفحك وتنعكس فورًا على الجداول والإحصاءات.</p>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleCreateUser();
-                  }}
-                  noValidate
-                >
-                  <label>
-                    الاسم الكامل:
-                    <input
-                      placeholder="مثال: د. فهد الغامدي"
-                      value={userName}
-                      onChange={(e) => setUserName(e.target.value)}
-                      autoFocus
-                    />
-                    {userFormErrors.name && (
-                      <span className="field-error">{userFormErrors.name}</span>
-                    )}
-                  </label>
-                  <label>
-                    البريد الإلكتروني الجامعي:
-                    <input
-                      type="email"
-                      dir="ltr"
-                      placeholder="name@univ.edu.sa"
-                      value={userEmail}
-                      onChange={(e) => setUserEmail(e.target.value)}
-                    />
-                    {userFormErrors.email && (
-                      <span className="field-error">{userFormErrors.email}</span>
-                    )}
-                  </label>
-                  <label>
-                    القسم / الإدارة:
-                    <input
-                      placeholder="مثال: تقنية المعلومات"
-                      value={userDepartment}
-                      onChange={(e) => setUserDepartment(e.target.value)}
-                    />
-                  </label>
-                  <label>
-                    الدور والصلاحيات:
-                    <select
-                      value={userRole}
-                      onChange={(e) => setUserRole(e.target.value as AdminRole)}
-                    >
-                      {AVAILABLE_ROLES.map((role) => (
-                        <option key={role} value={role}>
-                          {role}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <div className="checkbox-field">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={userActive}
-                        onChange={(e) => setUserActive(e.target.checked)}
-                      />
-                      تفعيل الحساب فور الإنشاء (حالة نشطة)
-                    </label>
-                  </div>
-                  <div className="dialog-actions">
-                    <button type="button" className="outline-button" onClick={closeModal}>
-                      إلغاء
-                    </button>
-                    <button type="submit" className="action-primary dialog-submit">
-                      حفظ المستخدم
-                    </button>
-                  </div>
-                </form>
-              </>
-            )}
-
-            {/* MODAL 2: EDIT USER */}
-            {modal === "edit-user" && selectedUser && (
-              <>
-                <h2 id="dialog-title">تعديل بيانات المستخدم</h2>
-                <p>تعديل الحساب المحدد وتحديث الدور وصلاحيات الوصول محليًا.</p>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleUpdateUser();
-                  }}
-                  noValidate
-                >
-                  <label>
-                    الاسم الكامل:
-                    <input
-                      value={userName}
-                      onChange={(e) => setUserName(e.target.value)}
-                      autoFocus
-                    />
-                    {userFormErrors.name && (
-                      <span className="field-error">{userFormErrors.name}</span>
-                    )}
-                  </label>
-                  <label>
-                    البريد الإلكتروني:
-                    <input
-                      type="email"
-                      dir="ltr"
-                      value={userEmail}
-                      onChange={(e) => setUserEmail(e.target.value)}
-                    />
-                    {userFormErrors.email && (
-                      <span className="field-error">{userFormErrors.email}</span>
-                    )}
-                  </label>
-                  <label>
-                    القسم / الإدارة:
-                    <input
-                      value={userDepartment}
-                      onChange={(e) => setUserDepartment(e.target.value)}
-                    />
-                  </label>
-                  <label>
-                    الدور:
-                    <select
-                      value={userRole}
-                      onChange={(e) => setUserRole(e.target.value as AdminRole)}
-                    >
-                      {AVAILABLE_ROLES.map((role) => (
-                        <option key={role} value={role}>
-                          {role}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <div className="checkbox-field">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={userActive}
-                        onChange={(e) => setUserActive(e.target.checked)}
-                      />
-                      الحساب نشط
-                    </label>
-                  </div>
-                  <div className="dialog-actions">
-                    <button type="button" className="outline-button" onClick={closeModal}>
-                      إلغاء
-                    </button>
-                    <button type="submit" className="action-primary dialog-submit">
-                      حفظ التعديلات
-                    </button>
-                  </div>
-                </form>
-              </>
-            )}
-
-            {/* MODAL 3: DELETE USER CONFIRMATION */}
-            {modal === "delete-user" && selectedUser && (
-              <div className="confirm-dialog-content">
-                <div className="confirm-icon warning">
-                  <AlertTriangle size={32} />
-                </div>
-                <h2 id="dialog-title">تأكيد حذف المستخدم</h2>
-                <p>
-                  هل أنت متأكد من رغبتك في حذف المستخدم <strong>{selectedUser.name}</strong> (
-                  {selectedUser.email})؟ سيتم تحديث الجداول فورًا وتوثيق العملية في سجل التدقيق.
-                </p>
-                <div className="dialog-actions">
-                  <button type="button" className="outline-button" onClick={closeModal}>
-                    إلغاء
-                  </button>
-                  <button
-                    type="button"
-                    className="action-danger"
-                    onClick={handleDeleteUser}
-                  >
-                    تأكيد الحذف
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* MODAL 4: ADD SMART VIEW */}
-            {modal === "add-view" && (
-              <>
-                <h2 id="dialog-title">إنشاء عرض ذكي جديد</h2>
-                <p>إنشاء نموذج توضيحي لعرض بيانات منظم وآمن مع تصنيف أمني محدد.</p>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleCreateView();
-                  }}
-                  noValidate
-                >
-                  <label>
-                    اسم العرض الذكي:
-                    <input
-                      placeholder="مثال: عرض الخريجين والتوظيف"
-                      value={viewName}
-                      onChange={(e) => setViewName(e.target.value)}
-                      autoFocus
-                    />
-                    {viewFormErrors.name && (
-                      <span className="field-error">{viewFormErrors.name}</span>
-                    )}
-                  </label>
-                  <label>
-                    مصدر البيانات الأكاديمي:
-                    <select
-                      value={viewSource}
-                      onChange={(e) => setViewSource(e.target.value)}
-                    >
-                      {AVAILABLE_SOURCES.map((src) => (
-                        <option key={src} value={src}>
-                          {src}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    المستوى الأمني وحساسية البيانات:
-                    <select
-                      value={viewSecurity}
-                      onChange={(e) => setViewSecurity(e.target.value as SecurityLevel)}
-                    >
-                      {AVAILABLE_SECURITIES.map((sec) => (
-                        <option key={sec} value={sec}>
-                          {sec}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <div className="checkbox-field">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={viewActive}
-                        onChange={(e) => setViewActive(e.target.checked)}
-                      />
-                      تفعيل العرض فور الإنشاء
-                    </label>
-                  </div>
-                  <div className="dialog-actions">
-                    <button type="button" className="outline-button" onClick={closeModal}>
-                      إلغاء
-                    </button>
-                    <button type="submit" className="action-primary dialog-submit">
-                      حفظ العرض الذكي
-                    </button>
-                  </div>
-                </form>
-              </>
-            )}
-
-            {/* MODAL 5: EDIT SMART VIEW */}
-            {modal === "edit-view" && selectedView && (
-              <>
-                <h2 id="dialog-title">تعديل العرض الذكي</h2>
-                <p>تعديل إعدادات المصدر والتصنيف الأمني وحالة التفعيل للعرض المحدد.</p>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleUpdateView();
-                  }}
-                  noValidate
-                >
-                  <label>
-                    اسم العرض الذكي:
-                    <input
-                      value={viewName}
-                      onChange={(e) => setViewName(e.target.value)}
-                      autoFocus
-                    />
-                    {viewFormErrors.name && (
-                      <span className="field-error">{viewFormErrors.name}</span>
-                    )}
-                  </label>
-                  <label>
-                    مصدر البيانات:
-                    <select
-                      value={viewSource}
-                      onChange={(e) => setViewSource(e.target.value)}
-                    >
-                      {AVAILABLE_SOURCES.map((src) => (
-                        <option key={src} value={src}>
-                          {src}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    المستوى الأمني:
-                    <select
-                      value={viewSecurity}
-                      onChange={(e) => setViewSecurity(e.target.value as SecurityLevel)}
-                    >
-                      {AVAILABLE_SECURITIES.map((sec) => (
-                        <option key={sec} value={sec}>
-                          {sec}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <div className="checkbox-field">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={viewActive}
-                        onChange={(e) => setViewActive(e.target.checked)}
-                      />
-                      العرض نشط ومتاح
-                    </label>
-                  </div>
-                  <div className="dialog-actions">
-                    <button type="button" className="outline-button" onClick={closeModal}>
-                      إلغاء
-                    </button>
-                    <button type="submit" className="action-primary dialog-submit">
-                      حفظ التعديلات
-                    </button>
-                  </div>
-                </form>
-              </>
-            )}
-
-            {/* MODAL 6: DELETE SMART VIEW CONFIRMATION */}
-            {modal === "delete-view" && selectedView && (
-              <div className="confirm-dialog-content">
-                <div className="confirm-icon warning">
-                  <AlertTriangle size={32} />
-                </div>
-                <h2 id="dialog-title">تأكيد حذف العرض الذكي</h2>
-                <p>
-                  هل أنت متأكد من رغبتك في حذف العرض الذكي <strong>{selectedView.name}</strong>؟ سيتم
-                  إلغاء ارتباطه بالتقارير ومصادر البيانات المرتبطة.
-                </p>
-                <div className="dialog-actions">
-                  <button type="button" className="outline-button" onClick={closeModal}>
-                    إلغاء
-                  </button>
-                  <button
-                    type="button"
-                    className="action-danger"
-                    onClick={handleDeleteView}
-                  >
-                    تأكيد الحذف
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* MODAL 7: FULL AUDIT TRAIL */}
-            {modal === "full-log" && (
-              <>
-                <h2 id="dialog-title">سجل التدقيق الكامل</h2>
-                <p>سجلات محلية توثق كافة العمليات والمحاكاة المنفذة في هذه الجلسة.</p>
-                <div className="table-toolbar log-toolbar">
-                  <div className="search-field log-search-field">
-                    <Search size={15} />
-                    <input
-                      type="search"
-                      placeholder="بحث في السجلات..."
-                      value={auditSearch}
-                      onChange={(e) => setAuditSearch(e.target.value)}
-                      aria-label="بحث في سجلات التدقيق"
-                    />
-                    {auditSearch && (
-                      <button
-                        type="button"
-                        className="clear-search"
-                        onClick={() => setAuditSearch("")}
-                        aria-label="مسح نص البحث"
-                      >
-                        <X size={14} />
-                      </button>
-                    )}
-                  </div>
-                  <div className="filter-group">
-                    <select
-                      value={auditStatusFilter}
-                      onChange={(e) => setAuditStatusFilter(e.target.value)}
-                      aria-label="تصفية حسب حالة السجل"
-                    >
-                      <option value="ALL">كافة الحالات</option>
-                      <option value="نجاح">ناجحة (نجاح)</option>
-                      <option value="تنبيه">تنبيهات</option>
-                      <option value="فشل">فاشلة</option>
-                    </select>
-                    <button
-                      type="button"
-                      className="outline-button audit-sort-btn"
-                      onClick={() =>
-                        setAuditSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
-                      }
-                      title="تبديل ترتيب السجلات"
-                      aria-label="تبديل ترتيب السجلات"
-                    >
-                      {auditSortOrder === "desc" ? "الأحدث أولاً" : "الأقدم أولاً"}
-                    </button>
-                  </div>
-                </div>
-                <div className="audit-dialog-list" role="feed">
+              <table className="ao-table">
+                <caption className="bayan-sr-only">جدول سجل التدقيق</caption>
+                <colgroup>
+                  <col style={{ width: "17%" }} />
+                  <col style={{ width: "21%" }} />
+                  <col style={{ width: "30%" }} />
+                  <col style={{ width: "20%" }} />
+                  <col style={{ width: "12%" }} />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th scope="col">الوقت</th>
+                    <th scope="col">المستخدم المنفذ</th>
+                    <th scope="col">الإجراء</th>
+                    <th scope="col">الهدف</th>
+                    <th scope="col">الحالة</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {filteredLogs.length === 0 ? (
-                    <p className="no-logs">لا توجد سجلات مطابقة للبحث.</p>
+                    <tr>
+                      <td colSpan={5}>
+                        <div className="ao-empty">
+                          <ScrollText size={34} aria-hidden="true" />
+                          <p>لا توجد سجلات مطابقة للبحث أو التصفية.</p>
+                        </div>
+                      </td>
+                    </tr>
                   ) : (
-                    filteredLogs.map((log, idx) => (
-                      <div className="dialog-log" key={`${log.id}-${idx}`}>
-                        <div className="log-header">
-                          <span className="log-time">
-                            <Clock3 size={13} /> {log.time}
+                    filteredLogs.map((log, index) => (
+                      <tr key={`${log.id}-${index}`}>
+                        <td>
+                          <span className="ao-time">
+                            <Clock3 size={14} aria-hidden="true" />
+                            {log.time}
                           </span>
+                        </td>
+                        <td>
+                          <b style={{ fontWeight: 600, color: "var(--bayan-text-primary, #0f172a)" }}>
+                            {log.user}
+                          </b>
+                        </td>
+                        <td>
+                          <span className="ao-action-text">{log.action}</span>
+                        </td>
+                        <td>
                           <span
-                            className={`state-pill ${log.status === "نجاح" ? "success" : "warning"}`}
+                            className={`ao-target ${
+                              log.target?.includes("@") ? "is-ltr" : ""
+                            }`}
+                            title={log.target || "عام"}
+                          >
+                            {log.target || "عام"}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            className={`ao-pill ${
+                              log.status === "نجاح"
+                                ? "is-ok"
+                                : log.status === "فشل"
+                                  ? "is-danger"
+                                  : "is-warn"
+                            }`}
                           >
                             {log.status}
                           </span>
-                        </div>
-                        <div className="log-body">
-                          <strong>{log.user}</strong>: {log.action}
-                        </div>
-                        {log.target && <div className="log-target">الهدف: {log.target}</div>}
-                      </div>
+                        </td>
+                      </tr>
                     ))
                   )}
-                </div>
-                <div className="dialog-actions">
-                  <button type="button" className="action-primary" onClick={closeModal}>
-                    إغلاق
-                  </button>
-                </div>
-              </>
-            )}
+                </tbody>
+              </table>
+            </div>
 
-            {/* MODAL 8: RESET DEMO DATA CONFIRMATION */}
-            {modal === "reset-confirm" && (
-              <div className="confirm-dialog-content">
-                <div className="confirm-icon info">
-                  <RotateCcw size={32} />
+            <div className="ao-pager">
+              <span>
+                عرض <span className="ao-num">{filteredLogs.length}</span> من{" "}
+                <span className="ao-num">{logs.length}</span> سجل
+              </span>
+            </div>
+          </section>
+        )}
+
+        {/* Health and quick actions */}
+        <div className="ao-shelf">
+          <section className="ao-widget" aria-label="حالة النظام">
+            <h3>
+              <Activity size={18} aria-hidden="true" />
+              حالة النظام
+              <span className="ao-demo">محاكاة</span>
+            </h3>
+            {[
+              { name: "الخدمات الأساسية", desc: "FastAPI / Uvicorn" },
+              { name: "قاعدة البيانات", desc: "PostgreSQL 16" },
+              { name: "محرك الاستعلامات", desc: "LangGraph Agent" },
+              { name: "خدمة العروض الذكية", desc: "Qdrant Vector DB" },
+            ].map((service) => (
+              <div className="ao-health-row" key={service.name}>
+                <div>
+                  <b>{service.name}</b>
+                  <small>{service.desc}</small>
                 </div>
-                <h2 id="dialog-title">استعادة البيانات الافتراضية</h2>
-                <p>
-                  هل ترغب في إعادة تعيين كافة بيانات المستخدمين والعروض الذكية وسجلات التدقيق إلى حالتها
-                  الأصلية؟ سيتم مسح التغييرات المحفوظة محليًا في المتصفح.
-                </p>
-                <div className="dialog-actions">
-                  <button type="button" className="outline-button" onClick={closeModal}>
-                    إلغاء
-                  </button>
-                  <button
-                    type="button"
-                    className="action-primary"
-                    onClick={handleResetDemoData}
-                  >
-                    تأكيد الاستعادة
-                  </button>
-                </div>
+                <span className="ao-health-state">يعمل</span>
               </div>
-            )}
-          </div>
+            ))}
+            <div className="ao-latency">
+              <Gauge size={18} aria-hidden="true" style={{ color: "var(--bayan-teal-700)" }} />
+              <small>زمن الاستجابة التقديري</small>
+              <b>
+                <span className="ao-num">320</span> مللي ثانية
+              </b>
+            </div>
+          </section>
+
+          <section className="ao-widget" aria-label="إجراءات سريعة">
+            <h3>
+              <Zap size={18} aria-hidden="true" />
+              إجراءات سريعة
+            </h3>
+            <div className="ao-quick">
+              <button type="button" onClick={openAddUserModal} disabled={!canEdit}>
+                <UserRoundPlus size={17} aria-hidden="true" />
+                <span>إضافة مستخدم جديد</span>
+                <ChevronLeft size={15} aria-hidden="true" />
+              </button>
+              <button type="button" onClick={openAddViewModal} disabled={!canEdit}>
+                <Layers3 size={17} aria-hidden="true" />
+                <span>إنشاء عرض ذكي</span>
+                <ChevronLeft size={15} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("audit");
+                  setOpenRowMenu(null);
+                }}
+              >
+                <ScrollText size={17} aria-hidden="true" />
+                <span>مراجعة سجل التدقيق</span>
+                <ChevronLeft size={15} aria-hidden="true" />
+              </button>
+              <button type="button" onClick={() => setModal("reset-confirm")}>
+                <RotateCcw size={17} aria-hidden="true" />
+                <span>إعادة ضبط البيانات التجريبية</span>
+                <ChevronLeft size={15} aria-hidden="true" />
+              </button>
+            </div>
+          </section>
         </div>
-      )}
+
+        {/* Dialogs */}
+        {Boolean(modal) && (
+          <div
+            className="dialog-overlay"
+            onMouseDown={(event) => {
+              if (event.currentTarget === event.target) closeModal();
+            }}
+          >
+            <div
+              ref={dialogRef}
+              tabIndex={-1}
+              className="dialog-card"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="dialog-title"
+            >
+              <button
+                type="button"
+                className="close-dialog"
+                aria-label="إغلاق النافذة"
+                onClick={closeModal}
+              >
+                <X size={18} />
+              </button>
+
+              {modal === "add-user" && (
+                <>
+                  <h2 id="dialog-title">إضافة مستخدم جديد</h2>
+                  <p>بيانات تجريبية تُحفظ محليًا في متصفحك وتنعكس فورًا على الجداول والإحصاءات.</p>
+                  <form
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      handleCreateUser();
+                    }}
+                    noValidate
+                  >
+                    <label>
+                      الاسم الكامل:
+                      <input
+                        placeholder="مثال: د. فهد الغامدي"
+                        value={userName}
+                        onChange={(event) => setUserName(event.target.value)}
+                        autoFocus
+                      />
+                      {userFormErrors.name && <span className="field-error">{userFormErrors.name}</span>}
+                    </label>
+                    <label>
+                      البريد الإلكتروني الجامعي:
+                      <input
+                        type="email"
+                        dir="ltr"
+                        placeholder="name@univ.edu.sa"
+                        value={userEmail}
+                        onChange={(event) => setUserEmail(event.target.value)}
+                      />
+                      {userFormErrors.email && (
+                        <span className="field-error">{userFormErrors.email}</span>
+                      )}
+                    </label>
+                    <label>
+                      القسم / الإدارة:
+                      <input
+                        placeholder="مثال: تقنية المعلومات"
+                        value={userDepartment}
+                        onChange={(event) => setUserDepartment(event.target.value)}
+                      />
+                    </label>
+                    <label>
+                      الدور والصلاحيات:
+                      <select
+                        value={userRole}
+                        onChange={(event) => setUserRole(event.target.value as AdminRole)}
+                      >
+                        {AVAILABLE_ROLES.map((role) => (
+                          <option key={role} value={role}>
+                            {role}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <div className="checkbox-field">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={userActive}
+                          onChange={(event) => setUserActive(event.target.checked)}
+                        />
+                        تفعيل الحساب فور الإنشاء (حالة نشطة)
+                      </label>
+                    </div>
+                    <div className="dialog-actions">
+                      <button type="button" className="outline-button" onClick={closeModal}>
+                        إلغاء
+                      </button>
+                      <button type="submit" className="action-primary dialog-submit">
+                        حفظ المستخدم
+                      </button>
+                    </div>
+                  </form>
+                </>
+              )}
+
+              {modal === "edit-user" && selectedUser && (
+                <>
+                  <h2 id="dialog-title">تعديل بيانات المستخدم</h2>
+                  <p>تعديل الحساب المحدد وتحديث الدور وصلاحيات الوصول محليًا.</p>
+                  <form
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      handleUpdateUser();
+                    }}
+                    noValidate
+                  >
+                    <label>
+                      الاسم الكامل:
+                      <input
+                        value={userName}
+                        onChange={(event) => setUserName(event.target.value)}
+                        autoFocus
+                      />
+                      {userFormErrors.name && <span className="field-error">{userFormErrors.name}</span>}
+                    </label>
+                    <label>
+                      البريد الإلكتروني:
+                      <input
+                        type="email"
+                        dir="ltr"
+                        value={userEmail}
+                        onChange={(event) => setUserEmail(event.target.value)}
+                      />
+                      {userFormErrors.email && (
+                        <span className="field-error">{userFormErrors.email}</span>
+                      )}
+                    </label>
+                    <label>
+                      القسم / الإدارة:
+                      <input
+                        value={userDepartment}
+                        onChange={(event) => setUserDepartment(event.target.value)}
+                      />
+                    </label>
+                    <label>
+                      الدور:
+                      <select
+                        value={userRole}
+                        onChange={(event) => setUserRole(event.target.value as AdminRole)}
+                      >
+                        {AVAILABLE_ROLES.map((role) => (
+                          <option key={role} value={role}>
+                            {role}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <div className="checkbox-field">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={userActive}
+                          onChange={(event) => setUserActive(event.target.checked)}
+                        />
+                        الحساب نشط
+                      </label>
+                    </div>
+                    <div className="dialog-actions">
+                      <button type="button" className="outline-button" onClick={closeModal}>
+                        إلغاء
+                      </button>
+                      <button type="submit" className="action-primary dialog-submit">
+                        حفظ التعديلات
+                      </button>
+                    </div>
+                  </form>
+                </>
+              )}
+
+              {modal === "delete-user" && selectedUser && (
+                <div className="confirm-dialog-content">
+                  <div className="confirm-icon warning">
+                    <AlertTriangle size={32} />
+                  </div>
+                  <h2 id="dialog-title">تأكيد حذف المستخدم</h2>
+                  <p>
+                    هل أنت متأكد من رغبتك في حذف المستخدم <strong>{selectedUser.name}</strong> (
+                    {selectedUser.email})؟ سيتم تحديث الجداول فورًا وتوثيق العملية في سجل التدقيق.
+                  </p>
+                  <div className="dialog-actions">
+                    <button type="button" className="outline-button" onClick={closeModal}>
+                      إلغاء
+                    </button>
+                    <button type="button" className="action-danger" onClick={handleDeleteUser}>
+                      تأكيد الحذف
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {modal === "add-view" && (
+                <>
+                  <h2 id="dialog-title">إنشاء عرض ذكي جديد</h2>
+                  <p>إنشاء نموذج توضيحي لعرض بيانات منظم وآمن مع تصنيف أمني محدد.</p>
+                  <form
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      handleCreateView();
+                    }}
+                    noValidate
+                  >
+                    <label>
+                      اسم العرض الذكي:
+                      <input
+                        placeholder="مثال: عرض الخريجين والتوظيف"
+                        value={viewName}
+                        onChange={(event) => setViewName(event.target.value)}
+                        autoFocus
+                      />
+                      {viewFormErrors.name && <span className="field-error">{viewFormErrors.name}</span>}
+                    </label>
+                    <label>
+                      مصدر البيانات الأكاديمي:
+                      <select value={viewSource} onChange={(event) => setViewSource(event.target.value)}>
+                        {AVAILABLE_SOURCES.map((source) => (
+                          <option key={source} value={source}>
+                            {source}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      المستوى الأمني وحساسية البيانات:
+                      <select
+                        value={viewSecurity}
+                        onChange={(event) => setViewSecurity(event.target.value as SecurityLevel)}
+                      >
+                        {AVAILABLE_SECURITIES.map((security) => (
+                          <option key={security} value={security}>
+                            {security}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <div className="checkbox-field">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={viewActive}
+                          onChange={(event) => setViewActive(event.target.checked)}
+                        />
+                        تفعيل العرض فور الإنشاء
+                      </label>
+                    </div>
+                    <div className="dialog-actions">
+                      <button type="button" className="outline-button" onClick={closeModal}>
+                        إلغاء
+                      </button>
+                      <button type="submit" className="action-primary dialog-submit">
+                        حفظ العرض الذكي
+                      </button>
+                    </div>
+                  </form>
+                </>
+              )}
+
+              {modal === "edit-view" && selectedView && (
+                <>
+                  <h2 id="dialog-title">تعديل العرض الذكي</h2>
+                  <p>تعديل إعدادات المصدر والتصنيف الأمني وحالة التفعيل للعرض المحدد.</p>
+                  <form
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      handleUpdateView();
+                    }}
+                    noValidate
+                  >
+                    <label>
+                      اسم العرض الذكي:
+                      <input
+                        value={viewName}
+                        onChange={(event) => setViewName(event.target.value)}
+                        autoFocus
+                      />
+                      {viewFormErrors.name && <span className="field-error">{viewFormErrors.name}</span>}
+                    </label>
+                    <label>
+                      مصدر البيانات:
+                      <select value={viewSource} onChange={(event) => setViewSource(event.target.value)}>
+                        {AVAILABLE_SOURCES.map((source) => (
+                          <option key={source} value={source}>
+                            {source}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      المستوى الأمني:
+                      <select
+                        value={viewSecurity}
+                        onChange={(event) => setViewSecurity(event.target.value as SecurityLevel)}
+                      >
+                        {AVAILABLE_SECURITIES.map((security) => (
+                          <option key={security} value={security}>
+                            {security}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <div className="checkbox-field">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={viewActive}
+                          onChange={(event) => setViewActive(event.target.checked)}
+                        />
+                        العرض نشط ومتاح
+                      </label>
+                    </div>
+                    <div className="dialog-actions">
+                      <button type="button" className="outline-button" onClick={closeModal}>
+                        إلغاء
+                      </button>
+                      <button type="submit" className="action-primary dialog-submit">
+                        حفظ التعديلات
+                      </button>
+                    </div>
+                  </form>
+                </>
+              )}
+
+              {modal === "delete-view" && selectedView && (
+                <div className="confirm-dialog-content">
+                  <div className="confirm-icon warning">
+                    <AlertTriangle size={32} />
+                  </div>
+                  <h2 id="dialog-title">تأكيد حذف العرض الذكي</h2>
+                  <p>
+                    هل أنت متأكد من رغبتك في حذف العرض الذكي <strong>{selectedView.name}</strong>؟ سيتم
+                    إلغاء ارتباطه بالتقارير ومصادر البيانات المرتبطة.
+                  </p>
+                  <div className="dialog-actions">
+                    <button type="button" className="outline-button" onClick={closeModal}>
+                      إلغاء
+                    </button>
+                    <button type="button" className="action-danger" onClick={handleDeleteView}>
+                      تأكيد الحذف
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {modal === "full-log" && (
+                <>
+                  <h2 id="dialog-title">سجل التدقيق الكامل</h2>
+                  <p>سجلات محلية توثق كافة العمليات والمحاكاة المنفذة في هذه الجلسة.</p>
+                  <div className="table-toolbar log-toolbar">
+                    <div className="search-field log-search-field">
+                      <Search size={15} />
+                      <input
+                        type="search"
+                        placeholder="بحث في السجلات..."
+                        value={auditSearch}
+                        onChange={(event) => setAuditSearch(event.target.value)}
+                        aria-label="بحث في سجلات التدقيق"
+                      />
+                      {auditSearch && (
+                        <button
+                          type="button"
+                          className="clear-search"
+                          onClick={() => setAuditSearch("")}
+                          aria-label="مسح نص البحث"
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
+                    </div>
+                    <div className="filter-group">
+                      <select
+                        value={auditStatusFilter}
+                        onChange={(event) => setAuditStatusFilter(event.target.value)}
+                        aria-label="تصفية حسب حالة السجل"
+                      >
+                        <option value="ALL">كافة الحالات</option>
+                        <option value="نجاح">ناجحة (نجاح)</option>
+                        <option value="تنبيه">تنبيهات</option>
+                        <option value="فشل">فاشلة</option>
+                      </select>
+                      <button
+                        type="button"
+                        className="outline-button audit-sort-btn"
+                        onClick={() =>
+                          setAuditSortOrder((current) => (current === "desc" ? "asc" : "desc"))
+                        }
+                        title="تبديل ترتيب السجلات"
+                        aria-label="تبديل ترتيب السجلات"
+                      >
+                        {auditSortOrder === "desc" ? "الأحدث أولاً" : "الأقدم أولاً"}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="audit-dialog-list" role="feed">
+                    {filteredLogs.length === 0 ? (
+                      <p className="no-logs">لا توجد سجلات مطابقة للبحث.</p>
+                    ) : (
+                      filteredLogs.map((log, index) => (
+                        <div className="dialog-log" key={`${log.id}-${index}`}>
+                          <div className="log-header">
+                            <span className="log-time">
+                              <Clock3 size={13} /> {log.time}
+                            </span>
+                            <span
+                              className={`state-pill ${
+                                log.status === "نجاح" ? "success" : "warning"
+                              }`}
+                            >
+                              {log.status}
+                            </span>
+                          </div>
+                          <div className="log-body">
+                            <strong>{log.user}</strong>: {log.action}
+                          </div>
+                          {log.target && <div className="log-target">الهدف: {log.target}</div>}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <div className="dialog-actions">
+                    <button type="button" className="action-primary" onClick={closeModal}>
+                      إغلاق
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {modal === "reset-confirm" && (
+                <div className="confirm-dialog-content">
+                  <div className="confirm-icon info">
+                    <RotateCcw size={32} />
+                  </div>
+                  <h2 id="dialog-title">استعادة البيانات الافتراضية</h2>
+                  <p>
+                    هل ترغب في إعادة تعيين كافة بيانات المستخدمين والعروض الذكية وسجلات التدقيق إلى
+                    حالتها الأصلية؟ سيتم مسح التغييرات المحفوظة محليًا في المتصفح.
+                  </p>
+                  <div className="dialog-actions">
+                    <button type="button" className="outline-button" onClick={closeModal}>
+                      إلغاء
+                    </button>
+                    <button type="button" className="action-primary" onClick={handleResetDemoData}>
+                      تأكيد الاستعادة
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </AdminLayout>
   );
 }

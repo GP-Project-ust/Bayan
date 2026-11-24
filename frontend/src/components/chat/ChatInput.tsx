@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
-import { Send, Square, PlusCircle, MessageSquare } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { ChevronDown, ChevronUp, Lightbulb, MessageSquare, PlusCircle, Send, Square } from "lucide-react";
 
 interface ChatInputProps {
   value: string;
@@ -10,7 +10,7 @@ interface ChatInputProps {
   onStop?: () => void;
   onNewChat: () => void;
   isStreaming: boolean;
-  conversationId?: string | null;
+  hasConversation: boolean;
   className?: string;
 }
 
@@ -28,122 +28,138 @@ export function ChatInput({
   onStop,
   onNewChat,
   isStreaming,
-  conversationId,
+  hasConversation,
   className = "",
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [examplesOpen, setExamplesOpen] = useState(false);
 
-  // ضبط الارتفاع التلقائي لخانة الإدخال
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${Math.min(
         180,
-        Math.max(64, textareaRef.current.scrollHeight)
+        Math.max(52, textareaRef.current.scrollHeight)
       )}px`;
     }
   }, [value]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       if (!isStreaming && value.trim().length >= 2) {
         onSend();
       }
     }
   };
 
-  const handleChipClick = (q: string) => {
+  const handleChipClick = (question: string) => {
     if (isStreaming) return;
-    onChange(q);
+    onChange(question);
     textareaRef.current?.focus();
   };
 
-  return (
-    <div className={`bayan-composer-container ${className}`}>
-      {/* أمثلة الأسئلة السريعة */}
-      <div className="bayan-examples-row" role="group" aria-label="أمثلة جاهزة للأسئلة">
-        {EXAMPLE_QUESTIONS.map((q, idx) => (
-          <button
-            key={`chip-${idx}`}
-            type="button"
-            className="bayan-chip"
-            onClick={() => handleChipClick(q)}
-            disabled={isStreaming}
-          >
-            <MessageSquare size={13} className="text-teal-400" aria-hidden="true" />
-            <span>{q}</span>
-          </button>
-        ))}
-      </div>
+  const examples = (
+    <div className="cx-examples" role="group" aria-label="أمثلة جاهزة للأسئلة">
+      {EXAMPLE_QUESTIONS.map((question) => (
+        <button
+          key={question}
+          type="button"
+          className="cx-example"
+          onClick={() => handleChipClick(question)}
+          disabled={isStreaming}
+        >
+          <MessageSquare size={14} aria-hidden="true" />
+          <span>{question}</span>
+        </button>
+      ))}
+    </div>
+  );
 
-      {/* حقل الإدخال والأزرار الرئيسية */}
-      <div className="bayan-composer-box">
+  return (
+    <div className={`cx-composer ${className}`}>
+      {hasConversation ? (
+        <>
+          <div className="cx-composer-top">
+            <button
+              type="button"
+              className="cx-btn"
+              onClick={() => setExamplesOpen((open) => !open)}
+              aria-expanded={examplesOpen}
+              aria-controls="cx-example-questions"
+            >
+              <Lightbulb size={14} aria-hidden="true" />
+              <span>أمثلة الأسئلة</span>
+              {examplesOpen ? (
+                <ChevronUp size={14} aria-hidden="true" />
+              ) : (
+                <ChevronDown size={14} aria-hidden="true" />
+              )}
+            </button>
+          </div>
+          {examplesOpen && <div id="cx-example-questions">{examples}</div>}
+        </>
+      ) : (
+        examples
+      )}
+
+      <div className="cx-box">
         <label htmlFor="bayan-chat-input" className="sr-only">
           سؤالك باللغة العربية
         </label>
         <textarea
           id="bayan-chat-input"
           ref={textareaRef}
-          rows={2}
           dir="rtl"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(event) => onChange(event.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="اكتب استعلامك بالعربية... (Enter للإرسال، Shift+Enter لسطر جديد)"
+          placeholder="اكتب سؤالك بالعربية…"
           disabled={isStreaming}
-          className="bayan-textarea"
+          className="cx-textarea"
           maxLength={2000}
         />
 
-        <div className="bayan-composer-actions">
-          {isStreaming ? (
-            <button
-              type="button"
-              onClick={onStop}
-              className="bayan-btn bayan-btn-stop"
-              aria-label="إيقاف البث الحالي"
-            >
-              <Square size={16} fill="currentColor" aria-hidden="true" />
-              <span>إيقاف</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onSend}
-              disabled={isStreaming || value.trim().length < 2}
-              className="bayan-btn bayan-btn-primary"
-              aria-label="إرسال السؤال"
-            >
-              <Send size={16} aria-hidden="true" />
-              <span>إرسال</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={onNewChat}
-            disabled={isStreaming}
-            className="bayan-btn bayan-btn-ghost"
-            title="بدء جلسة حوارية جديدة وتوليد معرف محلي"
-            aria-label="بدء محادثة جديدة"
-          >
-            <PlusCircle size={16} aria-hidden="true" />
-            <span>محادثة جديدة</span>
-          </button>
-        </div>
-      </div>
-
-      {/* شريط حالة المحادثة السفلي */}
-      <div className="bayan-composer-status">
-        <div className="bayan-conv-id-wrap">
-          <span className="text-bayan-400">معرّف المحادثة:</span>
-          <span className="bayan-conv-id" dir="ltr" title={conversationId || "غير محدد بعد"}>
-            {conversationId || "— ستولّده الخلفية مع أول استعلام"}
+        <div className="cx-actions">
+          <span className="cx-hint">
+            {isStreaming
+              ? "الرد قيد الإنشاء — يمكنك الإيقاف في أي وقت"
+              : "Enter للإرسال، وShift+Enter لسطر جديد"}
           </span>
-        </div>
-        <div className="text-2xs text-bayan-400">
-          Enter للإرسال • Shift+Enter لسطر جديد
+          {value.length >= 1600 && (
+            <span className="cx-counter" aria-live="polite">
+              {value.length}/2000
+            </span>
+          )}
+          <div className="cx-actions-buttons">
+            <button
+              type="button"
+              className="cx-btn"
+              onClick={onNewChat}
+              disabled={isStreaming}
+              title="بدء محادثة جديدة"
+            >
+              <PlusCircle size={15} aria-hidden="true" />
+              <span>محادثة جديدة</span>
+            </button>
+
+            {isStreaming ? (
+              <button type="button" className="cx-stop" onClick={onStop}>
+                <Square size={14} fill="currentColor" aria-hidden="true" />
+                <span>إيقاف</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="cx-send"
+                onClick={onSend}
+                disabled={value.trim().length < 2}
+              >
+                <Send size={16} aria-hidden="true" />
+                <span>إرسال</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

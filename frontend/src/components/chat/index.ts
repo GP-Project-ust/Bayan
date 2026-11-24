@@ -7,4 +7,6 @@ export { UserMessage } from "./UserMessage";
 export { AssistantMessage } from "./AssistantMessage";
 export { ChatInput } from "./ChatInput";
 export { ChatHeader } from "./ChatHeader";
+export { SessionDetailsDrawer } from "./SessionDetailsDrawer";
+export { ScrollToLatest } from "./ScrollToLatest";
 export { ChatInterface } from "./ChatInterface";

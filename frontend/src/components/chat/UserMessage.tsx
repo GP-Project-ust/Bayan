@@ -2,7 +2,7 @@
 
 import React from "react";
 import type { ChatMessage } from "@/types";
-import { User } from "lucide-react";
+import { formatMessageTime } from "@/lib/chat/format";
 
 interface UserMessageProps {
   message: ChatMessage;
@@ -10,22 +10,17 @@ interface UserMessageProps {
 }
 
 export function UserMessage({ message, className = "" }: UserMessageProps) {
-  const formattedTime = new Date(message.timestamp).toLocaleTimeString("ar-SA", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const time = formatMessageTime(message.timestamp);
 
   return (
-    <div className={`bayan-msg-row user ${className}`}>
-      <div className="bayan-msg-bubble user">
-        <p className="bayan-msg-content">{message.content}</p>
-        <span className="bayan-msg-time" aria-label={`وقت الإرسال: ${formattedTime}`}>
-          {formattedTime}
-        </span>
-      </div>
-      <div className="bayan-avatar user" aria-hidden="true">
-        <User size={18} className="text-teal-200" />
-      </div>
+    <div className={`cx-question ${className}`}>
+      <p>{message.content}</p>
+      <time
+        dateTime={new Date(message.timestamp).toISOString()}
+        aria-label={`وقت الإرسال ${time}`}
+      >
+        {time}
+      </time>
     </div>
   );
 }

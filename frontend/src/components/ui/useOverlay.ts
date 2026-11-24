@@ -17,7 +17,10 @@ export function useOverlay(open: boolean, onClose: () => void) {
     const focusable=()=>Array.from(panel.querySelectorAll<HTMLElement>(
       'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'
     )).filter(el=>el.getClientRects().length>0);
-    (focusable()[0]??panel).focus();
+    // Dialogs can mark the field a reader should start on; fall back to the
+    // first focusable element (usually the close button).
+    const preferred = panel.querySelector<HTMLElement>('[data-autofocus]');
+    (preferred ?? focusable()[0] ?? panel).focus();
     const onKeyDown=(event:KeyboardEvent)=>{
       if(event.key==="Escape"){event.preventDefault();onClose();}
       if(event.key==="Tab"){
