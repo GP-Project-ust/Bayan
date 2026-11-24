@@ -1,0 +1,203 @@
+/*
+  Bayan Design System — Premium Enterprise Design Tokens
+  Declares the complete design tokens for the Bayan AI Platform.
+  Preserves full backwards compatibility with all existing --bayan-* variables.
+  Reference: Bayan Premium Enterprise Design System, 2026.
+*/
+:root {
+  /* =====================================================================
+     BRAND PALETTES
+     ===================================================================== */
+  /* Deep Institutional Navy */
+  --bayan-navy-950: #061527;
+  --bayan-navy-900: #0A2342; /* Approved Brand Navy */
+  --bayan-navy-850: #0E2A4D;
+  --bayan-navy-800: #123255; /* Approved Navy Hover */
+  --bayan-navy-700: #163E69;
+  --bayan-navy-600: #1D5088;
+  --bayan-navy-500: #2664A6;
+  --bayan-navy-400: #3D7EC5;
+  --bayan-navy-300: #6BA0DB;
+  --bayan-navy-200: #A8C8ED;
+  --bayan-navy-100: #D8E7F7;
+  --bayan-navy-50: #EFF6FC;
+
+  /* Refined Institutional Teal / Turquoise */
+  --bayan-teal-900: #004D54;
+  --bayan-teal-800: #00636D;
+  --bayan-teal-700: #007681; /* Approved Primary Action */
+  --bayan-teal-600: #008B96; /* Approved Primary Action Hover */
+  --bayan-teal-500: #00A6B2; /* Approved Brand Turquoise Accent */
+  --bayan-teal-400: #1AC3D0;
+  --bayan-teal-300: #46D4DF;
+  --bayan-teal-200: #8CE5EC;
+  --bayan-teal-100: #CBF4F7;
+  --bayan-teal-50: #EFFBFC;
+
+  /* Warm Institutional Gold / Amber Accent */
+  --bayan-gold-900: #573A05;
+  --bayan-gold-800: #7A5308;
+  --bayan-gold-700: #9A6700;
+  --bayan-gold-600: #B5811A;
+  --bayan-gold-500: #D29E2C; /* Premium Gold Accent */
+  --bayan-gold-400: #E3B34C;
+  --bayan-gold-300: #F1CD7A;
+  --bayan-gold-200: #F9E4B2;
+  --bayan-gold-100: #FEF3D6;
+  --bayan-gold-50: #FFFBEF;
+
+  /* Crisp Slate Neutrals */
+  --bayan-slate-950: #020617;
+  --bayan-slate-900: #0F172A;
+  --bayan-slate-850: #151F32;
+  --bayan-slate-800: #1E293B;
+  --bayan-slate-700: #334155;
+  --bayan-slate-600: #475569;
+  --bayan-slate-500: #64748B;
+  --bayan-slate-400: #94A3B8;
+  --bayan-slate-300: #CBD5E1;
+  --bayan-slate-200: #E2E8F0;
+  --bayan-slate-100: #F1F5F9;
+  --bayan-slate-50: #F8FAFC;
+  --bayan-white: #FFFFFF;
+
+  /* Backwards-Compatible Brand Bindings */
+  --bayan-brand-navy: var(--bayan-navy-900);
+  --bayan-brand-turquoise: var(--bayan-teal-500);
+  --bayan-brand-navy-hover: var(--bayan-navy-800);
+  --bayan-brand-turquoise-hover: var(--bayan-teal-600);
+  --bayan-action-primary: var(--bayan-teal-700);
+  --bayan-action-primary-hover: var(--bayan-teal-800);
+  --bayan-brand-gold: var(--bayan-gold-500);
+  --bayan-brand-gold-hover: var(--bayan-gold-600);
+
+  /* =====================================================================
+     SURFACES & BACKGROUNDS
+     ===================================================================== */
+  --bayan-surface-app: #F8FAFC;
+  --bayan-surface-card: #FFFFFF;
+  --bayan-surface-raised: #FFFFFF;
+  --bayan-surface-subtle: #F1F5F9;
+  --bayan-surface-soft: #EFFBFC;
+  --bayan-surface-info: #EFF6FF;
+  --bayan-surface-glass: rgba(255, 255, 255, 0.85);
+
+  --bayan-border-subtle: #E2E8F0;
+  --bayan-border-strong: #CBD5E1;
+  --bayan-border-focus: var(--bayan-teal-600);
+
+  --bayan-text-primary: #0F172A;
+  --bayan-text-secondary: #475569;
+  --bayan-text-tertiary: #64748B;
+  --bayan-text-muted: #94A3B8;
+  --bayan-text-inverse: #FFFFFF;
+
+  /* =====================================================================
+     SEMANTIC FEEDBACK
+     ===================================================================== */
+  --bayan-feedback-success: #059669;
+  --bayan-feedback-success-bg: #ECFDF5;
+  --bayan-feedback-success-border: #A7F3D0;
+
+  --bayan-feedback-warning: #D97706;
+  --bayan-feedback-warning-bg: #FFFBEB;
+  --bayan-feedback-warning-border: #FDE68A;
+
+  --bayan-feedback-danger: #DC2626;
+  --bayan-feedback-danger-bg: #FEF2F2;
+  --bayan-feedback-danger-border: #FECACA;
+
+  --bayan-feedback-info: #2563EB;
+  --bayan-feedback-info-bg: #EFF6FF;
+  --bayan-feedback-info-border: #BFDBFE;
+
+  /* =====================================================================
+     TYPOGRAPHY & ARABIC RTL SYSTEM
+     ===================================================================== */
+  --bayan-font-sans: var(--font-bayan-arabic), "IBM Plex Sans Arabic", "Noto Sans Arabic", "Cairo", "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  --bayan-font-family: var(--bayan-font-sans);
+  --bayan-font-mono: "JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace;
+
+  --bayan-text-2xs: 0.6875rem; /* 11px */
+  --bayan-text-xs: 0.75rem;    /* 12px */
+  --bayan-text-sm: 0.875rem;   /* 14px */
+  --bayan-text-md: 1rem;       /* 16px */
+  --bayan-text-base: 1rem;     /* 16px */
+  --bayan-text-lg: 1.125rem;   /* 18px */
+  --bayan-text-xl: 1.25rem;    /* 20px */
+  --bayan-text-2xl: 1.5rem;    /* 24px */
+  --bayan-text-3xl: 1.875rem;  /* 30px */
+  --bayan-text-4xl: 2.25rem;   /* 36px */
+
+  --bayan-line-height-tight: 1.35;
+  --bayan-line-height-heading: 1.35;
+  --bayan-line-height-body: 1.7;
+  --bayan-line-height-relaxed: 1.8;
+
+  --bayan-weight-regular: 400;
+  --bayan-weight-medium: 500;
+  --bayan-weight-semibold: 600;
+  --bayan-weight-bold: 700;
+  --bayan-weight-extrabold: 800;
+
+  /* Letter-spacing: normal is strictly enforced for Arabic to protect ligatures */
+  --bayan-letter-spacing-arabic: normal;
+
+  /* =====================================================================
+     SPACING & DIMENSIONS (4px baseline grid)
+     ===================================================================== */
+  --bayan-space-1: 0.25rem;  /* 4px */
+  --bayan-space-2: 0.5rem;   /* 8px */
+  --bayan-space-3: 0.75rem;  /* 12px */
+  --bayan-space-4: 1rem;     /* 16px */
+  --bayan-space-5: 1.25rem;  /* 20px */
+  --bayan-space-6: 1.5rem;   /* 24px */
+  --bayan-space-8: 2rem;     /* 32px */
+  --bayan-space-10: 2.5rem;  /* 40px */
+  --bayan-space-12: 3rem;    /* 48px */
+  --bayan-space-16: 4rem;    /* 64px */
+
+  /* Border Radii */
+  --bayan-radius-xs: 4px;
+  --bayan-radius-sm: 6px;
+  --bayan-radius-md: 10px;
+  --bayan-radius-lg: 14px;
+  --bayan-radius-xl: 20px;
+  --bayan-radius-2xl: 28px;
+  --bayan-radius-pill: 9999px;
+
+  /* Control Heights */
+  --bayan-size-control-sm: 36px;
+  --bayan-size-control-md: 42px;
+  --bayan-size-control-lg: 48px;
+
+  /* =====================================================================
+     ELEVATION & SHADOWS (Layered ambient + directional)
+     ===================================================================== */
+  --bayan-shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --bayan-shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.07), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
+  --bayan-shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
+  --bayan-shadow-lg: 0 10px 24px -4px rgba(15, 23, 42, 0.10), 0 4px 10px -3px rgba(15, 23, 42, 0.05);
+  --bayan-shadow-xl: 0 20px 32px -6px rgba(15, 23, 42, 0.12), 0 8px 16px -4px rgba(15, 23, 42, 0.06);
+  --bayan-shadow-card: 0 1px 3px rgba(10, 35, 66, 0.04), 0 6px 16px -2px rgba(10, 35, 66, 0.06);
+  --bayan-shadow-card-hover: 0 4px 8px rgba(10, 35, 66, 0.06), 0 12px 28px -4px rgba(10, 35, 66, 0.10);
+
+  /* Focus Ring */
+  --bayan-focus-ring: 0 0 0 3px rgba(0, 166, 178, 0.28);
+  --bayan-focus-ring-gold: 0 0 0 3px rgba(210, 158, 44, 0.28);
+  --bayan-focus-ring-danger: 0 0 0 3px rgba(220, 38, 38, 0.28);
+
+  /* Motion & Transitions */
+  --bayan-ease-default: cubic-bezier(0.16, 1, 0.3, 1);
+  --bayan-motion-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  --bayan-motion-normal: 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  --bayan-motion-slow: 350ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Z-Index Hierarchy */
+  --bayan-z-sticky: 30;
+  --bayan-z-header: 40;
+  --bayan-z-drawer: 60;
+  --bayan-z-overlay: 70;
+  --bayan-z-modal: 100;
+  --bayan-z-toast: 110;
+}
