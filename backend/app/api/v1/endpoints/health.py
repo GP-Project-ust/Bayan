@@ -5,8 +5,10 @@
 """
 
 import socket
+from urllib.parse import urlparse
 
 import httpx
+import psycopg
 from fastapi import APIRouter
 from sqlalchemy import text
 
@@ -45,17 +47,46 @@ def _check_database() -> bool:
         return False
 
 
+def _check_university_database() -> bool:
+    """فحص الاتصال بقاعدة بيانات الجامعة — الاعتماد الحرج لوكيل SQL."""
+    try:
+        with psycopg.connect(get_settings().odoo_database_url, connect_timeout=2):
+            return True
+    except Exception:  # noqa: BLE001 — أي فشل اتصال يعني "غير جاهز"
+        return False
+
+
 @router.get("/health")
 def health_check() -> dict:
-    """حالة التطبيق وكل مكونات البنية التحتية."""
+    """حالة التطبيق وكل مكونات البنية التحتية.
+
+    المكوّنان الحرجان (قاعدة المنصة + قاعدة الجامعة) يُفحصان دائماً.
+    المكوّنات المساندة تُفحص فقط عند تفعيلها في الإعدادات — حتى لا تُظهر
+    بيئة النشر حالة "degraded" بسبب خدمات لم تُرفع أصلًا (وضع mock لا يحتاجها).
+    """
     settings = get_settings()
 
     components = {
         "database": _check_database(),
-        "redis": _check_tcp("localhost", 6379),
-        "qdrant": _check_http(settings.qdrant_url.rstrip("/") + "/healthz"),
-        "ollama": _check_http(settings.ollama_base_url.rstrip("/") + "/api/tags"),
+        "university_database": _check_university_database(),
     }
+
+    # Redis — يُفحص فقط عند ضبط رابطه (بيئة بلا Redis تضبطه فارغاً)
+    if settings.redis_url:
+        redis_url = urlparse(settings.redis_url)
+        components["redis"] = _check_tcp(
+            redis_url.hostname or "localhost", redis_url.port or 6379
+        )
+
+    # Qdrant — يُفحص فقط عند مزوّد تضمين حقيقي (ليس mock)
+    if settings.embedding_provider.strip().lower() != "mock":
+        components["qdrant"] = _check_http(settings.qdrant_url.rstrip("/") + "/healthz")
+
+    # Ollama — يُفحص فقط عند اعتماد LLM محلي عليه
+    if settings.llm_provider.strip().lower() == "ollama":
+        components["ollama"] = _check_http(
+            settings.ollama_base_url.rstrip("/") + "/api/tags"
+        )
 
     status_by_component = {
         name: ("up" if ok else "down") for name, ok in components.items()

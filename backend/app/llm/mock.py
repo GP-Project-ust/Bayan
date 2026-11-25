@@ -23,8 +23,8 @@ class MockChatModel(BaseChatModel):
     # ردود معيارية لكل دور — موثقة هنا ليمكن لأي عضو توقعها في اختباراته
     _ROLE_REPLIES: dict[str, str] = {
         "supervisor": '{"route": "sql_agent", "confidence": 0.95}',
-        "sql": "SELECT program_name, COUNT(*) AS student_count "
-        "FROM v_program_stats GROUP BY program_name ORDER BY student_count DESC LIMIT 20;",
+        "sql": "SELECT program_name, SUM(student_count) AS students "
+        "FROM v_program_stats GROUP BY program_name ORDER BY students DESC;",
         "rag": "وفق لائحة القبول، تُمنح الترقية للطالب المجتاز "
         "36 ساعة معتمدة بمعدل لا يقل عن 2.0.",
         "analyst": "التحليل الأولي: البيانات تُظهر تركز الطلاب في برنامجي "

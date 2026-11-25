@@ -153,6 +153,19 @@ class TestASTRejectsDMLandDDL:
             validate_sql_ast(sql, _ALLOWED_VIEWS, _MAX_ROWS)
 
 
+class TestASTRejectsDangerousFunctions:
+    """دوال خطرة (اتصال خارجي/تنفيذ عن بُعد/شلل) — حُصّنت بعد فحص ما بعد PR #17."""
+
+    @pytest.mark.parametrize("evil_sql", [
+        "SELECT dblink('host=evil.example', 'SELECT 1')",
+        "SELECT dblink_exec('dbname=university', 'DELETE FROM op_student')",
+        "SELECT pg_sleep(60)",
+    ])
+    def test_rejects_forbidden_functions(self, evil_sql):
+        with pytest.raises(ValueError, match="الحارس يرفض"):
+            validate_sql_ast(evil_sql, _ALLOWED_VIEWS, _MAX_ROWS)
+
+
 # ===========================================================================
 # § 3 — تحقق AST: رفض الحقن ومصادر خارج الكتالوج
 # ===========================================================================

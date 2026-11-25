@@ -99,12 +99,12 @@ def cmd_stats(questions: list[dict]) -> int:
 def cmd_verify(questions: list[dict], dsn: str) -> int:
     """تنفيذ الاستعلامات المرجعية على قاعدة العرض وطباعة النتائج للتثبيت."""
     try:
-        import psycopg2  # noqa: F401 — متاح ضمن اعتماديات backend
+        import psycopg  # noqa: F401 — متاح ضمن اعتماديات backend (psycopg3)
     except ImportError:
-        print("psycopg2 غير مثبت — شغّل داخل بيئة backend (pip install -r backend/requirements.txt)")
+        print("psycopg (psycopg3) غير مثبت — شغّل داخل بيئة backend (pip install -r backend/requirements.txt)")
         return 1
 
-    import psycopg2 as pg
+    import psycopg as pg
 
     issues = check_structure(questions)
     if issues:
