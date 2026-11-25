@@ -189,20 +189,51 @@ def test_catalog_v2_exposes_five_views_and_blocks_physical_tables():
     # التأكد من عدم تسرب أي جدول فيزيائي عبر get_catalog حتى عند تمرير اسمه
     assert provider.get_catalog(["op_student", "res_partner"]) == []
 
-    # التأكد من تصنيف Blacklist مستبعد دائماً
-    assert repo.list_active_views(tenant_id="tenant-uni")
+    # التأكد من تصنيف v_student_financial_status كـ restricted وحجبها عند تقييد التصنيف
+    all_stored_views = {v.technical_name: v for v in repo.list_active_views(tenant_id="tenant-uni")}
+    assert all_stored_views["v_student_financial_status"].classification == "restricted"
+    assert all_stored_views["v_program_financial_summary"].classification == "public"
+
+    public_only = SemanticCatalogV2Provider(
+        repository=repo,
+        options=CatalogBuildOptions(
+            tenant_id="tenant-uni",
+            source_id="SRC-UNI",
+            allowed_classifications=("public", "masked"),
+        ),
+    )
+    assert "v_student_financial_status" not in [e.view for e in public_only.get_catalog()]
+    assert "v_program_financial_summary" in [e.view for e in public_only.get_catalog()]
+
+    # التأكد من أن allowed_views_scope يمنع توسيع النطاق عند الاستدعاء
+    scoped = SemanticCatalogV2Provider(
+        repository=repo,
+        options=CatalogBuildOptions(
+            tenant_id="tenant-uni",
+            source_id="SRC-UNI",
+            allowed_views_scope=("v_program_stats",),
+        ),
+    )
+    assert [
+        e.view for e in scoped.get_catalog(["v_student_financial_status", "v_program_stats"])
+    ] == ["v_program_stats"]
 
 
 def test_04_views_sql_defines_two_documented_readonly_views():
     sql = VIEWS_04_PATH.read_text(encoding="utf-8")
-    views = re.findall(r"CREATE\s+OR\s+REPLACE\s+VIEW\s+([a-z0-9_]+)\s+AS", sql)
+    executable_sql = " ".join(re.sub(r"--[^\n]*", "", sql).split())
+    views = re.findall(r"CREATE\s+OR\s+REPLACE\s+VIEW\s+([a-z0-9_]+)\s+AS", executable_sql)
     assert views == ["v_student_financial_status", "v_program_financial_summary"]
-    assert "COMMENT ON VIEW v_student_financial_status" in sql
-    assert "COMMENT ON VIEW v_program_financial_summary" in sql
+    assert "DROP VIEW" not in executable_sql.upper()
+    assert "CASCADE" not in executable_sql.upper()
+    assert "COALESCE(BOOL_OR(f.state = 'متأخر'), FALSE) AS has_overdue" in executable_sql
+    assert "WITH student_totals AS" in executable_sql
+    assert "COMMENT ON VIEW v_student_financial_status" in executable_sql
+    assert "COMMENT ON VIEW v_program_financial_summary" in executable_sql
     assert (
         "GRANT SELECT ON v_student_financial_status, v_program_financial_summary TO bayan_reader"
-        in sql
+        in executable_sql
     )
     # التأكد من عدم كشف البريد أو الهاتف داخل المشهد المالي الجديد
-    assert "p.email" not in sql
-    assert "p.phone" not in sql
+    assert "p.email" not in executable_sql
+    assert "p.phone" not in executable_sql

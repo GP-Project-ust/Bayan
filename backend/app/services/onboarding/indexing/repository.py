@@ -46,6 +46,7 @@ class SemanticIndexRepository(Protocol):
         tenant_id: str,
         source_ids: Sequence[str] | None = None,
         allowed_views: Sequence[str] | None = None,
+        allowed_classifications: Sequence[str] | None = None,
         entry_types: Sequence[str] | None = None,
         limit: int = 10,
     ) -> list[SemanticSearchResult]: ...
@@ -56,6 +57,7 @@ class SemanticIndexRepository(Protocol):
         tenant_id: str,
         source_id: str | None = None,
         allowed_views: Sequence[str] | None = None,
+        allowed_classifications: Sequence[str] | None = None,
     ) -> list[SemanticEntry]: ...
 
 
@@ -199,6 +201,10 @@ class PgVectorSemanticRepository:
         with self._connect() as conn:
             try:
                 with conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT pg_advisory_xact_lock(hashtext(%s))",
+                        (f"bayan:semantic:{tenant_id}:{source_id}",),
+                    )
                     for item in upserts:
                         entry = item.entry
                         if entry.tenant_id != tenant_id or entry.source_id != source_id:
@@ -302,6 +308,7 @@ class PgVectorSemanticRepository:
         tenant_id: str,
         source_ids: Sequence[str] | None = None,
         allowed_views: Sequence[str] | None = None,
+        allowed_classifications: Sequence[str] | None = None,
         entry_types: Sequence[str] | None = None,
         limit: int = 10,
     ) -> list[SemanticSearchResult]:
@@ -322,6 +329,16 @@ class PgVectorSemanticRepository:
         ]
         params: list[Any] = [vec_lit, tenant_id]
 
+        if allowed_classifications is not None:
+            cls_list = [
+                str(c).strip().lower()
+                for c in allowed_classifications
+                if str(c).strip() and str(c).strip().lower() != "blacklist"
+            ]
+            if not cls_list:
+                return []
+            clauses.append("LOWER(classification) = ANY(%s)")
+            params.append(cls_list)
         if source_ids is not None:
             src_list = [s for s in source_ids if s]
             if not src_list:
@@ -385,6 +402,7 @@ class PgVectorSemanticRepository:
         tenant_id: str,
         source_id: str | None = None,
         allowed_views: Sequence[str] | None = None,
+        allowed_classifications: Sequence[str] | None = None,
     ) -> list[SemanticEntry]:
         if not tenant_id.strip():
             raise ValueError("tenant_id مطلوب لقراءة المشاهد المعتمدة من الفهرس.")
@@ -397,6 +415,16 @@ class PgVectorSemanticRepository:
             "classification <> 'blacklist'",
         ]
         params: list[Any] = [tenant_id]
+        if allowed_classifications is not None:
+            cls_list = [
+                str(c).strip().lower()
+                for c in allowed_classifications
+                if str(c).strip() and str(c).strip().lower() != "blacklist"
+            ]
+            if not cls_list:
+                return []
+            clauses.append("LOWER(classification) = ANY(%s)")
+            params.append(cls_list)
         if source_id:
             clauses.append("source_id = %s")
             params.append(source_id)
@@ -556,6 +584,7 @@ class InMemorySemanticRepository:
         tenant_id: str,
         source_ids: Sequence[str] | None = None,
         allowed_views: Sequence[str] | None = None,
+        allowed_classifications: Sequence[str] | None = None,
         entry_types: Sequence[str] | None = None,
         limit: int = 10,
     ) -> list[SemanticSearchResult]:
@@ -563,6 +592,17 @@ class InMemorySemanticRepository:
             raise ValueError("يُمنع البحث الدلالي دون تحديد tenant_id (fail-closed).")
         bounded_limit = max(1, min(int(limit), 50))
         allowed_view_set = set(allowed_views) if allowed_views is not None else None
+        allowed_cls_set = (
+            {
+                str(c).strip().lower()
+                for c in allowed_classifications
+                if str(c).strip() and str(c).strip().lower() != "blacklist"
+            }
+            if allowed_classifications is not None
+            else None
+        )
+        if allowed_cls_set is not None and not allowed_cls_set:
+            return []
         source_set = set(source_ids) if source_ids is not None else None
         type_set = set(entry_types) if entry_types is not None else None
 
@@ -571,7 +611,9 @@ class InMemorySemanticRepository:
             e = rec.entry
             if e.tenant_id != tenant_id or e.indexing_state != "indexed":
                 continue
-            if e.classification == "blacklist":
+            if e.classification.lower() == "blacklist":
+                continue
+            if allowed_cls_set is not None and e.classification.lower() not in allowed_cls_set:
                 continue
             if source_set is not None and e.source_id not in source_set:
                 continue
@@ -605,17 +647,30 @@ class InMemorySemanticRepository:
         tenant_id: str,
         source_id: str | None = None,
         allowed_views: Sequence[str] | None = None,
+        allowed_classifications: Sequence[str] | None = None,
     ) -> list[SemanticEntry]:
         if not tenant_id.strip():
             raise ValueError("tenant_id مطلوب لقراءة المشاهد المعتمدة من الفهرس.")
         allowed_set = set(allowed_views) if allowed_views is not None else None
+        allowed_cls_set = (
+            {
+                str(c).strip().lower()
+                for c in allowed_classifications
+                if str(c).strip() and str(c).strip().lower() != "blacklist"
+            }
+            if allowed_classifications is not None
+            else None
+        )
+        if allowed_cls_set is not None and not allowed_cls_set:
+            return []
         views = [
             copy.deepcopy(rec.entry)
             for rec in self._records.values()
             if rec.entry.tenant_id == tenant_id
             and rec.entry.entry_type == "view"
             and rec.entry.indexing_state == "indexed"
-            and rec.entry.classification != "blacklist"
+            and rec.entry.classification.lower() != "blacklist"
+            and (allowed_cls_set is None or rec.entry.classification.lower() in allowed_cls_set)
             and (source_id is None or rec.entry.source_id == source_id)
             and (allowed_set is None or rec.entry.technical_name in allowed_set)
         ]

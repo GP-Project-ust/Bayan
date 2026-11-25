@@ -93,6 +93,16 @@ def test_unified_pipeline_idempotent_incremental_and_retires_safely():
         pipeline.run(source_settings=src, tenant_id="tenant-uni")
     assert len(repo.list_active_views(tenant_id="tenant-uni")) == 5
 
+    # منع توجيه pgvector إلى قاعدة بيانات العميل المصدر نفسه
+    same_db_pipeline = UnifiedOnboardingPipeline(
+        app_settings=Settings(database_url="postgresql://reader:secret@localhost:5433/university"),
+        repository=repo,
+        embedder=embedder,
+        source_connect_fn=lambda **_kw: InMemoryPostgresConnection(current_catalog),
+    )
+    with pytest.raises(ValueError, match="تطابق قاعدة بيانات المنصة"):
+        same_db_pipeline.run(source_settings=src, tenant_id="tenant-uni")
+
 
 def test_unified_cli_processes_both_university_and_logistics_without_code_changes(capsys):
     cfg = Settings(

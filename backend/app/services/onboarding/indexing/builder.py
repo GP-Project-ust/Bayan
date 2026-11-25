@@ -63,6 +63,21 @@ def _approx_ar_type(data_type: str) -> str:
     return "نص"
 
 
+def _infer_default_classification(
+    obj: DescribedObject,
+    fallback: str,
+) -> str:
+    """إسناد تصنيف أمني مبدئي حتمي للبيانات المالية الفردية (restricted) مقابل المجمّعة."""
+    col_names = {c.name.lower() for c in obj.columns}
+    has_individual_id = bool(col_names & {"roll_number", "student_name", "email", "phone"})
+    has_financial_balances = bool(
+        col_names & {"outstanding", "total_amount", "total_paid", "paid_amount"}
+    )
+    if (has_individual_id and has_financial_balances) or "financial_status" in obj.name.lower():
+        return "restricted"
+    return fallback
+
+
 class SemanticEntryBuilder:
     """تحويل تقرير الاكتشاف الحتمي إلى عناصر فهرس دلالي جاهزة للتضمين."""
 
@@ -97,7 +112,8 @@ class SemanticEntryBuilder:
         for obj in sorted(report.objects, key=lambda o: o.schema_qualified_name):
             override = semantics_map.get(obj.schema_qualified_name, {})
             classification = str(
-                override.get("classification") or self.default_classification
+                override.get("classification")
+                or _infer_default_classification(obj, self.default_classification)
             ).lower()
             if classification == "blacklist":
                 continue

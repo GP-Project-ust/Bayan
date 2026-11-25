@@ -11,6 +11,8 @@ class CatalogBuildOptions:
 
     tenant_id: str
     source_id: str | None = None
+    allowed_views_scope: tuple[str, ...] | None = None
+    allowed_classifications: tuple[str, ...] | None = None
     preferred_view_order: tuple[str, ...] = (
         "v_student_profile",
         "v_fees_summary",

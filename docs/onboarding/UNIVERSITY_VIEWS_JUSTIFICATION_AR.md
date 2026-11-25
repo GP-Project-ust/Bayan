@@ -40,6 +40,7 @@
 
 ## 3. ضوابط الصلاحيات والتحقق
 
-- يبدأ الملف بـ `DROP VIEW IF EXISTS ... CASCADE` ضمن معاملة آمنة، ثم `GRANT SELECT ON v_student_financial_status, v_program_financial_summary TO bayan_reader;`.
+- يعتمد الملف `CREATE OR REPLACE VIEW` ضمن معاملة آمنة (دون `DROP VIEW ... CASCADE` حتى لا تُحذف مشاهد أو صلاحيات تابعة بالخطأ)، ثم `GRANT SELECT ON v_student_financial_status, v_program_financial_summary TO bayan_reader;`.
+- يصنّف المشهد `v_student_financial_status` في الفهرس الدلالي بتصنيف `restricted` لارتباطه ببيانات مالية فردية للطالب (`roll_number`, `student_name`, `outstanding`) مع استبعاد `email` و`phone`، بينما يصنّف `v_program_financial_summary` بتصنيف `public` مجمّعاً دون هوية أفراد.
 - يحتفظ كل مشهد بتعليق عربي `COMMENT ON VIEW` وتعليقات `COMMENT ON COLUMN` لكل عمود ليتغذى الفهرس الدلالي منها تلقائياً في المرحلة الحتمية.
 - **ملاحظة تحقق حي:** لم يُنفذ الملف على خادم PostgreSQL حي لعدم توفر Docker/PostgreSQL في هذه البيئة؛ بانتظار المراجعة والتطبيق عبر `psql` عند رفع `university-db`.

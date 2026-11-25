@@ -234,3 +234,21 @@ def test_cross_tenant_and_cross_source_isolation_in_semantic_search():
         "v_active_shipments_overview",
         "v_warehouse_dispatch_summary",
     }
+
+    # التحقق من أخذ قفل التزامن الاستشاري داخل pgvector.apply_changes وrollback عند الخطأ
+    cur = _StubPgCursor(vector_installed=True)
+    conn = _StubPgConnection(cur)
+    pg_repo = PgVectorSemanticRepository(
+        database_url="postgresql://bayan:bayan@localhost:5432/bayan",
+        dimensions=1024,
+        connect_fn=lambda _url: conn,
+    )
+    pg_repo.apply_changes(
+        tenant_id="tenant-alpha",
+        source_id="SRC-UNI",
+        upserts=[],
+        retire_ids=[],
+    )
+    executed_sql = "\n".join(sql for sql, _ in cur.executed)
+    assert "pg_advisory_xact_lock" in executed_sql
+    assert conn.committed is True

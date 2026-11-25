@@ -82,4 +82,4 @@ fmt: ## تنسيق الكود تلقائياً
 #   استبطان القاعدة المضبوطة <- وصف عربي حتمي <- تضمين <- حفظ pgvector <- تقرير
 # =============================================================================
 onboarding: ## تشغيل سلسلة التهيئة الدلالية الحتمية الموحدة (pgvector + Catalog v2)
-	cd backend && $(PY_RUN) -m app.services.onboarding.cli --tenant $(or $(ONBOARDING_TENANT),university-demo) --source-id $(or $(ONBOARDING_SOURCE_ID),SRC-UNIVERSITY)
+	PYTHONPATH=backend $(if $(wildcard backend/.venv/Scripts/python.exe),backend/.venv/Scripts/python.exe,$(PY_RUN)) -m app.services.onboarding.cli --tenant $(or $(ONBOARDING_TENANT),university-demo) --source-id $(or $(ONBOARDING_SOURCE_ID),SRC-UNIVERSITY)
