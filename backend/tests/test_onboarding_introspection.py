@@ -347,8 +347,7 @@ def _official_university_catalog() -> dict[str, Any]:
                 "name": "op_student",
                 "object_type": "table",
                 "comment": (
-                    "بيان (توافق OpenEduCat): سجلات قيد الطلاب — "
-                    "بيانات الهوية الأكاديمية فقط"
+                    "بيان (توافق OpenEduCat): سجلات قيد الطلاب — بيانات الهوية الأكاديمية فقط"
                 ),
                 "reltuples": 500,
                 "columns": [
