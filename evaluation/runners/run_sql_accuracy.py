@@ -229,11 +229,11 @@ def main() -> int:
     except Exception:  # noqa: BLE001 — إعدادات قديمة/معدومة لا توقف القياس
         provider, model = "؟", "؟"
 
-    # 2) اعتماديات القاعدة
+    # 2) اعتماديات القاعدة (psycopg3 — نفس اعتماديات backend، لا psycopg2)
     try:
-        import psycopg2
+        import psycopg
     except ImportError:
-        print("❌ psycopg2 غير مثبت — ثبّتها: pip install -r backend/requirements.txt")
+        print("❌ psycopg (psycopg3) غير مثبت — ثبّتها: pip install -r backend/requirements.txt")
         return 2
 
     questions = load_questions()
@@ -245,7 +245,7 @@ def main() -> int:
 
     # 3) اتصال قاعدة القياس (بقارئ reader — ADR-001)
     try:
-        conn = psycopg2.connect(args.dsn, connect_timeout=5,
+        conn = psycopg.connect(args.dsn, connect_timeout=5,
                                 options=f"-c statement_timeout={QUERY_TIMEOUT_MS}")
     except Exception as exc:  # noqa: BLE001
         print(f"❌ تعذر الاتصال بقاعدة القياس: {exc}")

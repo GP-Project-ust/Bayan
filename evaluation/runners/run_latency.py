@@ -127,8 +127,8 @@ def main() -> int:
     agent_db = getattr(settings, "odoo_database_url", "") if settings else ""
     if agent_db:
         try:
-            import psycopg2
-            psycopg2.connect(agent_db, connect_timeout=3).close()
+            import psycopg
+            psycopg.connect(agent_db, connect_timeout=3).close()
         except Exception as exc:  # noqa: BLE001
             print(f"❌ قاعدة الوكيل غير متاحة ({agent_db}): {exc}")
             print("القياس بلا قاعدة يقيس مسار الفشل السريع — شغّل make dev-db أولاً")
