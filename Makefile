@@ -5,7 +5,7 @@
 # القاعدة التجريبية الموحدة للجامعة (الموصى بها لكل الفريق): make dev-db
 
 .DEFAULT_GOAL := help
-.PHONY: help setup infra dev-db llm up down ps logs backend-dev frontend-dev test lint fmt
+.PHONY: help setup infra dev-db llm up down ps logs backend-dev frontend-dev test lint fmt onboarding
 
 # مفسّر Python الذي يُتوقع وجود psycopg لديه:
 # بيئة backend الافتراضية أولاً، ثم بيئة جذر المستودع، ثم python3 النظام
@@ -76,3 +76,10 @@ lint: ## فحص جودة الكود (ruff)
 
 fmt: ## تنسيق الكود تلقائياً
         cd backend && $(PY_RUN) -m ruff format app tests && $(PY_RUN) -m ruff check --fix app tests
+
+# =============================================================================
+# التهيئة الدلالية الموحدة (Sprint 1 — Issue #7):
+#   استبطان القاعدة المضبوطة <- وصف عربي حتمي <- تضمين <- حفظ pgvector <- تقرير
+# =============================================================================
+onboarding: ## تشغيل سلسلة التهيئة الدلالية الحتمية الموحدة (pgvector + Catalog v2)
+	cd backend && $(PY_RUN) -m app.services.onboarding.cli --tenant $(or $(ONBOARDING_TENANT),university-demo) --source-id $(or $(ONBOARDING_SOURCE_ID),SRC-UNIVERSITY)
