@@ -89,6 +89,9 @@ _FORBIDDEN_FUNCTIONS = {
     "pg_read_file", "pg_write_file", "pg_read_binary_file",
     "pg_ls_dir", "pg_stat_file", "lo_import", "lo_export",
     "copy",
+    # اتصال خارجي/تنفيذ عن بُعد أو شلل الخدمة (فحص اختراق ما بعد PR #17)
+    "dblink", "dblink_exec", "pg_sleep", "pg_terminate_backend",
+    "pg_cancel_backend",
 }
 
 
