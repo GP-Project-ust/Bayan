@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping
+from urllib.parse import urlparse
 
 from app.core.config import Settings, get_settings
 from app.services.onboarding.catalog import (
@@ -133,6 +134,7 @@ class UnifiedOnboardingPipeline:
     ) -> OnboardingRunResult:
         if not tenant_id.strip():
             raise ValueError("tenant_id مطلوب لتشغيل خط التهيئة الموحد.")
+        self._assert_platform_source_separation(source_settings)
         report = self.discovery_pipeline.run(source_settings)
         summary = self.indexer.index_report(
             report,
@@ -160,15 +162,41 @@ class UnifiedOnboardingPipeline:
             execution_report_ar=report_ar,
         )
 
+    def _assert_platform_source_separation(
+        self,
+        source_settings: PostgresConnectionSettings,
+    ) -> None:
+        parsed_platform = urlparse(self.app_settings.database_url)
+        plat_host = (parsed_platform.hostname or "localhost").lower()
+        plat_port = int(parsed_platform.port or 5432)
+        plat_db = parsed_platform.path.lstrip("/").lower()
+
+        src_summary = source_settings.safe_summary()
+        src_host = str(src_summary.get("host") or "localhost").lower()
+        src_port = int(src_summary.get("port") or 5432)
+        src_db = str(src_summary.get("database") or "").lower()
+
+        if plat_host == src_host and plat_port == src_port and plat_db and plat_db == src_db:
+            raise ValueError(
+                "يُمنع تطابق قاعدة بيانات المنصة (DATABASE_URL) مع قاعدة بيانات العميل المصدر."
+            )
+
     def get_catalog_provider(
         self,
         *,
         tenant_id: str,
         source_id: str | None = None,
+        allowed_views_scope: tuple[str, ...] | None = None,
+        allowed_classifications: tuple[str, ...] | None = None,
     ) -> SemanticCatalogV2Provider:
         return SemanticCatalogV2Provider(
             repository=self.repository,
-            options=CatalogBuildOptions(tenant_id=tenant_id, source_id=source_id),
+            options=CatalogBuildOptions(
+                tenant_id=tenant_id,
+                source_id=source_id,
+                allowed_views_scope=allowed_views_scope,
+                allowed_classifications=allowed_classifications,
+            ),
         )
 
     def search(
@@ -178,6 +206,7 @@ class UnifiedOnboardingPipeline:
         tenant_id: str,
         source_ids: list[str] | None = None,
         allowed_views: list[str] | None = None,
+        allowed_classifications: list[str] | None = None,
         entry_types: list[str] | None = None,
         limit: int = 10,
     ) -> list[SemanticSearchResult]:
@@ -186,6 +215,7 @@ class UnifiedOnboardingPipeline:
             tenant_id=tenant_id,
             source_ids=source_ids,
             allowed_views=allowed_views,
+            allowed_classifications=allowed_classifications,
             entry_types=entry_types,
             limit=limit,
         )

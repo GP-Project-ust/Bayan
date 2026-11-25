@@ -28,6 +28,7 @@ class SemanticSearchService:
         tenant_id: str,
         source_ids: Sequence[str] | None = None,
         allowed_views: Sequence[str] | None = None,
+        allowed_classifications: Sequence[str] | None = None,
         entry_types: Sequence[str] | None = None,
         limit: int = 10,
     ) -> list[SemanticSearchResult]:
@@ -43,6 +44,7 @@ class SemanticSearchService:
             tenant_id=tenant_id,
             source_ids=source_ids,
             allowed_views=allowed_views,
+            allowed_classifications=allowed_classifications,
             entry_types=entry_types,
             limit=bounded_limit,
         )
