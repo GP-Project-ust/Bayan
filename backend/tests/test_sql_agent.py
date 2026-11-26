@@ -18,6 +18,7 @@ import psycopg
 import pytest
 
 from app.agents.sql_agent import (
+    _extract_sql_from_response,
     _select_candidate_views,
     execute_readonly,
     sql_agent_node,
@@ -363,4 +364,37 @@ class TestAgainstLiveUniversityDb:
         with pytest.raises(psycopg.Error):
             with psycopg.connect(get_settings().odoo_database_url, connect_timeout=2) as conn:
                 conn.execute("INSERT INTO op_course (name, code) VALUES ('اختبار', 'TST')")
+
+
+# ===========================================================================
+# § 7 — استخراج SQL من رد النموذج: نص وكتل محتوى (Gemini 3+)
+# ===========================================================================
+
+class TestExtractSqlFromModelContent:
+    """Gemini 3+ يعيد كتل محتوى قائمة — الاستخراج يقبل الصيغتين دفاعياً."""
+
+    def test_plain_string_with_markdown_fence(self):
+        raw = "تفضل:\n```sql\nSELECT 1\n```"
+        assert _extract_sql_from_response(raw) == "SELECT 1"
+
+    def test_content_blocks_list(self):
+        content = [
+            {"type": "text", "text": "SELECT program_name FROM v_program_stats"},
+        ]
+        assert _extract_sql_from_response(content) == "SELECT program_name FROM v_program_stats"
+
+    def test_skips_non_text_blocks(self):
+        content = [
+            {"type": "reasoning", "text": "أفكر في SELECT مزيف"},
+            {"type": "text", "text": "الجواب: WITH t AS (SELECT 1) SELECT * FROM t"},
+        ]
+        assert _extract_sql_from_response(content).startswith("WITH t AS")
+
+    def test_mixed_string_and_dict_blocks(self):
+        content = ["سأجيب:", {"type": "text", "text": "SELECT 2"}]
+        assert _extract_sql_from_response(content) == "SELECT 2"
+
+    def test_empty_variants(self):
+        assert _extract_sql_from_response("") == ""
+        assert _extract_sql_from_response([]) == ""
 
