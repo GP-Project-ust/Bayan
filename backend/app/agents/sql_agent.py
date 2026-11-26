@@ -212,10 +212,26 @@ def execute_readonly(sql: str) -> tuple[list[dict[str, Any]], float]:
 # استخراج SQL من رد النموذج
 # ---------------------------------------------------------------------------
 
-def _extract_sql_from_response(content: str) -> str:
-    """استخراج نص SQL من رد النموذج اللغوي بشكل دفاعي."""
+def _extract_sql_from_response(content: str | list) -> str:
+    """استخراج نص SQL من رد النموذج اللغوي بشكل دفاعي.
+
+    المحتوى قد يكون نصاً (النماذج الكلاسيكية وmock) أو قائمة كتل
+    (Gemini 3+ يعيد كتل محتوى قائمة) — تُجمَّع القطع النصية أولاً.
+    """
     if not content:
         return ""
+    if isinstance(content, list):
+        pieces: list[str] = []
+        for part in content:
+            if isinstance(part, str):
+                pieces.append(part)
+            elif isinstance(part, dict):
+                # كتل النص فقط (type=text أو بلا نوع) — كتل التفكير تُتجاهل
+                part_type = part.get("type")
+                text = part.get("text")
+                if text and (part_type == "text" or part_type is None):
+                    pieces.append(str(text))
+        content = "\n".join(pieces)
     # إزالة تنسيق markdown إن وجد
     content = re.sub(r"```(?:sql)?\s*", "", content, flags=re.IGNORECASE)
     content = re.sub(r"```", "", content)
