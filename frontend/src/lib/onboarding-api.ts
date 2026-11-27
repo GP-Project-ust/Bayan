@@ -1,4 +1,4 @@
-import { API_URL } from "@/lib/api";
+import { getApiBaseUrl } from "@/lib/chat/sse-client";
 import type {
   ActivationReadinessResponse,
   OfficialCatalogEntry,
@@ -25,7 +25,6 @@ async function onboardingRequest<T>(
     method?: string;
     body?: unknown;
     tenantId?: string;
-    permissions?: string;
   } = {}
 ): Promise<T> {
   const headers: Record<string, string> = {
@@ -34,11 +33,7 @@ async function onboardingRequest<T>(
   if (options.tenantId) {
     headers["X-Bayan-Tenant-ID"] = options.tenantId;
   }
-  if (options.permissions) {
-    headers["X-Bayan-Permissions"] = options.permissions;
-  }
-
-  const res = await fetch(`${API_URL}/api/v1/onboarding${path}`, {
+  const res = await fetch(`${getApiBaseUrl()}/api/v1/onboarding${path}`, {
     method: options.method ?? "GET",
     headers,
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
@@ -245,7 +240,6 @@ export const onboardingApi = {
     onboardingRequest<OrganizationDetail>(`/organizations/${orgId}/stages/${stageRef}/reset`, {
       method: "POST",
       tenantId: orgId,
-      permissions: "onboarding.reset",
       body: payload,
     }),
 

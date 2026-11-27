@@ -33,4 +33,33 @@ describe("onboardingApi client", () => {
 
     await expect(onboardingApi.getOrganization("org-999")).rejects.toBeInstanceOf(OnboardingApiError);
   });
+
+  it("3. يستخدم عنوان API الرسمي ولا يرسل صلاحيات يحددها العميل", async () => {
+    const previousUrl = process.env.NEXT_PUBLIC_API_URL;
+    process.env.NEXT_PUBLIC_API_URL = "https://api.example.test/";
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ id: "org-123", name: "جامعة البيان", status: "pending" }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    try {
+      await onboardingApi.resetStage("org-123", "schema", {
+        operator_name: "مشغل معتمد",
+        reason: "إعادة الفحص",
+        confirm: true,
+      });
+      const [url, init] = fetchMock.mock.calls[0];
+      expect(String(url)).toBe(
+        "https://api.example.test/api/v1/onboarding/organizations/org-123/stages/schema/reset"
+      );
+      expect(init.headers).not.toHaveProperty("X-Bayan-Permissions");
+    } finally {
+      if (previousUrl === undefined) {
+        delete process.env.NEXT_PUBLIC_API_URL;
+      } else {
+        process.env.NEXT_PUBLIC_API_URL = previousUrl;
+      }
+    }
+  });
 });

@@ -190,31 +190,34 @@ export function OnboardingWorkspace() {
   }, [selectedOrg]);
 
   return (
-    <AppShell
-      title="مركز التهيئة الذكية والمعرفة الدلالية"
-      subtitle="إدارة المراحل 0–8: الاستلام، الاستبطان الحتمي، النطاقات، المفاهيم، العلاقات، الفهرسة الدلالية في pgvector و Catalog v2"
-      mode="admin"
-      headerActions={
-        <div className="flex items-center gap-2">
-          <Link
-            href={PLATFORM_ROUTES.onboardingHistory}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-800"
-          >
-            <History className="h-3.5 w-3.5" />
-            <span>سجل التهيئة والأرشيف</span>
-          </Link>
-          <button
-            type="button"
-            onClick={() => void refreshList()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-200 hover:bg-cyan-500/20"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            <span>تحديث</span>
-          </button>
-        </div>
-      }
-    >
+    <AppShell mode="admin" layoutClassName="feature-layout" workspaceClassName="feature-workspace">
       <div className="space-y-6 p-6 text-slate-100" dir="rtl">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-white">مركز التهيئة الذكية والمعرفة الدلالية</h1>
+            <p className="mt-1 text-sm text-slate-400">
+              إدارة المراحل 0–8: الاستلام، الاستبطان الحتمي، النطاقات، المفاهيم، العلاقات، الفهرسة الدلالية في
+              pgvector و Catalog v2
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Link
+              href={PLATFORM_ROUTES.onboardingHistory}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-800"
+            >
+              <History className="h-3.5 w-3.5" />
+              <span>سجل التهيئة والأرشيف</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => void refreshList()}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-200 hover:bg-cyan-500/20"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              <span>تحديث</span>
+            </button>
+          </div>
+        </header>
         {/* شريط حالة البوابة والنظام */}
         <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
           <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3.5">

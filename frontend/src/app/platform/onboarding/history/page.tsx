@@ -27,31 +27,33 @@ export default function OnboardingHistoryPage() {
   }, []);
 
   return (
-    <AppShell
-      title="سجل تشغيلات وأرشيف التهيئة الذكية"
-      subtitle="عرض تاريخ المؤسسات المهيّأة والمفعّلة والمؤرشفة"
-      mode="admin"
-      headerActions={
-        <div className="flex gap-2">
-          <Link
-            href={PLATFORM_ROUTES.onboarding}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-white"
-          >
-            <ArrowRight className="h-3.5 w-3.5" />
-            <span>العودة لمسار التهيئة</span>
-          </Link>
-          <button
-            type="button"
-            onClick={() => void loadHistory()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-200"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            <span>تحديث</span>
-          </button>
-        </div>
-      }
-    >
+    <AppShell mode="admin" layoutClassName="feature-layout" workspaceClassName="feature-workspace">
       <div className="space-y-4 p-6 text-slate-100" dir="rtl">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-white">سجل تشغيلات وأرشيف التهيئة الذكية</h1>
+            <p className="mt-1 text-sm text-slate-400">
+              عرض تاريخ المؤسسات المهيّأة والمفعّلة والمؤرشفة
+            </p>
+          </div>
+          <div className="flex shrink-0 gap-2">
+            <Link
+              href={PLATFORM_ROUTES.onboarding}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-white"
+            >
+              <ArrowRight className="h-3.5 w-3.5" />
+              <span>العودة لمسار التهيئة</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => void loadHistory()}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-200"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              <span>تحديث</span>
+            </button>
+          </div>
+        </header>
         {error && (
           <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-3 text-xs text-rose-200">
             {error}
