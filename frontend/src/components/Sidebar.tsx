@@ -62,6 +62,7 @@ export default function Sidebar({ mode, onNewChat, onHistory, activeChat, compac
           <NavigationLink onNavigate={onNavigate} href="/admin/data-sources" icon={<Database/>} selected={path.startsWith("/admin/data-sources")}>مصادر البيانات</NavigationLink>
           <NavigationLink onNavigate={onNavigate} href="/admin/smart-views" icon={<Layers3/>}>العروض الذكية</NavigationLink>
           <NavigationLink onNavigate={onNavigate} href="/admin/audit" icon={<ScrollText/>}>سجل التدقيق</NavigationLink>
+          <NavigationLink onNavigate={onNavigate} href="/platform/onboarding" icon={<Database/>} selected={path.startsWith("/platform/onboarding")}>التهيئة الذكية</NavigationLink>
           <NavigationLink onNavigate={onNavigate} href="/platform/settings" icon={<Settings/>}>الإعدادات</NavigationLink>
         </nav>
       )}
