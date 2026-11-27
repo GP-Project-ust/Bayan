@@ -6,13 +6,18 @@ import os
 from dataclasses import asdict
 from typing import Any, Callable, Dict, List, Optional
 
-from fastapi import APIRouter, Header, HTTPException, Path, Query, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Path, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.config import get_settings
 from app.services.onboarding.connectors import ConnectorSecurityError, DataSourceConnectionError
 from app.services.onboarding.governance import (
+    CATALOG_READ_PERMISSION,
+    ONBOARDING_ADMIN_PERMISSION,
+    ONBOARDING_RESET_PERMISSION,
     AuthorizationError,
+    Principal,
+    TenantPermissionAuthorizer,
     enforce_tenant_header,
     get_stage_reset_history,
     get_stage_reset_status,
@@ -40,8 +45,6 @@ from app.services.onboarding.workflow import (
     start_async_monitoring,
     synchronize_semantic_catalog,
 )
-
-router = APIRouter(prefix="/onboarding", tags=["onboarding"])
 
 OrgId = str
 MAX_ACTOR_LEN = 120
@@ -175,11 +178,9 @@ def _get_workflow_runtime(
 
     settings = get_settings()
     env_mode = os.getenv("BAYAN_ENV", "development").strip().lower()
-    use_pg_index = os.getenv("BAYAN_ONBOARDING_USE_PGVECTOR", "").strip().lower() in {
-        "1",
-        "true",
-        "yes",
-    }
+    use_pg_index = env_mode == "production" or os.getenv(
+        "BAYAN_ONBOARDING_USE_PGVECTOR", ""
+    ).strip().lower() in {"1", "true", "yes"}
     index_repo: SemanticIndexRepository
     if use_pg_index:
         index_repo = PgVectorSemanticRepository(
@@ -203,6 +204,84 @@ def _get_workflow_runtime(
     request.app.state.onboarding_semantic_bridge = bridge
     request.app.state.onboarding_workflow_service = service
     return service, bridge, gateway
+
+
+def get_onboarding_principal(request: Request) -> Principal:
+    """اقرأ هوية سبق أن تحقق منها middleware موثوق؛ لا تقرأها من الطلب."""
+    principal = getattr(request.state, "principal", None)
+    if not isinstance(principal, Principal):
+        raise HTTPException(
+            status_code=401,
+            detail={"code": "identity_required", "message": "المصادقة مطلوبة."},
+        )
+    if not all(
+        (
+            principal.user_id,
+            principal.tenant_id,
+            principal.membership_id,
+            principal.session_id,
+        )
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail={"code": "identity_required", "message": "هوية أو عضوية الجلسة غير مكتملة."},
+        )
+    request.state.onboarding_principal = principal
+    return principal
+
+
+def authorize_onboarding_request(
+    request: Request,
+    principal: Principal = Depends(get_onboarding_principal),
+) -> None:
+    """فرض صلاحية الخادم وعضوية المستأجر على كل مسارات onboarding."""
+    path = request.url.path.rstrip("/")
+    if request.method == "GET" and (
+        path.endswith("/catalog") or path.endswith("/semantic-search")
+    ):
+        permissions = (CATALOG_READ_PERMISSION,)
+    elif path.endswith("/reset"):
+        permissions = (ONBOARDING_ADMIN_PERMISSION, ONBOARDING_RESET_PERMISSION)
+    else:
+        permissions = (ONBOARDING_ADMIN_PERMISSION,)
+
+    organization_id = request.path_params.get("organization_id")
+    if organization_id:
+        service, _, _ = _get_workflow_runtime(request)
+        try:
+            organization = service.get_organization(organization_id)
+        except OnboardingError as exc:
+            raise HTTPException(
+                status_code=exc.status_code,
+                detail={"code": exc.code, "message": exc.message},
+            ) from exc
+        tenant_id = str(organization.get("tenant_id") or organization["id"])
+    else:
+        tenant_id = principal.tenant_id
+
+    authorizer = TenantPermissionAuthorizer()
+    for permission in permissions:
+        try:
+            authorizer.require(principal, tenant_id, permission)
+        except AuthorizationError as exc:
+            raise HTTPException(
+                status_code=403,
+                detail={"code": exc.code, "message": exc.message},
+            ) from exc
+
+
+router = APIRouter(
+    prefix="/onboarding",
+    tags=["onboarding"],
+    dependencies=[Depends(authorize_onboarding_request)],
+)
+
+
+def _request_principal(request: Request) -> Principal:
+    principal = getattr(request.state, "onboarding_principal", None)
+    if not isinstance(principal, Principal):
+        raise HTTPException(status_code=401, detail={"code": "identity_required"})
+    return principal
 
 
 def _exec(fn: Callable[[], Any]) -> Any:
@@ -261,13 +340,28 @@ def list_organizations(
     include_archived: bool = Query(default=False),
 ) -> List[Dict[str, Any]]:
     service, _, _ = _get_workflow_runtime(request)
-    return _exec(lambda: service.list_organizations(include_archived=include_archived))
+    principal = _request_principal(request)
+    return _exec(
+        lambda: [
+            organization
+            for organization in service.list_organizations(include_archived=include_archived)
+            if organization.get("tenant_id") == principal.tenant_id
+        ]
+    )
 
 
 @router.post("/organizations", status_code=201)
 def create_organization(request: Request, req: CreateOrganizationReq) -> Dict[str, Any]:
     service, _, _ = _get_workflow_runtime(request)
+    principal = _request_principal(request)
+    if req.tenant_id and req.tenant_id != principal.tenant_id:
+        raise HTTPException(
+            status_code=403,
+            detail={"code": "tenant_access_denied", "message": "لا تملك عضوية المستأجر المطلوب."},
+        )
     payload = req.model_dump(by_alias=True, exclude_none=True)
+    payload["tenant_id"] = principal.tenant_id
+    payload["operator_name"] = principal.audit_actor
     return _exec(lambda: service.create_organization(payload))
 
 
@@ -297,7 +391,7 @@ def approve_intake(
     return _exec(
         lambda: (
             enforce_tenant_header(organization_id, x_bayan_tenant_id),
-            service.approve_intake(organization_id, req.operator_name),
+            service.approve_intake(organization_id, _request_principal(request).audit_actor),
         )[1]
     )
 
@@ -348,7 +442,10 @@ def test_source(
         lambda: (
             enforce_tenant_header(organization_id, x_bayan_tenant_id),
             service.test_data_source(
-                organization_id, source_id, password=req.password, operator_name=req.operator_name
+                organization_id,
+                source_id,
+                password=req.password,
+                operator_name=_request_principal(request).audit_actor,
             ),
         )[1]
     )
@@ -367,7 +464,7 @@ def start_discovery(
             enforce_tenant_header(organization_id, x_bayan_tenant_id),
             service.run_discovery(
                 organization_id,
-                operator_name=req.operator_name,
+                operator_name=_request_principal(request).audit_actor,
                 passwords=req.passwords,
                 generate_ai_proposals=req.generate_ai_proposals,
                 approve_external_ai=req.approve_external_ai,
@@ -389,7 +486,7 @@ def analyze_domains(
             enforce_tenant_header(organization_id, x_bayan_tenant_id),
             service.analyze_domains(
                 organization_id,
-                operator_name=req.operator_name,
+                operator_name=_request_principal(request).audit_actor,
                 use_ai=req.use_ai,
                 approve_external_ai=req.approve_external_ai,
             ),
@@ -413,7 +510,7 @@ def review_domain(
                 organization_id,
                 domain_id,
                 decision=req.decision,
-                operator_name=req.operator_name,
+                operator_name=_request_principal(request).audit_actor,
                 name_ar=req.name_ar,
                 description=req.description,
                 note=req.note,
@@ -437,7 +534,7 @@ def move_table(
                 organization_id,
                 table_ref=req.table_ref,
                 target_domain_id=req.target_domain_id,
-                operator_name=req.operator_name,
+                operator_name=_request_principal(request).audit_actor,
             ),
         )[1]
     )
@@ -459,7 +556,7 @@ def merge_domains(
                 domain_ids=req.domain_ids,
                 name_ar=req.name_ar,
                 description=req.description,
-                operator_name=req.operator_name,
+                operator_name=_request_principal(request).audit_actor,
             ),
         )[1]
     )
@@ -478,7 +575,7 @@ def generate_concepts(
             enforce_tenant_header(organization_id, x_bayan_tenant_id),
             service.generate_concepts(
                 organization_id,
-                operator_name=req.operator_name,
+                operator_name=_request_principal(request).audit_actor,
                 regenerate=req.regenerate,
                 use_ai=req.use_ai,
                 approve_external_ai=req.approve_external_ai,
@@ -503,7 +600,7 @@ def review_concept(
                 organization_id,
                 concept_id,
                 decision=req.decision,
-                operator_name=req.operator_name,
+                operator_name=_request_principal(request).audit_actor,
                 name_ar=req.name_ar,
                 description=req.description,
                 synonyms=req.synonyms,
@@ -530,7 +627,7 @@ def bulk_approve(
         lambda: (
             enforce_tenant_header(organization_id, x_bayan_tenant_id),
             service.bulk_approve_stage(
-                organization_id, stage=stage, operator_name=req.operator_name
+                organization_id, stage=stage, operator_name=_request_principal(request).audit_actor
             ),
         )[1]
     )
@@ -564,7 +661,7 @@ def analyze_relationships(
             enforce_tenant_header(organization_id, x_bayan_tenant_id),
             service.relationship_service.generate_candidates(
                 organization_id,
-                operator_name=req.operator_name,
+                operator_name=_request_principal(request).audit_actor,
                 use_ai=req.use_ai,
                 approve_external_ai=req.approve_external_ai,
             ),
@@ -588,7 +685,7 @@ def review_relationship(
                 organization_id,
                 relationship_id,
                 decision=req.decision,
-                operator_name=req.operator_name,
+                operator_name=_request_principal(request).audit_actor,
                 note=req.note,
             ),
         )[1]
@@ -613,7 +710,7 @@ def manual_relationship(
                 cardinality=req.cardinality,
                 label=req.label,
                 rationale=req.rationale,
-                operator_name=req.operator_name,
+                operator_name=_request_principal(request).audit_actor,
             ),
         )[1]
     )
@@ -637,7 +734,7 @@ def edit_relationship(
                 label=req.label,
                 rationale=req.rationale,
                 cardinality=req.cardinality,
-                operator_name=req.operator_name,
+                operator_name=_request_principal(request).audit_actor,
             ),
         )[1]
     )
@@ -659,7 +756,7 @@ def resolve_escalation(
                 organization_id,
                 escalation_id,
                 decision=req.decision,
-                operator_name=req.operator_name,
+                operator_name=_request_principal(request).audit_actor,
                 note=req.note,
             ),
         )[1]
@@ -703,19 +800,16 @@ def reset_stage_endpoint(
     stage_ref: str,
     req: StageResetReq,
     x_bayan_tenant_id: Optional[str] = Header(default=None, alias="X-Bayan-Tenant-ID"),
-    x_bayan_permissions: Optional[str] = Header(default=None, alias="X-Bayan-Permissions"),
 ) -> Dict[str, Any]:
     service, _, _ = _get_workflow_runtime(request)
     return _exec(
         lambda: (
-            enforce_tenant_header(
-                organization_id, x_bayan_tenant_id, x_bayan_permissions, "onboarding.reset"
-            ),
+            enforce_tenant_header(organization_id, x_bayan_tenant_id),
             reset_stage(
                 service,
                 organization_id,
                 stage_ref,
-                req.operator_name,
+                _request_principal(request).audit_actor,
                 reason=req.reason,
                 confirm=req.confirm,
             ),
@@ -773,7 +867,7 @@ def activate_org(
             activate_organization(
                 service,
                 organization_id,
-                operator_name=req.operator_name,
+                operator_name=_request_principal(request).audit_actor,
                 handover_note=req.handover_note,
                 bridge=bridge,
             ),
@@ -847,7 +941,10 @@ def monitor_org(
         lambda: (
             enforce_tenant_header(organization_id, x_bayan_tenant_id),
             monitor_schema(
-                service, organization_id, operator_name=req.operator_name, passwords=req.passwords
+                service,
+                organization_id,
+                operator_name=_request_principal(request).audit_actor,
+                passwords=req.passwords,
             ),
         )[1]
     )
@@ -865,7 +962,10 @@ def start_async_monitor_org(
         lambda: (
             enforce_tenant_header(organization_id, x_bayan_tenant_id),
             start_async_monitoring(
-                service, organization_id, operator_name=req.operator_name, passwords=req.passwords
+                service,
+                organization_id,
+                operator_name=_request_principal(request).audit_actor,
+                passwords=req.passwords,
             ),
         )[1]
     )
@@ -888,7 +988,7 @@ def schema_change_decision(
                 organization_id,
                 change_id,
                 decision=req.decision,
-                operator_name=req.operator_name,
+                operator_name=_request_principal(request).audit_actor,
                 note=req.note,
                 updated_label_ar=req.updated_label_ar,
             ),
@@ -929,7 +1029,10 @@ def sync_org_catalog(
         lambda: (
             enforce_tenant_header(organization_id, x_bayan_tenant_id),
             synchronize_semantic_catalog(
-                service, organization_id, operator_name=req.operator_name, bridge=bridge
+                service,
+                organization_id,
+                operator_name=_request_principal(request).audit_actor,
+                bridge=bridge,
             ),
         )[1]
     )
@@ -946,6 +1049,6 @@ def archive_org(
     return _exec(
         lambda: (
             enforce_tenant_header(organization_id, x_bayan_tenant_id),
-            service.archive_organization(organization_id, req.operator_name),
+            service.archive_organization(organization_id, _request_principal(request).audit_actor),
         )[1]
     )

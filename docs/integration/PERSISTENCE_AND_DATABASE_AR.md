@@ -12,3 +12,9 @@
 - تمر دالة `_strip_transient_secrets` على كل لقطة قبل الحفظ لحذف أي مفاتيح `password` أو `dsn` أو `secret`.
 - تفرض `connectors/scanner.py` اتصال قراءة فقط (`transaction_read_only=on` لـ PostgreSQL، و`mode=ro` + `PRAGMA query_only = ON` لـ SQLite داخل `BAYAN_SQLITE_ROOT`).
 - تُكتب جداول الفهرس المتجهي (`pgvector`) وجداول حالة التهيئة داخل قاعدة بيانات المنصة فقط، ولا تمس قاعدة العميل المصدر بأي كتابة.
+
+## 3. تشغيل الفهرسة الدلالية
+
+- في `BAYAN_ENV=production` يستخدم مسار التهيئة `PgVectorSemanticRepository` مع `DATABASE_URL` تلقائياً؛ لا يعود إلى فهرس الذاكرة عند غياب خدمة PostgreSQL أو فشلها.
+- في التطوير والاختبارات يستخدم مستودع الذاكرة افتراضياً، ويمكن اختيار pgvector صراحةً عبر `BAYAN_ONBOARDING_USE_PGVECTOR=1`.
+- هذا الإعداد لا يفعّل `Catalog v2` في وكيل SQL؛ يبقى `CATALOG_PROVIDER=legacy` حتى اعتماد التبديل وفق عقد الكتالوج المجمد.

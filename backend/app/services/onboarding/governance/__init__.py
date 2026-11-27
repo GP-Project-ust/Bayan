@@ -2,6 +2,8 @@
 
 from .identity import (
     CATALOG_READ_PERMISSION,
+    ONBOARDING_ADMIN_PERMISSION,
+    ONBOARDING_RESET_PERMISSION,
     AuthorizationError,
     Authorizer,
     Principal,
@@ -21,6 +23,8 @@ __all__ = [
     "Authorizer",
     "AuthorizationError",
     "CATALOG_READ_PERMISSION",
+    "ONBOARDING_ADMIN_PERMISSION",
+    "ONBOARDING_RESET_PERMISSION",
     "Principal",
     "STAGE_ALIASES",
     "STAGES_ORDER",

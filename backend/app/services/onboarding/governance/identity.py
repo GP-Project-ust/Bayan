@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
 from typing import FrozenSet, Optional, Protocol
 
 CATALOG_READ_PERMISSION = "onboarding.catalog.read"
 ONBOARDING_ADMIN_PERMISSION = "onboarding.admin"
+ONBOARDING_RESET_PERMISSION = "onboarding.reset"
 
 
 class AuthorizationError(PermissionError):
@@ -21,16 +21,27 @@ class AuthorizationError(PermissionError):
 
 @dataclass(frozen=True)
 class Principal:
-    """الهوية الموثقة للطلب (تُحقن من بوابة/تطبيق بيان الرسمي)."""
+    """هوية موثقة يحقنها middleware موثوق في ``request.state.principal``."""
 
-    subject_id: str
-    tenant_ids: FrozenSet[str]
+    user_id: str
+    tenant_id: str
+    roles: FrozenSet[str]
     permissions: FrozenSet[str]
+    membership_id: str
+    session_id: str
     display_name: str = ""
 
     @property
     def audit_actor(self) -> str:
-        return self.subject_id
+        return self.user_id
+
+    @property
+    def subject_id(self) -> str:
+        return self.user_id
+
+    @property
+    def tenant_ids(self) -> FrozenSet[str]:
+        return frozenset({self.tenant_id}) if self.tenant_id else frozenset()
 
 
 class Authorizer(Protocol):
@@ -41,7 +52,7 @@ class TenantPermissionAuthorizer:
     """تطبيق عزل المستأجر والصلاحية بمبدأ الرفض الافتراضي (Fail-Closed)."""
 
     def require(self, principal: Principal, tenant_id: str, permission: str) -> None:
-        if not principal.subject_id:
+        if not principal.user_id or not principal.session_id or not principal.membership_id:
             raise AuthorizationError("identity_required", "هوية المستخدم الموثقة مطلوبة.")
         if tenant_id not in principal.tenant_ids:
             raise AuthorizationError(
@@ -58,27 +69,8 @@ class TenantPermissionAuthorizer:
 def enforce_tenant_header(
     organization_id: str,
     x_bayan_tenant_id: Optional[str],
-    x_bayan_permissions: Optional[str] = None,
-    required_permission: Optional[str] = None,
 ) -> None:
-    """فرض مطابقة ترويسة المستأجر عند تزويدها أو في وضع الإنتاج الصارم."""
-    strict = os.getenv("BAYAN_ENV", "development").strip().lower() == "production"
+    """تحقق اختياري من اتساق الترويسة؛ لا تستخدم لإثبات الهوية أو العضوية."""
     tenant_hdr = (x_bayan_tenant_id or "").strip()
-    if strict and not tenant_hdr:
-        raise AuthorizationError(
-            "tenant_header_required", "ترويسة X-Bayan-Tenant-ID مطلوبة في هذا المسار."
-        )
     if tenant_hdr and tenant_hdr != organization_id:
-        allowed_set = {item.strip() for item in tenant_hdr.split(",") if item.strip()}
-        if organization_id not in allowed_set:
-            raise AuthorizationError(
-                "tenant_access_denied",
-                "تعارض في نطاق المستأجر المصرّح به في الطلب.",
-            )
-    if required_permission:
-        perms = {p.strip() for p in (x_bayan_permissions or "").split(",") if p.strip()}
-        if (strict or x_bayan_permissions is not None) and required_permission not in perms:
-            raise AuthorizationError(
-                "permission_denied",
-                f"الصلاحية المطلوبة مفقودة: {required_permission}.",
-            )
+        raise AuthorizationError("tenant_access_denied", "تعارض في نطاق المستأجر بالطلب.")

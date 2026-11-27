@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import sqlite3
 from pathlib import Path
 from typing import Any
@@ -25,6 +26,7 @@ from app.services.onboarding.semantics import (
 )
 from app.services.onboarding.workflow import (
     ApprovalRequiredError,
+    OnboardingError,
     OnboardingWorkflowService,
     SemanticKnowledgeBridge,
     ValidationError,
@@ -36,6 +38,7 @@ from app.services.onboarding.workflow import (
     monitor_schema,
     synchronize_semantic_catalog,
 )
+from app.services.onboarding.workflow import sync as workflow_sync
 
 
 def _deterministic_test_embedder() -> OfficialEmbeddingService:
@@ -437,3 +440,112 @@ def test_postgresql_connector_delegates_to_pr1_introspector_read_only() -> None:
     assert len(items) == 1
     assert items[0]["schema_qualified_name"] == "public.v_program_stats"
     assert items[0]["description_source"] == "database_comment"
+
+
+class _TransactionalTestService:
+    def __init__(self, organization: dict[str, Any]) -> None:
+        self.organization = copy.deepcopy(organization)
+
+    def get_organization(self, _organization_id: str) -> dict[str, Any]:
+        return copy.deepcopy(self.organization)
+
+    def mutate_organization(
+        self,
+        _organization_id: str,
+        mutator: Any,
+    ) -> dict[str, Any]:
+        candidate = copy.deepcopy(self.organization)
+        updated = mutator(candidate)
+        self.organization = copy.deepcopy(updated)
+        return copy.deepcopy(updated)
+
+
+def test_activation_does_not_persist_before_semantic_publication(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = _TransactionalTestService(
+        {"id": "org-test", "status": "pending", "physical_catalog": [], "audit_logs": []}
+    )
+    monkeypatch.setattr(
+        workflow_sync,
+        "get_activation_readiness",
+        lambda *_args: {"already_active": False, "ready": True, "blockers": []},
+    )
+
+    class _FailingBridge:
+        def publish_approved_organization(self, organization: dict[str, Any]) -> None:
+            assert organization["status"] == "active"
+            raise RuntimeError("indexing failed")
+
+    with pytest.raises(RuntimeError, match="indexing failed"):
+        activate_organization(
+            service,
+            "org-test",
+            operator_name="د. سارة أحمد",
+            bridge=_FailingBridge(),
+        )
+
+    assert service.organization["status"] == "pending"
+    assert "activation" not in service.organization
+
+
+def test_sync_does_not_persist_before_semantic_publication() -> None:
+    organization = {
+        "id": "org-test",
+        "status": "active",
+        "physical_catalog": [],
+        "schema_changes": [
+            {
+                "id": "change-1",
+                "technical_name": "public.students",
+                "change_type": "object_modified",
+                "status": "approved",
+                "after_snapshot": {
+                    "object_ref": "source::public.students",
+                    "name": "students",
+                    "schema_qualified_name": "public.students",
+                    "columns": [],
+                },
+            }
+        ],
+        "monitoring": {"latest_scanned_catalog": []},
+        "concepts": [],
+        "relationships": [],
+        "semantic_sync": {"status": "idle", "history": []},
+        "audit_logs": [],
+    }
+    service = _TransactionalTestService(organization)
+
+    class _FailingBridge:
+        def publish_approved_organization(self, _organization: dict[str, Any]) -> None:
+            raise RuntimeError("indexing failed")
+
+    with pytest.raises(RuntimeError, match="indexing failed"):
+        synchronize_semantic_catalog(
+            service,
+            "org-test",
+            operator_name="د. سارة أحمد",
+            bridge=_FailingBridge(),
+        )
+
+    assert service.organization["schema_changes"][0]["status"] == "approved"
+    assert service.organization["semantic_sync"]["status"] == "idle"
+
+
+def test_activation_requires_semantic_index_bridge(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = _TransactionalTestService(
+        {"id": "org-test", "status": "pending", "physical_catalog": [], "audit_logs": []}
+    )
+    monkeypatch.setattr(
+        workflow_sync,
+        "get_activation_readiness",
+        lambda *_args: {"already_active": False, "ready": True, "blockers": []},
+    )
+
+    with pytest.raises(OnboardingError) as error:
+        activate_organization(service, "org-test", operator_name="د. سارة أحمد")
+
+    assert error.value.status_code == 503
+    assert service.organization["status"] == "pending"

@@ -21,6 +21,7 @@ from .bridge import SemanticKnowledgeBridge
 from .models import (
     ApprovalRequiredError,
     ConflictError,
+    OnboardingError,
     ValidationError,
     utc_now,
     validate_human_actor,
@@ -237,6 +238,12 @@ def activate_organization(
             "تعذر التفعيل: " + " | ".join(b["message"] for b in readiness["blockers"]),
             code="readiness_blocked",
         )
+    if bridge is None:
+        raise OnboardingError(
+            "semantic_index_unavailable",
+            "تعذر التفعيل دون جسر الفهرسة الدلالية.",
+            status_code=503,
+        )
 
     def _activate(org: Dict[str, Any]) -> Dict[str, Any]:
         catalog = list(org.get("physical_catalog") or [])
@@ -287,29 +294,21 @@ def activate_organization(
                 "created_at": activated_at,
             },
         )
+        pub = bridge.publish_approved_organization(org)
+        org["activation"]["semantic_publication"] = {
+            "tenant_id": pub.tenant_id,
+            "source_ids": list(pub.source_ids),
+            "indexing_summaries": list(pub.indexing_summaries),
+            "catalog_views": [entry.view for entry in pub.catalog_views],
+            "approved_objects_count": pub.approved_objects_count,
+            "rejected_excluded_count": pub.rejected_excluded_count,
+            "approved_relationships_count": pub.approved_relationships_count,
+            "semantic_revision": pub.semantic_revision,
+            "published_at": utc_now(),
+        }
         return org
 
     org = service.mutate_organization(organization_id, _activate)
-
-    # نشر المعرفة المعتمدة إلى pgvector و Catalog v2 إن وُجد الجسر
-    if bridge is not None:
-        pub = bridge.publish_approved_organization(org)
-
-        def _attach_pub(state_org: Dict[str, Any]) -> Dict[str, Any]:
-            state_org["activation"]["semantic_publication"] = {
-                "tenant_id": pub.tenant_id,
-                "source_ids": list(pub.source_ids),
-                "indexing_summaries": list(pub.indexing_summaries),
-                "catalog_views": [entry.view for entry in pub.catalog_views],
-                "approved_objects_count": pub.approved_objects_count,
-                "rejected_excluded_count": pub.rejected_excluded_count,
-                "approved_relationships_count": pub.approved_relationships_count,
-                "semantic_revision": pub.semantic_revision,
-                "published_at": utc_now(),
-            }
-            return state_org
-
-        org = service.mutate_organization(organization_id, _attach_pub)
     return org
 
 
@@ -736,6 +735,12 @@ def synchronize_semantic_catalog(
             f"لا يمكن المزامنة لوجود {len(unresolved)} تغييرات غير محسومة.",
             code="schema_changes_pending",
         )
+    if bridge is None:
+        raise OnboardingError(
+            "semantic_index_unavailable",
+            "تعذر إكمال المزامنة دون جسر الفهرسة الدلالية.",
+            status_code=503,
+        )
 
     approved_changes = [ch for ch in changes if ch.get("status") == "approved"]
     latest_catalog = list(org.get("monitoring", {}).get("latest_scanned_catalog") or [])
@@ -856,20 +861,13 @@ def synchronize_semantic_catalog(
                 "created_at": utc_now(),
             },
         )
+        pub = bridge.publish_approved_organization(state_org)
+        state_org.setdefault("semantic_sync", {})["last_publication"] = {
+            "indexing_summaries": list(pub.indexing_summaries),
+            "catalog_views": [entry.view for entry in pub.catalog_views],
+            "semantic_revision": pub.semantic_revision,
+        }
         return state_org
 
     synced_org = service.mutate_organization(organization_id, _apply_sync)
-
-    if bridge is not None:
-        pub = bridge.publish_approved_organization(synced_org)
-
-        def _attach_sync_pub(state_org: Dict[str, Any]) -> Dict[str, Any]:
-            state_org.setdefault("semantic_sync", {})["last_publication"] = {
-                "indexing_summaries": list(pub.indexing_summaries),
-                "catalog_views": [entry.view for entry in pub.catalog_views],
-                "semantic_revision": pub.semantic_revision,
-            }
-            return state_org
-
-        synced_org = service.mutate_organization(organization_id, _attach_sync_pub)
     return synced_org
