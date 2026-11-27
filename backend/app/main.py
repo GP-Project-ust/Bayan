@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.endpoints.dev_indexer import router as indexer_router
+from app.api.v1.endpoints.onboarding import router as onboarding_router
 from app.api.v1.endpoints.playground import router as dev_router
 from app.api.v1.router import api_router
 from app.core.config import get_settings
@@ -40,6 +41,7 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(api_router, prefix=settings.api_prefix)
+    app.include_router(onboarding_router, prefix=settings.api_prefix)
 
     # أدوات التطوير — تُقدَّم خارج بادئة الـ API وتعطَّل في الإنتاج
     app.include_router(dev_router)
